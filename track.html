@@ -349,23 +349,35 @@
             }
           });
 
+          const escTrack = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
           // Order details
           orderDetails.innerHTML = `
             <p style="margin: 0 0 0.5rem; font-weight: 700; color: var(--color-deep-wine);">Order Details:</p>
             <ul style="margin: 0; padding-left: 1.2rem; line-height: 1.6;">
-              <li><strong>Ref ID:</strong> ${order.orderId || "N/A"}</li>
+              <li><strong>Ref ID:</strong> ${escTrack(order.orderId || "N/A")}</li>
               <li>
                 <strong>Verification PIN:</strong>
-                <span style="font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.15em; color: var(--color-coral, #ff5733); padding: 0 4px; user-select: all; -webkit-user-select: all;">${order.orderPin}</span>
-                <button type="button" class="copy-pin-btn" aria-label="Copy Order Verification PIN" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 0.5rem; vertical-align: middle;" onclick="navigator.clipboard.writeText('${order.orderPin}').then(() => { this.textContent = '✓ Copied!'; setTimeout(() => this.innerHTML = '<i class=\\'fa-solid fa-copy\\' aria-hidden=\\'true\\'></i> Copy', 2000); })">
+                <span style="font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.15em; color: var(--color-coral, #ff5733); padding: 0 4px; user-select: all; -webkit-user-select: all;">${escTrack(order.orderPin)}</span>
+                <button type="button" class="copy-pin-btn" aria-label="Copy Order Verification PIN" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 0.5rem; vertical-align: middle;" data-copy-pin="${escTrack(order.orderPin)}">
                   <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy
                 </button>
               </li>
-              <li><strong>Fulfilment:</strong> ${order.fulfilment} (${order.location})</li>
-              <li><strong>Items:</strong> ${order.items || "N/A"}</li>
-              <li><strong>Placed:</strong> ${new Date(order.createdAt).toLocaleString()}</li>
+              <li><strong>Fulfilment:</strong> ${escTrack(order.fulfilment)} (${escTrack(order.location)})</li>
+              <li><strong>Items:</strong> ${escTrack(order.items || "N/A")}</li>
+              <li><strong>Placed:</strong> ${escTrack(new Date(order.createdAt).toLocaleString())}</li>
             </ul>
           `;
+          const trackCopyPinBtn = orderDetails.querySelector(".copy-pin-btn");
+          if (trackCopyPinBtn) {
+            trackCopyPinBtn.addEventListener("click", () => {
+              const pinVal = trackCopyPinBtn.dataset.copyPin || "";
+              navigator.clipboard.writeText(pinVal).then(() => {
+                trackCopyPinBtn.textContent = "✓ Copied!";
+                setTimeout(() => { trackCopyPinBtn.innerHTML = '<i class="fa-solid fa-copy" aria-hidden="true"></i> Copy'; }, 2000);
+              }).catch(() => {});
+            });
+          }
 
           // 12-Minute Cancellation Eligibility Controls
           if (cancelInterval) {

@@ -2,31 +2,67 @@
 /* Color Palette Variables: Light (Default) and Dark Themes */
 :root,
 :root[data-theme="light"] {
-  --color-ivory: #F7F1E3;
-  --color-parchment: #EADFD0;
+  --color-ivory: #FFF8F5;
+  --color-parchment: #FDEEF1;
   --color-deep-wine: #5C1A2B;
-  --color-slate: #2E3A46;
-  --color-saffron: #D4962A;
+  --color-slate: #2A1218;
+  --color-saffron: #E8557A;
   --color-olive: #8A9A4B;
+  --cb-bg: #FFF8F5;
+  --cb-surface: #FFFFFF;
+  --cb-surface-soft: #FDEEF1;
+  --cb-text: #2A1218;
+  --cb-muted: #6E5560;
+  --cb-border: #F0D9DF;
+  --cb-brand: #8C1D40;
+  --cb-brand-hover: #6F1632;
+  --cb-brand-text: #FFFFFF;
+  --cb-accent: #E8557A;
+  --cb-header-bg: #5C1A2B;
+  --cb-header-text: #FFF4F6;
 }
 
 :root[data-theme="dark"] {
-  --color-ivory: #161114;
-  --color-parchment: #241b21;
-  --color-slate: #F4EDE3;
-  --color-deep-wine: #E57388;
-  --color-saffron: #F0A83B;
+  --color-ivory: #150B0E;
+  --color-parchment: #2D1A20;
+  --color-slate: #F6E9EC;
+  --color-deep-wine: #2A0F18;
+  --color-saffron: #FF8FAB;
   --color-olive: #A3B55A;
+  --cb-bg: #150B0E;
+  --cb-surface: #221317;
+  --cb-surface-soft: #2D1A20;
+  --cb-text: #F6E9EC;
+  --cb-muted: #C4A9B1;
+  --cb-border: #3D2830;
+  --cb-brand: #F0708F;
+  --cb-brand-hover: #F58AA3;
+  --cb-brand-text: #2A0A14;
+  --cb-accent: #FF8FAB;
+  --cb-header-bg: #2A0F18;
+  --cb-header-text: #FFF4F6;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --color-ivory: #161114;
-    --color-parchment: #241b21;
-    --color-slate: #F4EDE3;
-    --color-deep-wine: #E57388;
-    --color-saffron: #F0A83B;
+    --color-ivory: #150B0E;
+    --color-parchment: #2D1A20;
+    --color-slate: #F6E9EC;
+    --color-deep-wine: #2A0F18;
+    --color-saffron: #FF8FAB;
     --color-olive: #A3B55A;
+    --cb-bg: #150B0E;
+    --cb-surface: #221317;
+    --cb-surface-soft: #2D1A20;
+    --cb-text: #F6E9EC;
+    --cb-muted: #C4A9B1;
+    --cb-border: #3D2830;
+    --cb-brand: #F0708F;
+    --cb-brand-hover: #F58AA3;
+    --cb-brand-text: #2A0A14;
+    --cb-accent: #FF8FAB;
+    --cb-header-bg: #2A0F18;
+    --cb-header-text: #FFF4F6;
   }
 }
 

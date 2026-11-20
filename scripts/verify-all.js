@@ -18,6 +18,16 @@ const vm = require("vm");
 const ROOT_DIR = path.resolve(__dirname, "..");
 const SELF_PATH = path.resolve(__filename);
 
+// Configure ephemeral test credentials and signing secrets for the local verification run
+process.env.ADMIN_USERNAME = process.env.ADMIN_USERNAME || "RomeosAdmin890";
+process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Adm94Kx72Qp81Z";
+process.env.STAFF_USERNAME = process.env.STAFF_USERNAME || "RomeosStaff890";
+process.env.STAFF_PASSWORD = process.env.STAFF_PASSWORD || "Stf63Mp49Lw28R";
+process.env.DRIVER_USERNAME = process.env.DRIVER_USERNAME || "RomeosRider890";
+process.env.DRIVER_PASSWORD = process.env.DRIVER_PASSWORD || "Rdr72Kp45Lw19Q";
+process.env.ADMIN_SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || "test-admin-session-secret-only";
+process.env.CUSTOMER_AUTH_SECRET = process.env.CUSTOMER_AUTH_SECRET || "test-customer-auth-secret-only";
+
 const results = [];
 
 function record(section, name, passed, detail) {
@@ -908,19 +918,24 @@ async function checkWhatsAppApi() {
     };
   }
 
-  // 6a. GET /api/orders?diagnostics=1
+  // 6a. GET /api/orders?diagnostics=1 (requires admin auth)
+  const diagUnauthRes = createMockRes();
+  await handler({ method: "GET", query: { diagnostics: "1" }, headers: {} }, diagUnauthRes);
+  const { issueSessionToken } = require(path.join(ROOT_DIR, "api/admin.js"));
+  const diagToken = issueSessionToken("RomeosAdmin890", "admin");
   const diagRes = createMockRes();
-  await handler({ method: "GET", query: { diagnostics: "1" }, headers: {} }, diagRes);
+  await handler({ method: "GET", query: { diagnostics: "1" }, headers: { authorization: `Bearer ${diagToken}` } }, diagRes);
   const diagOk =
+    diagUnauthRes.statusCode === 401 &&
     diagRes.statusCode === 200 &&
     diagRes.body?.configured === true &&
     diagRes.body?.recipient === "2349055303848" &&
     /^\d{8,15}$/.test(String(diagRes.body?.recipient || ""));
   record(
     "api-whatsapp",
-    "GET /api/orders?diagnostics=1 returns restaurant WhatsApp recipient 2349055303848",
+    "GET /api/orders?diagnostics=1 blocks unauthenticated (401) and returns WhatsApp recipient for admin (200)",
     diagOk,
-    `status=${diagRes.statusCode}, recipient=${diagRes.body?.recipient}`
+    `unauth=${diagUnauthRes.statusCode}, status=${diagRes.statusCode}, recipient=${diagRes.body?.recipient}`
   );
 
   // 6b. POST /api/orders (Delivery)
@@ -1333,19 +1348,9 @@ async function checkWhatsAppApi() {
   );
 
   // 6j. Customer 12-Minute Easy Cancellation Window & Expiration Enforcement
-  const cancelExpiredRes = createMockRes();
-  await trackHandler(
-    {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: {
-        action: "cancel",
-        phone: "08012345678",
-        pin: orderPin,
-        _testNow: Date.now() + 13 * 60 * 1000, // 13 minutes later -> expired
-      },
-    },
-    cancelExpiredRes
+  const expiredEligibility = trackHandler.computeCancellationEligibility(
+    { created_at: new Date().toISOString(), status: "preparing" },
+    Date.now() + 13 * 60 * 1000
   );
   const cancelValidRes = createMockRes();
   await trackHandler(
@@ -1361,15 +1366,16 @@ async function checkWhatsAppApi() {
     cancelValidRes
   );
   const cancelOk =
-    cancelExpiredRes.statusCode === 400 &&
+    expiredEligibility.withinWindow === false &&
+    expiredEligibility.canCancel === false &&
     cancelValidRes.statusCode === 200 &&
     cancelValidRes.body?.cancelled === true &&
     cancelValidRes.body?.order?.status === "cancelled";
   record(
     "customer-cancel-12m",
-    "Customer can cancel within 12 minutes of ordering (200) and is rejected after 12 minutes (400)",
+    "Customer can cancel within 12 minutes of ordering (200) and is rejected after 12 minutes",
     cancelOk,
-    `within12m=${cancelValidRes.statusCode}, after13m=${cancelExpiredRes.statusCode}, status=${cancelValidRes.body?.order?.status}`
+    `within12m=${cancelValidRes.statusCode}, after13mCanCancel=${expiredEligibility.canCancel}, status=${cancelValidRes.body?.order?.status}`
   );
 
   // Clean up test orders with Admin DELETE privilege
@@ -1980,7 +1986,7 @@ async function checkLegalAndDealsCompliance() {
   );
   const verifyAfterDelRes = localMockRes();
   await adminHandlerLocal(
-    { method: "GET", query: { verifyRefundToken: rToken } },
+    { method: "GET", headers: { authorization: `Bearer ${admTokenLocal}` }, query: { verifyRefundToken: rToken } },
     verifyAfterDelRes
   );
   record(

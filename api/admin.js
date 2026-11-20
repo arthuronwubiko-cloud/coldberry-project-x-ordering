@@ -173,143 +173,7 @@ async function dispatchPromoEmails({ recipients, subject, textBody, ctaText, cta
   return { provider: "preview_log", sentCount: recipients.length, failedCount: 0, errors: [] };
 }
 
-// Default 14-char alphanumeric SHA-256 digests (overridable via environment variables)
-const DEFAULT_ADMIN_USER_SHA256 = "7c1b0c180024d6adffaced672b335015f4903f1ad3b8655bde67c5662b2abd49";
-const DEFAULT_ADMIN_PASS_SHA256 = "ee5c41ee35d3093beeed33399a5e202c30dbfaf45d01eaded0d64c0b4a65920c";
-const DEFAULT_STAFF_USER_SHA256 = "f53c870b5ebfc26167f0769cf4c5a0aba18237e7fd8c15ae23b4f1fcd626b1c2";
-const DEFAULT_STAFF_PASS_SHA256 = "48d34a3857a2de233934580a1fcc5224c68f709ac02d66a088a62f53d6d44cbc";
-const DEFAULT_DRIVER_USER_SHA256 = "93278e709aa4c10b5a5db34cffd1830934195ea311d328a148e0801fedccfe00";
-const DEFAULT_DRIVER_PASS_SHA256 = "505d0df56267597acafdc8ebb0f65f78a1ee14a0399113e761cef56e1e9120c5";
-
-const ADDITIONAL_ADMIN_DIGESTS = [
-  {
-    // ColdAdmin8901A / Adm73Jx91Qp42K
-    user: "525588808ec88fdc20b746f21dd47a12934457d24adaf87c96af8c87e490c9fa",
-    pass: "deb6c65e11fe122704b619ede279141d7e4f1e82469f9298d076724f080d3638",
-  },
-  {
-    // ColdAdmin8902B / Adm84Ky62Rp53M
-    user: "eeb0ab32a86d20d9764901cce65526f33579c77f7ef2075c6334126145510888",
-    pass: "5316850e5e3178785e5dd553a65e226d9667771879009928e5b5bd5ac6226f6e",
-  },
-  {
-    // ColdberryAdm89 / Adm94Kx72Qp81Z
-    user: "f9145e3fe7f18a7d759a9ec1c9e3fd6b1f2acdcc9e9bdaf6410b1ed804a4f24b",
-    pass: "ee5c41ee35d3093beeed33399a5e202c30dbfaf45d01eaded0d64c0b4a65920c",
-  },
-  {
-    user: "447d7a85a470e758e833d551de73a519c89ccef52e83e33e11073cbb4e883248",
-    pass: "1260ee87ef6130ee5faa7fd203003a73630366f3dbf9a8a94962177000aeddf9",
-  },
-  {
-    user: "5dcdd0e9d9285413dd48d5a39ee69e95bffeaa66035ea9af958a48efbc02ee98",
-    pass: "15b92858e33a6b945a75a05bfeacd8acb6e15aec90ddfa3d327626abd2da4789",
-  },
-];
-
-const ADDITIONAL_STAFF_DIGESTS = [
-  {
-    // ColdStaff8901A / Stf11Ab22Cd33E
-    user: "9910a1c262dcfa2a9ce894d0d84d84e59b2787836011b460251a1d070c3dd1e0",
-    pass: "5b94efb5db37c3edb0f81aa6c7d328cb68b1245fd345f49da1a41453e5c04f90",
-  },
-  {
-    // ColdStaff8902B / Stf22Bc33De44F
-    user: "1e8c892512247cdc4eaef868dcc871ba6a71543274d43a627de45a12c1f8850f",
-    pass: "a653c1919b396a56fa1561b39e17cfadd4f079a456362599f35eaef221fe6312",
-  },
-  {
-    // ColdStaff8903C / Stf33Cd44Ef55G
-    user: "4e7b914ffcfe367e597177bde849b75ff03ee876db6d2b5cbb12644592392abf",
-    pass: "24d39b68115c46a1213bb472f87d9374cad4428723674670de662373d453cab5",
-  },
-  {
-    // ColdStaff8904D / Stf44De55Fg66H
-    user: "f9fc44207a3286f0bd76d988646bc0fee3d8f67f573c821a9d08892f73b0a0af",
-    pass: "bd85e33978ffc3c6849fe47f635a9d64863fdfff676a2f06c01837dad0f13a90",
-  },
-  {
-    // ColdStaff8905E / Stf55Ef66Gh77J
-    user: "44a48520c2745c0d14a656461872e391aa2ca13e623904ba5de752a984bacd3c",
-    pass: "d669d2256f05fa593692a9450dece020ebb9f2afd8d8b40a5ee324730ac4c14b",
-  },
-  {
-    // ColdStaff8906F / Stf66Fg77Hj88K
-    user: "fc9aeb1349d65d774540f25eff78a4d48058c414b313805df3a90124f1009247",
-    pass: "3bf00b3c8456b9e1be0440d10891765654dcc7f40dac1dd312fce8e1dada6f9f",
-  },
-  {
-    // ColdStaff8907G / Stf77Gh88Jk99L
-    user: "69b9c3318f5632d5d5bcafa5232e3a43228f0c1cddd6b17361ef357a7c076c3a",
-    pass: "af721e01add2cb1139dd5e85f55f151be28aa0b4962cec753f44a3dfe7e1dae3",
-  },
-  {
-    user: "953d2cbf5dd927a621f6fb7fcb2224638255bce896a12ce54c3c738c770cff64",
-    pass: "2ffcb37896a35596033c39ee3bda35eecf69c35a0985811b0ff3b66e4fa39593",
-  },
-  {
-    user: "049c4273b4eb254fc8d9f7f4e63b47709f99e2fc2aedc48c7b59192b56018583",
-    pass: "519c4a53b09c96ba125792959035f664b8461fb6e739626fac422d22934b867b",
-  },
-  {
-    user: "511e772c99ba6431c37b75af8e45283a7239a5017ff6f1c7d88a4dec2f890eb8",
-    pass: "f073cbe9c6514548e45ff08af989e4db744bdd2e968126e274d6614bd5e72301",
-  },
-  {
-    user: "0da56f17bb0f13c765915367c56b53c67b3f582b81e2eccae7bafa5eced35a45",
-    pass: "2c66cdca8fbb7039924bceb6bd94ffdc818795d551c8999136aa7bdaf8593a48",
-  },
-  {
-    user: "dca8dfe3de3ae17a2151153bc8ae609dbafe980500bf146faacbff2b0ddb86ab",
-    pass: "a5847378e2b675c3ffe0b6ad539595b000d2784aa97fc82cd6c0f2879cb9b61b",
-  },
-  {
-    user: "4fe2b4876cf0f7a8e3764de7fa8bb56b243728a14135dcf366ac2c4d98ffd633",
-    pass: "87d0523a1fce6e74a785020925cd941db2a56d81d8adef4d0b3a35ef018a0a6a",
-  },
-  {
-    user: "f5b4ba79959b2890437f163350fa8701396e0ab993d076524f4b23103c52d164",
-    pass: "0ae003dca480becc680ef666e5c85097d4b1aa533f342dbd5a3477eeb1876425",
-  },
-];
-
-const ADDITIONAL_DRIVER_DIGESTS = [
-  {
-    // ColdRider8901A / Rdr11Ab22Cd33E
-    user: "b5b38ec8121028fa901bb3b5d180fa6c82a1b17069c798344af0a1328c2e147e",
-    pass: "2a0f21b4717a538c174e136e0b03ffb254fcdfa804078b75c6c5af365c6a8d1c",
-  },
-  {
-    // ColdRider8902B / Rdr22Bc33De44F
-    user: "ab7c359f383ea8edb9d998737c3c7499d586cc7588dd989ed0f7b620dbba5aac",
-    pass: "d60969bc94e54417c7a3d045fa98310e50b3a77dd142625be0f31c562bdc3295",
-  },
-  {
-    // ColdRider8903C / Rdr33Cd44Ef55G
-    user: "d4e1c2d80a8d00160c0c36263fc6f6ffdce7fa9bc27ef3181bac8e5721c4891d",
-    pass: "5c09024dc51fac453608a9fd8dd54871898a2a7a51441a54e643b649271e6032",
-  },
-  {
-    // ColdRider8904D / Rdr44De55Fg66H
-    user: "51d0e2da2d2681135f51fd11c5d2d2824cb4e64f37a6cfa1a7ffeeaa9b578510",
-    pass: "ce7af9c90549891b952d305c6f808f6ac125d7958f3610886bb84d02f9cbda08",
-  },
-  {
-    // ColdRider8905E / Rdr55Ef66Gh77J
-    user: "17b5343497ce8030044dd95277ff1b36ae25572d566c468e250b5f8715f8d07a",
-    pass: "7c534d7265266ded741a6f03628f833e5b9cdf63d81ea2e2b3e652ff030ced6b",
-  },
-  {
-    // ColdRider8906F / Rdr66Fg77Hj88K
-    user: "bb10bf999a5506344b00080300ec4ec6302a5dff387c8501ec965ae943e9ad24",
-    pass: "e7342e157968ca30866b9d98612e778a6b28fc4c28e45611b3e801b958d790ed",
-  },
-  {
-    // ColdRider8907G / Rdr77Gh88Jk99L
-    user: "88a572e7bbbba30ca91bb4e4942ca2a531867cfe2cadc2a76b01b4332787ef68",
-    pass: "62b3f26ccfdeb6eafcca2e8126b67f16def414ced62b1a2f7c6bc5b29b37c523",
-  },
-];
+let ephemeralAdminSecret = null;
 
 function sha256Hex(value) {
   return crypto.createHash("sha256").update(String(value || ""), "utf8").digest("hex");
@@ -325,11 +189,15 @@ function timingSafeHexEqual(hexA, hexB) {
 }
 
 function getSigningKey() {
-  return (
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.ADMIN_SECRET ||
-    sha256Hex(`${DEFAULT_ADMIN_USER_SHA256}:${DEFAULT_ADMIN_PASS_SHA256}:${DEFAULT_STAFF_PASS_SHA256}:${DEFAULT_DRIVER_PASS_SHA256}`)
-  );
+  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_SECRET;
+  if (secret) return secret;
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_SESSION_SECRET or ADMIN_SECRET must be configured in production.");
+  }
+  if (!ephemeralAdminSecret) {
+    ephemeralAdminSecret = crypto.randomBytes(32).toString("hex");
+  }
+  return ephemeralAdminSecret;
 }
 
 function generate15CharRefundToken() {
@@ -342,15 +210,30 @@ function generate15CharRefundToken() {
   return token;
 }
 
-function getExpectedDigests() {
-  return {
-    adminUser: process.env.ADMIN_USERNAME ? sha256Hex(process.env.ADMIN_USERNAME) : DEFAULT_ADMIN_USER_SHA256,
-    adminPass: process.env.ADMIN_PASSWORD ? sha256Hex(process.env.ADMIN_PASSWORD) : DEFAULT_ADMIN_PASS_SHA256,
-    staffUser: process.env.STAFF_USERNAME ? sha256Hex(process.env.STAFF_USERNAME) : DEFAULT_STAFF_USER_SHA256,
-    staffPass: process.env.STAFF_PASSWORD ? sha256Hex(process.env.STAFF_PASSWORD) : DEFAULT_STAFF_PASS_SHA256,
-    driverUser: process.env.DRIVER_USERNAME ? sha256Hex(process.env.DRIVER_USERNAME) : DEFAULT_DRIVER_USER_SHA256,
-    driverPass: process.env.DRIVER_PASSWORD ? sha256Hex(process.env.DRIVER_PASSWORD) : DEFAULT_DRIVER_PASS_SHA256,
-  };
+function getConfiguredRoleCredentials() {
+  const roles = [];
+  if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD) {
+    roles.push({
+      role: "admin",
+      user: sha256Hex(process.env.ADMIN_USERNAME),
+      pass: sha256Hex(process.env.ADMIN_PASSWORD),
+    });
+  }
+  if (process.env.STAFF_USERNAME && process.env.STAFF_PASSWORD) {
+    roles.push({
+      role: "staff",
+      user: sha256Hex(process.env.STAFF_USERNAME),
+      pass: sha256Hex(process.env.STAFF_PASSWORD),
+    });
+  }
+  if (process.env.DRIVER_USERNAME && process.env.DRIVER_PASSWORD) {
+    roles.push({
+      role: "driver",
+      user: sha256Hex(process.env.DRIVER_USERNAME),
+      pass: sha256Hex(process.env.DRIVER_PASSWORD),
+    });
+  }
+  return roles;
 }
 
 function authenticateCredentials(username, password) {
@@ -359,30 +242,11 @@ function authenticateCredentials(username, password) {
   }
   const uHex = sha256Hex(username);
   const pHex = sha256Hex(password);
-  const expected = getExpectedDigests();
+  const configured = getConfiguredRoleCredentials();
 
-  if (timingSafeHexEqual(uHex, expected.adminUser) && timingSafeHexEqual(pHex, expected.adminPass)) {
-    return { username, role: "admin" };
-  }
-  for (const cred of ADDITIONAL_ADMIN_DIGESTS) {
+  for (const cred of configured) {
     if (timingSafeHexEqual(uHex, cred.user) && timingSafeHexEqual(pHex, cred.pass)) {
-      return { username, role: "admin" };
-    }
-  }
-  if (timingSafeHexEqual(uHex, expected.staffUser) && timingSafeHexEqual(pHex, expected.staffPass)) {
-    return { username, role: "staff" };
-  }
-  for (const cred of ADDITIONAL_STAFF_DIGESTS) {
-    if (timingSafeHexEqual(uHex, cred.user) && timingSafeHexEqual(pHex, cred.pass)) {
-      return { username, role: "staff" };
-    }
-  }
-  if (timingSafeHexEqual(uHex, expected.driverUser) && timingSafeHexEqual(pHex, expected.driverPass)) {
-    return { username, role: "driver" };
-  }
-  for (const cred of ADDITIONAL_DRIVER_DIGESTS) {
-    if (timingSafeHexEqual(uHex, cred.user) && timingSafeHexEqual(pHex, cred.pass)) {
-      return { username, role: "driver" };
+      return { username, role: cred.role };
     }
   }
   return null;
@@ -425,18 +289,20 @@ function verifySessionToken(token) {
 function resolveAuthFromRequest(req) {
   const headers = req.headers || {};
 
-  // 1. Bearer session token or legacy ADMIN_SECRET
-  const bearer = headers.authorization?.startsWith("Bearer ") ? headers.authorization.slice(7).trim() : null;
-  const querySecret = req.query?.secret || null;
-  const candidateToken = bearer || querySecret;
+  // 1. Bearer session token or legacy ADMIN_SECRET (header only, never query string)
+  const candidateToken = headers.authorization?.startsWith("Bearer ") ? headers.authorization.slice(7).trim() : null;
 
   if (candidateToken) {
     const tokenAuth = verifySessionToken(candidateToken);
     if (tokenAuth) return tokenAuth;
 
     const envSecret = process.env.ADMIN_SECRET;
-    if (envSecret && candidateToken === envSecret) {
-      return { username: "env-admin", role: "admin" };
+    if (envSecret) {
+      const a = Buffer.from(String(candidateToken), "utf8");
+      const b = Buffer.from(String(envSecret), "utf8");
+      if (a.length === b.length && crypto.timingSafeEqual(a, b)) {
+        return { username: "env-admin", role: "admin" };
+      }
     }
   }
 
@@ -548,9 +414,16 @@ function parseBody(req) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
-  res.setHeader("Access-Control-Allow-Origin", req.headers?.origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Auth-Username, X-Auth-Password");
+
+  const {
+    acquireRequestSlot,
+    releaseRequestSlot,
+    checkRateLimit,
+    getClientIp,
+    applyCorsHeaders,
+  } = require("./overload-protection");
+
+  applyCorsHeaders(req, res, "GET, POST, PATCH, DELETE, OPTIONS", "Content-Type, Authorization, X-Auth-Username, X-Auth-Password");
 
   if (req.method === "OPTIONS") {
     return res.status(204).send("");
@@ -561,13 +434,30 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed." });
   }
 
+  const clientIp = getClientIp(req);
+  const generalRate = checkRateLimit(`admin:${clientIp}`, 120, 60_000);
+  if (!generalRate.allowed) {
+    res.setHeader("Retry-After", String(generalRate.retryAfter));
+    return res.status(429).json({ error: "Too many requests. Please wait a moment." });
+  }
+
+  if (!acquireRequestSlot()) {
+    res.setHeader("Retry-After", "1");
+    return res.status(503).json({ error: "Service temporarily busy. Please retry shortly." });
+  }
+
+  try {
   // POST actions
   if (req.method === "POST") {
     const body = parseBody(req);
     const action = String(body.action || "").toLowerCase();
 
-    // 1. Verify Refund Token
+    // 1. Verify Refund Token (Admin / Staff only)
     if (action === "verify_refund_token" || action === "verify_refund") {
+      const postAuth = resolveAuthFromRequest(req);
+      if (!postAuth || (postAuth.role !== "admin" && postAuth.role !== "staff")) {
+        return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required." });
+      }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
       if (!token) return res.status(400).json({ error: "Refund token is required." });
       const rec = await findRefundToken(token);
@@ -591,13 +481,15 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // 2. Check-In / Claim Refund Token
+    // 2. Check-In / Claim Refund Token (Admin / Staff only)
     if (action === "check_in_refund" || action === "claim_refund" || action === "checkin_refund") {
+      const auth = resolveAuthFromRequest(req);
+      if (!auth || (auth.role !== "admin" && auth.role !== "staff")) {
+        return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required to claim refund tokens." });
+      }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
       if (!token) return res.status(400).json({ error: "Refund token is required." });
-      const auth = resolveAuthFromRequest(req);
-      const claimedBy = auth ? auth.username : (body.claimedBy || "staff");
-      const claimRes = await claimRefundToken(token, claimedBy);
+      const claimRes = await claimRefundToken(token, auth.username);
       if (claimRes.error) {
         return res.status(400).json({ error: claimRes.error, record: claimRes.record, alreadyClaimed: claimRes.alreadyClaimed });
       }
@@ -720,6 +612,12 @@ module.exports = async function handler(req, res) {
     }
 
     // Default POST: Login / verify 14-character alphanumeric username + password
+    const loginRate = checkRateLimit(`admin_login:${clientIp}`, 15, 60_000);
+    if (!loginRate.allowed) {
+      res.setHeader("Retry-After", String(loginRate.retryAfter));
+      return res.status(429).json({ error: "Too many login attempts. Please wait a minute." });
+    }
+
     const username = String(body.username || "").trim();
     const password = String(body.password || "").trim();
 
@@ -740,33 +638,6 @@ module.exports = async function handler(req, res) {
       role: result.role,
       permissions: getPermissionsForRole(result.role),
       token,
-    });
-  }
-
-  // GET: Verify Refund Token (allows public or staff lookup via ?verifyRefundToken=...)
-  if (req.method === "GET" && req.query?.verifyRefundToken) {
-    recordVisitorHit(req.headers?.["x-forwarded-for"] || req.socket?.remoteAddress);
-    const token = String(req.query.verifyRefundToken).trim().toUpperCase();
-    const rec = await findRefundToken(token);
-    if (!rec) {
-      return res.status(404).json({ valid: false, error: "Refund token not found." });
-    }
-    return res.status(200).json({
-      valid: true,
-      verified: true,
-      token: rec.token,
-      refundToken: rec.token,
-      orderId: rec.order_id,
-      customerName: rec.customer_name,
-      customerPhone: rec.customer_phone,
-      refundedAmount: Number(rec.amount),
-      amount: Number(rec.amount),
-      reason: rec.reason,
-      issuedBy: rec.issued_by,
-      issuedAt: rec.issued_at,
-      status: rec.status,
-      claimedAt: rec.claimed_at,
-      checkedIn: rec.status === "claimed",
     });
   }
 
@@ -1108,17 +979,15 @@ module.exports = async function handler(req, res) {
     totalSignedIn: usersSummary ? usersSummary.totalSignedIn : undefined,
     activeSignedIn: usersSummary ? usersSummary.activeSignedIn : undefined,
   });
+  } finally {
+    releaseRequestSlot();
+  }
 };
 
 module.exports.CREDENTIAL_REGEX = CREDENTIAL_REGEX;
 module.exports.STAFF_ALLOWED_STATUSES = STAFF_ALLOWED_STATUSES;
 module.exports.DRIVER_ALLOWED_STATUSES = DRIVER_ALLOWED_STATUSES;
-module.exports.DEFAULT_ADMIN_USER_SHA256 = DEFAULT_ADMIN_USER_SHA256;
-module.exports.DEFAULT_ADMIN_PASS_SHA256 = DEFAULT_ADMIN_PASS_SHA256;
-module.exports.DEFAULT_STAFF_USER_SHA256 = DEFAULT_STAFF_USER_SHA256;
-module.exports.DEFAULT_STAFF_PASS_SHA256 = DEFAULT_STAFF_PASS_SHA256;
-module.exports.DEFAULT_DRIVER_USER_SHA256 = DEFAULT_DRIVER_USER_SHA256;
-module.exports.DEFAULT_DRIVER_PASS_SHA256 = DEFAULT_DRIVER_PASS_SHA256;
 module.exports.authenticateCredentials = authenticateCredentials;
 module.exports.issueSessionToken = issueSessionToken;
 module.exports.verifySessionToken = verifySessionToken;
+module.exports.resolveAuthFromRequest = resolveAuthFromRequest;

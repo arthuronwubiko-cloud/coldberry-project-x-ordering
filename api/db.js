@@ -55,6 +55,7 @@ function readLocalOrdersFile() {
 }
 
 function writeLocalOrdersFile(orders) {
+  if ((process.env.VERCEL || process.env.NODE_ENV === "production") && isConfigured()) return;
   try {
     const cutoff = Date.now() - 5 * 24 * 60 * 60 * 1000;
     const pruned = orders
@@ -63,7 +64,7 @@ function writeLocalOrdersFile(orders) {
         return !Number.isFinite(ts) || ts >= cutoff;
       })
       .slice(0, MAX_LOCAL_ORDERS);
-    fs.writeFileSync(LOCAL_ORDERS_FILE, JSON.stringify(pruned), "utf8");
+    fs.writeFileSync(LOCAL_ORDERS_FILE, JSON.stringify(pruned), { encoding: "utf8", mode: 0o600 });
   } catch (_) {}
 }
 
@@ -154,8 +155,6 @@ function getSupabaseConfig() {
   const candidates = [
     process.env.SUPABASE_SERVICE_ROLE_KEY,
     process.env.SUPABASE_KEY,
-    process.env.SUPABASE_ANON_KEY,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   ];
   const key = candidates.find((k) => k && typeof k === "string" && !k.startsWith("[SENSITIVE"));
 
@@ -847,10 +846,10 @@ function readLocalFeedbackFile() {
 function writeLocalFeedbackFile(list) {
   try {
     const data = JSON.stringify(list.slice(0, 300));
-    fs.writeFileSync(LOCAL_FEEDBACK_FILE, data, "utf8");
+    fs.writeFileSync(LOCAL_FEEDBACK_FILE, data, { encoding: "utf8", mode: 0o600 });
     const coldberryStore = "/tmp/coldberry-feedback-store.json";
     if (LOCAL_FEEDBACK_FILE !== coldberryStore) {
-      fs.writeFileSync(coldberryStore, data, "utf8");
+      fs.writeFileSync(coldberryStore, data, { encoding: "utf8", mode: 0o600 });
     }
   } catch (_) {}
 }
@@ -1033,7 +1032,7 @@ function readLocalRefundsFile() {
 
 function writeLocalRefundsFile(list) {
   try {
-    fs.writeFileSync(LOCAL_REFUNDS_FILE, JSON.stringify(list.slice(0, 500)), "utf8");
+    fs.writeFileSync(LOCAL_REFUNDS_FILE, JSON.stringify(list.slice(0, 500)), { encoding: "utf8", mode: 0o600 });
   } catch (_) {}
 }
 
@@ -1432,8 +1431,9 @@ function readLocalUsersFile() {
 }
 
 function writeLocalUsersFile(users) {
+  if ((process.env.VERCEL || process.env.NODE_ENV === "production") && isConfigured()) return;
   try {
-    fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(users.slice(0, 500), null, 2), "utf8");
+    fs.writeFileSync(LOCAL_USERS_FILE, JSON.stringify(users.slice(0, 500), null, 2), { encoding: "utf8", mode: 0o600 });
   } catch (_) {}
 }
 
@@ -1754,7 +1754,7 @@ function readLocalMessagesFile() {
 
 function writeLocalMessagesFile(list) {
   try {
-    fs.writeFileSync(LOCAL_MESSAGES_FILE, JSON.stringify(list.slice(0, 300), null, 2), "utf8");
+    fs.writeFileSync(LOCAL_MESSAGES_FILE, JSON.stringify(list.slice(0, 300), null, 2), { encoding: "utf8", mode: 0o600 });
   } catch (_) {}
 }
 
@@ -1881,7 +1881,7 @@ function recordVisitorHit(identifier) {
     for (const key of Object.keys(store)) {
       if (store[key] < cutoff) delete store[key];
     }
-    fs.writeFileSync(LOCAL_VISITORS_FILE, JSON.stringify(store), "utf8");
+    fs.writeFileSync(LOCAL_VISITORS_FILE, JSON.stringify(store), { encoding: "utf8", mode: 0o600 });
     return Object.keys(store).length;
   } catch (_) {
     return 1;
@@ -1935,7 +1935,7 @@ function readLocalPromoEmailsFile() {
 
 function writeLocalPromoEmailsFile(list) {
   try {
-    fs.writeFileSync(LOCAL_PROMO_EMAILS_FILE, JSON.stringify(list.slice(0, 100), null, 2), "utf8");
+    fs.writeFileSync(LOCAL_PROMO_EMAILS_FILE, JSON.stringify(list.slice(0, 100), null, 2), { encoding: "utf8", mode: 0o600 });
   } catch (_) {}
 }
 

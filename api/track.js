@@ -114,13 +114,6 @@ function formatTrackingOrderPayload(order, now = Date.now()) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
-  res.setHeader("Access-Control-Allow-Origin", req.headers?.origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(204).send("");
-  }
 
   const {
     acquireRequestSlot,
@@ -129,7 +122,14 @@ module.exports = async function handler(req, res) {
     getClientIp,
     getCachedResponse,
     setCachedResponse,
+    applyCorsHeaders,
   } = require("./overload-protection");
+
+  applyCorsHeaders(req, res, "GET, POST, DELETE, OPTIONS", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).send("");
+  }
 
   const clientIp = getClientIp(req);
   const rateLimit = checkRateLimit(clientIp);
@@ -182,8 +182,17 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: "Enter a valid 6-digit Order PIN." });
     }
 
+    const phoneRateLimit = checkRateLimit(`track:${clientIp}:${phone}`, 15, 15 * 60 * 1000);
+    if (!phoneRateLimit.allowed) {
+      res.setHeader("Retry-After", String(phoneRateLimit.retryAfter));
+      return res.status(429).json({
+        error: "Too many tracking attempts for this phone number. Please try again later.",
+        retryAfter: phoneRateLimit.retryAfter,
+      });
+    }
+
     const cacheKey = `track:${phone}:${pin}`;
-    const now = Number.isFinite(body._testNow) ? body._testNow : Date.now();
+    const now = Date.now();
 
     if (!isCancelAction && !isMarkReceivedAction) {
       // Micro-cache check for lookup queries, recalculating live cancel timer

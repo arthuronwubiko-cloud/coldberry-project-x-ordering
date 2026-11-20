@@ -64,12 +64,13 @@ function getRestaurantWhatsAppNumber() {
   return DEFAULT_RESTAURANT_WHATSAPP_NUMBER;
 }
 
+const crypto = require("crypto");
+
 function generateOrderId() {
-  try {
+  if (typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
-  } catch {
-    return `order-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   }
+  return `order-${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
 }
 
 function validateOrder(body, orderPin) {
@@ -243,6 +244,11 @@ module.exports = async function handler(req, res) {
 
   try {
     if (req.method === "GET" && req.query?.diagnostics === "1") {
+      const { resolveAuthFromRequest } = require("./admin");
+      const auth = resolveAuthFromRequest(req);
+      if (!auth || auth.role !== "admin") {
+        return res.status(401).json({ error: "Unauthorized. Admin authentication required for diagnostics." });
+      }
       const envRecipient =
         process.env.RESTAURANT_WHATSAPP_NUMBER ||
         process.env.WHATSAPP_ORDER_RECIPIENT;

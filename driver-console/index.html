@@ -676,11 +676,15 @@
           return "";
         }
 
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
+
         function showToast(msg, isError = false) {
           const t = document.createElement("div");
           t.className = "toast";
           if (isError) t.style.background = "var(--danger)";
-          t.innerHTML = `<i class="fa-solid ${isError ? "fa-circle-exclamation" : "fa-circle-check"}"></i> <span>${msg}</span>`;
+          t.innerHTML = `<i class="fa-solid ${isError ? "fa-circle-exclamation" : "fa-circle-check"}"></i> <span>${esc(msg)}</span>`;
           document.body.appendChild(t);
           setTimeout(() => {
             t.style.opacity = "0";
@@ -763,7 +767,7 @@
           riderStatusBadge.hidden = false;
           refreshBtn.hidden = false;
           logoutBtn.hidden = false;
-          riderStatusBadge.innerHTML = `<i class="fa-solid fa-motorcycle"></i> ${username}`;
+          riderStatusBadge.innerHTML = `<i class="fa-solid fa-motorcycle"></i> ${esc(username)}`;
 
           fetchDeliveries();
           if (refreshInterval) clearInterval(refreshInterval);
@@ -964,21 +968,23 @@
         }
 
         function renderDeliveryCard(order) {
-          const id = order.order_id || order.orderId;
-          const pin = order.order_pin || order.orderPin || "N/A";
-          const customerName = order.customer_name || order.customerName || "Customer";
-          const phone = order.customer_phone || order.customerPhone || "";
-          const address = order.address || "Delivery address provided with order";
-          const location = order.location || "Lagos";
-          const status = (order.status || "pending").toLowerCase();
+          const id = esc(order.order_id || order.orderId);
+          const pin = esc(order.order_pin || order.orderPin || "N/A");
+          const customerName = esc(order.customer_name || order.customerName || "Customer");
+          const rawPhone = String(order.customer_phone || order.customerPhone || "");
+          const phone = esc(rawPhone);
+          const safeTelPhone = esc(rawPhone.replace(/[^0-9+]/g, ""));
+          const address = esc(order.address || "Delivery address provided with order");
+          const location = esc(order.location || "Lagos");
+          const status = (order.status || "pending").toLowerCase().replace(/[^a-z_]/g, "");
           const paymentStatus = (order.payment_status || order.paymentStatus || "pending").toLowerCase();
           const isPaid = paymentStatus === "paid" || paymentStatus === "received";
           const grandTotal = Number(order.grand_total || order.grandTotal || 0);
-          const timeStr = formatTimeAgo(order.created_at || order.timestamp);
+          const timeStr = esc(formatTimeAgo(order.created_at || order.timestamp));
 
           const pkg = summarizePackages(order.items);
-          const mapsUrl = buildGoogleMapsLink(address, location);
-          const waUrl = buildWhatsAppLink(phone, customerName, id);
+          const mapsUrl = esc(buildGoogleMapsLink(order.address || "Delivery address provided with order", order.location || "Lagos"));
+          const waUrl = esc(buildWhatsAppLink(rawPhone, order.customer_name || order.customerName || "Customer", order.order_id || order.orderId));
 
           // Status Badge Pill
           let pillHtml = "";
@@ -991,7 +997,7 @@
           } else if (status === "completed") {
             pillHtml = `<span class="status-pill pill-completed"><i class="fa-solid fa-circle-check"></i> Delivered</span>`;
           } else {
-            pillHtml = `<span class="status-pill pill-ready">${status}</span>`;
+            pillHtml = `<span class="status-pill pill-ready">${esc(status)}</span>`;
           }
 
           // Payment Badge (PAID vs COLLECT PAYMENT)
@@ -1009,7 +1015,7 @@
                    </div>
                    <div style="font-size: 0.78rem;">Collect cash / transfer upon delivery</div>
                  </div>
-                 <div class="payment-amount">${formatMoney(grandTotal)}</div>
+                 <div class="payment-amount">${esc(formatMoney(grandTotal))}</div>
                </div>`;
 
           // Action Button
@@ -1084,7 +1090,7 @@
                 <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="driver-btn driver-btn-wa">
                   <i class="fa-brands fa-whatsapp" aria-hidden="true"></i> WhatsApp
                 </a>
-                <a href="tel:${phone}" class="driver-btn driver-btn-call">
+                <a href="tel:${safeTelPhone}" class="driver-btn driver-btn-call">
                   <i class="fa-solid fa-phone" aria-hidden="true"></i> Call
                 </a>
               </div>
@@ -1104,8 +1110,8 @@
                 </div>
                 <details style="margin-top: 0.45rem; font-size: 0.8rem; color: var(--muted);">
                   <summary style="cursor: pointer;">Itemized Receipt Details</summary>
-                  <div style="margin-top: 0.35rem; white-space: pre-line; color: var(--text);">${pkg.raw}</div>
-                  ${order.notes ? `<div style="margin-top: 0.35rem; color: var(--coral);"><strong>Customer Notes:</strong> ${order.notes}</div>` : ""}
+                  <div style="margin-top: 0.35rem; white-space: pre-line; color: var(--text);">${esc(pkg.raw)}</div>
+                  ${order.notes ? `<div style="margin-top: 0.35rem; color: var(--coral);"><strong>Customer Notes:</strong> ${esc(order.notes)}</div>` : ""}
                 </details>
               </div>
 

@@ -20,7 +20,13 @@ function requestHandler(req, res) {
 
   // Proxy /api/* to main storefront API origin
   if (pathname.startsWith("/api/")) {
-    const targetUrl = new URL(req.url, API_ORIGIN);
+    const expectedOrigin = new URL(API_ORIGIN).origin;
+    const targetUrl = new URL(pathname + (parsed.search || ""), API_ORIGIN);
+    if (targetUrl.origin !== expectedOrigin) {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "Invalid proxy target." }));
+      return;
+    }
     const proxyModule = targetUrl.protocol === "https:" ? require("https") : http;
 
     const proxyReq = proxyModule.request(

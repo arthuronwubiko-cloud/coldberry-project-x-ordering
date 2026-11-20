@@ -62,7 +62,7 @@ function persistStore() {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(filePath, JSON.stringify(obj), "utf8");
+    fs.writeFileSync(filePath, JSON.stringify(obj), { encoding: "utf8", mode: 0o600 });
   } catch (err) {
     // In restricted or serverless environments where write may fail, fail silently
     // in-memory map remains authoritative for the lifecycle of the instance

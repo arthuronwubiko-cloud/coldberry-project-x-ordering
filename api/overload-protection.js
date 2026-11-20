@@ -31,24 +31,25 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 120; // 120 reqs/min per IP
 const ipRequestWindows = new Map();
 
-function checkRateLimit(ip) {
+function checkRateLimit(ip, maxRequests = MAX_REQUESTS_PER_WINDOW, windowMs = RATE_LIMIT_WINDOW_MS) {
   const now = Date.now();
   const clientIp = ip || "unknown";
+  const key = `${clientIp}:${maxRequests}:${windowMs}`;
 
-  let record = ipRequestWindows.get(clientIp);
-  if (!record || now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+  let record = ipRequestWindows.get(key);
+  if (!record || now - record.windowStart > windowMs) {
     record = { windowStart: now, count: 1 };
-    ipRequestWindows.set(clientIp, record);
-    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1 };
+    ipRequestWindows.set(key, record);
+    return { allowed: true, remaining: maxRequests - 1 };
   }
 
   record.count++;
-  if (record.count > MAX_REQUESTS_PER_WINDOW) {
-    const retryAfter = Math.ceil((record.windowStart + RATE_LIMIT_WINDOW_MS - now) / 1000);
+  if (record.count > maxRequests) {
+    const retryAfter = Math.ceil((record.windowStart + windowMs - now) / 1000);
     return { allowed: false, retryAfter: Math.max(1, retryAfter) };
   }
 
-  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count };
+  return { allowed: true, remaining: maxRequests - record.count };
 }
 
 // Periodic cleanup of stale rate-limit IP records to prevent memory leak
@@ -174,13 +175,14 @@ async function executeWithDbCircuitBreaker(operationFn, fallbackFn, timeoutMs = 
   }
 }
 
-// Helper to extract client IP from request headers or socket
+// Helper to extract client IP from trusted proxy headers or socket
 function getClientIp(req) {
   return (
-    req.headers?.["x-forwarded-for"]?.split(",")?.[0]?.trim() ||
     req.headers?.["x-real-ip"] ||
-    req.connection?.remoteAddress ||
+    req.headers?.["x-vercel-forwarded-for"]?.split(",")?.[0]?.trim() ||
     req.socket?.remoteAddress ||
+    req.connection?.remoteAddress ||
+    req.headers?.["x-forwarded-for"]?.split(",")?.[0]?.trim() ||
     "127.0.0.1"
   );
 }
@@ -196,6 +198,40 @@ async function defaultHandler(req, res) {
   }
 }
 
+const DEFAULT_ALLOWED_ORIGINS = new Set([
+  "http://localhost:3000",
+  "http://localhost:4000",
+  "http://localhost:4001",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:4000",
+  "http://127.0.0.1:4001",
+  "https://coldberry-project-x.vercel.app",
+  "https://coldberry-project-x-ordering.vercel.app",
+  "https://romeos-project-x.vercel.app",
+  "https://romeos-project-x-ordering.vercel.app",
+  "https://romeos-project-x-admin.vercel.app",
+]);
+
+function isAllowedOrigin(origin) {
+  if (!origin || typeof origin !== "string") return false;
+  if (DEFAULT_ALLOWED_ORIGINS.has(origin)) return true;
+  const envOrigins = String(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return envOrigins.includes(origin);
+}
+
+function applyCorsHeaders(req, res, methods = "GET, POST, OPTIONS", headers = "Content-Type, Authorization") {
+  const origin = req?.headers?.origin;
+  if (isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
+  res.setHeader("Access-Control-Allow-Methods", methods);
+  res.setHeader("Access-Control-Allow-Headers", headers);
+}
+
 defaultHandler.acquireRequestSlot = acquireRequestSlot;
 defaultHandler.releaseRequestSlot = releaseRequestSlot;
 defaultHandler.checkRateLimit = checkRateLimit;
@@ -203,6 +239,8 @@ defaultHandler.getCachedResponse = getCachedResponse;
 defaultHandler.setCachedResponse = setCachedResponse;
 defaultHandler.executeWithDbCircuitBreaker = executeWithDbCircuitBreaker;
 defaultHandler.getClientIp = getClientIp;
+defaultHandler.isAllowedOrigin = isAllowedOrigin;
+defaultHandler.applyCorsHeaders = applyCorsHeaders;
 defaultHandler.CIRCUIT_STATES = CIRCUIT_STATES;
 defaultHandler.circuitState = circuitState;
 defaultHandler.MAX_CONCURRENT_REQUESTS = MAX_CONCURRENT_REQUESTS;

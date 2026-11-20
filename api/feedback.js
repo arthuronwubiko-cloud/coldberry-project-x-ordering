@@ -3,7 +3,7 @@
 // Neon Postgres and Supabase with local fallback.
 
 const { insertFeedback, getFeedback } = require("./db");
-const { getClientIp, checkRateLimit } = require("./overload-protection");
+const { getClientIp, checkRateLimit, applyCorsHeaders } = require("./overload-protection");
 
 function parseBody(req) {
   if (typeof req.body === "object" && req.body !== null) return req.body;
@@ -19,9 +19,7 @@ function parseBody(req) {
 
 module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
-  res.setHeader("Access-Control-Allow-Origin", req.headers?.origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  applyCorsHeaders(req, res, "GET, POST, OPTIONS", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.status(204).send("");
@@ -31,10 +29,11 @@ module.exports = async function handler(req, res) {
     const limit = Math.min(Number(req.query?.limit) || 20, 100);
     const offset = Math.max(Number(req.query?.offset) || 0, 0);
     const result = await getFeedback({ limit, offset });
+    const sanitized = (result.feedback || []).map(({ order_pin, ...rest }) => rest);
     return res.status(200).json({
-      feedback: result.feedback || [],
+      feedback: sanitized,
       provider: result.provider,
-      count: result.feedback?.length || 0,
+      count: sanitized.length,
     });
   }
 

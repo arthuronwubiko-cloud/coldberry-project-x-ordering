@@ -13,25 +13,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <style>
       :root {
-        --bg: #fff8f3;
-        --surface: #ffffff;
-        --surface-2: #fdf2e9;
-        --text: #1c1216;
-        --muted: #5c4d53;
-        --border: rgba(92, 26, 43, 0.14);
-        --wine: #5c1a2b;
-        --coral: #ff5733;
-        --saffron: #f0a83b;
-        --danger: #dc3545;
-        --success: #198754;
+        --bg: #FFF8F5;
+        --surface: #FFFFFF;
+        --surface-2: #FDEEF1;
+        --text: #2A1218;
+        --muted: #6E5560;
+        --border: #F0D9DF;
+        --wine: #5C1A2B;
+        --coral: #8C1D40;
+        --coral-hover: #6F1632;
+        --brand-text: #FFFFFF;
+        --accent: #E8557A;
+        --header-bg: #5C1A2B;
+        --header-text: #FFF4F6;
+        --saffron: #B7791F;
+        --danger: #B3261E;
+        --success: #2F7D4F;
+        --info: #2563A8;
       }
       :root[data-theme="dark"] {
-        --bg: #161114;
-        --surface: #20171d;
-        --surface-2: #2a1e25;
-        --text: #faf6f2;
-        --muted: #b9aeb3;
-        --border: rgba(255, 255, 255, 0.1);
+        --bg: #150B0E;
+        --surface: #221317;
+        --surface-2: #2D1A20;
+        --text: #F6E9EC;
+        --muted: #C4A9B1;
+        --border: #3D2830;
+        --coral: #F0708F;
+        --coral-hover: #F58AA3;
+        --brand-text: #2A0A14;
+        --accent: #FF8FAB;
+        --header-bg: #2A0F18;
+        --header-text: #FFF4F6;
+        --saffron: #F5C451;
+        --danger: #FF7B72;
+        --success: #5CC98A;
+        --info: #6CB2FF;
       }
       * { box-sizing: border-box; }
       body {
@@ -42,7 +58,8 @@
         line-height: 1.5;
       }
       .console-header {
-        background: var(--surface);
+        background: var(--header-bg);
+        color: var(--header-text);
         border-bottom: 1px solid var(--border);
         padding: 0.9rem 1.5rem;
         display: flex;
@@ -1450,21 +1467,21 @@
         }
 
         function buildReceiptCardHtml(order, isAdmin) {
-          const id = order.order_id || order.orderId;
-          const pin = order.order_pin || order.orderPin || "N/A";
-          const name = order.customer_name || order.customerName || "Customer";
-          const phone = order.customer_phone || order.customerPhone || "";
-          const fulfilment = order.fulfilment || "Delivery";
-          const location = order.location || "";
-          const address = order.address || "";
-          const items = order.items || "";
-          const notes = order.notes || "";
-          const status = (order.status || "pending").toLowerCase();
+          const id = esc(order.order_id || order.orderId);
+          const pin = esc(order.order_pin || order.orderPin || "N/A");
+          const name = esc(order.customer_name || order.customerName || "Customer");
+          const phone = esc(order.customer_phone || order.customerPhone || "");
+          const fulfilment = esc(order.fulfilment || "Delivery");
+          const location = esc(order.location || "");
+          const address = esc(order.address || "");
+          const items = esc(order.items || "");
+          const notes = esc(order.notes || "");
+          const status = (order.status || "pending").toLowerCase().replace(/[^a-z_]/g, "");
           const paymentStatus = (order.payment_status || order.paymentStatus || "pending").toLowerCase();
           const isPaid = paymentStatus === "paid" || paymentStatus === "received";
-          const dateStr = formatDate(order.created_at || order.timestamp);
+          const dateStr = esc(formatDate(order.created_at || order.timestamp));
           const pricing = getOrderPricing(order);
-          const isDelivery = fulfilment === "Delivery";
+          const isDelivery = (order.fulfilment || "Delivery") === "Delivery";
 
           const adminExtras = isAdmin
             ? `<button class="quick-btn danger" data-action="state" data-id="${id}" data-status="cancelled">Cancel</button>
@@ -1653,7 +1670,7 @@
                 <div class="customer-group-card">
                   <div class="customer-group-header">
                     <div class="customer-group-title">
-                      <i class="fa-solid fa-user-tag" aria-hidden="true"></i> ${nameKey}
+                      <i class="fa-solid fa-user-tag" aria-hidden="true"></i> ${esc(nameKey)}
                     </div>
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
                       <span class="status-pill status-confirmed">${custOrders.length} order${custOrders.length > 1 ? "s" : ""}</span>
@@ -1679,15 +1696,16 @@
             ordersBody.innerHTML = "";
 
             filtered.forEach((order) => {
-              const id = order.order_id || order.orderId;
-              const pin = order.order_pin || order.orderPin || "N/A";
-              const name = order.customer_name || order.customerName || "Customer";
-              const phone = order.customer_phone || order.customerPhone || "";
-              const fulfilment = order.fulfilment || "Delivery";
-              const location = order.location || "";
-              const address = order.address || "";
-              const items = order.items || "";
-              const status = (order.status || "pending").toLowerCase();
+              const id = esc(order.order_id || order.orderId);
+              const pin = esc(order.order_pin || order.orderPin || "N/A");
+              const name = esc(order.customer_name || order.customerName || "Customer");
+              const phone = esc(order.customer_phone || order.customerPhone || "");
+              const rawFulfilment = order.fulfilment || "Delivery";
+              const fulfilment = esc(rawFulfilment);
+              const location = esc(order.location || "");
+              const address = esc(order.address || "");
+              const items = esc(order.items || "");
+              const status = (order.status || "pending").toLowerCase().replace(/[^a-z_]/g, "");
               const paymentStatus = (order.payment_status || order.paymentStatus || "pending").toLowerCase();
               const isPaid = paymentStatus === "paid" || paymentStatus === "received";
               const pricing = getOrderPricing(order);
@@ -1901,7 +1919,11 @@
           out.hidden = false;
           if (val.length !== 15) { out.innerHTML = `<span style="color:var(--danger);">Token must be exactly 15 characters.</span>`; return; }
           try {
-            const res = await fetch(`${getApiBase()}/api/admin?verifyRefundToken=${encodeURIComponent(val)}`, { cache: "no-store" });
+            const token = sessionStorage.getItem(TOKEN_KEY) || "";
+            const res = await fetch(`${getApiBase()}/api/admin?verifyRefundToken=${encodeURIComponent(val)}`, {
+              cache: "no-store",
+              headers: { Authorization: `Bearer ${token}` },
+            });
             const d = await res.json().catch(() => ({}));
             if (!res.ok || !d.valid) { out.innerHTML = `<span style="color:var(--danger);">✗ ${esc(d.error || "Invalid token")}</span>`; return; }
             out.innerHTML = `<div style="border:1px solid var(--border);border-radius:8px;padding:0.8rem;">

@@ -21,3 +21,6 @@ CREATE TABLE IF NOT EXISTS customer_users (
 );
 
 CREATE INDEX IF NOT EXISTS customer_users_username_idx ON customer_users (username);
+
+ALTER TABLE public.customer_users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.refund_tokens ENABLE ROW LEVEL SECURITY;

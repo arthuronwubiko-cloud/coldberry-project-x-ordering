@@ -47,13 +47,18 @@ function isRateLimited(ip) {
   return bucket.count > 30;
 }
 
+let ephemeralAuthSecret = null;
+
 function getAuthSecret() {
-  return (
-    process.env.CUSTOMER_AUTH_SECRET ||
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.DATABASE_URL ||
-    "romeos-customer-auth-secret-fallback-key"
-  );
+  const secret = process.env.CUSTOMER_AUTH_SECRET || process.env.ADMIN_SESSION_SECRET;
+  if (secret) return secret;
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    throw new Error("CUSTOMER_AUTH_SECRET or ADMIN_SESSION_SECRET must be configured in production.");
+  }
+  if (!ephemeralAuthSecret) {
+    ephemeralAuthSecret = crypto.randomBytes(32).toString("hex");
+  }
+  return ephemeralAuthSecret;
 }
 
 function hashPassword(password) {
@@ -215,10 +220,8 @@ module.exports = async function handler(req, res) {
     return res.status(204).end();
   }
 
-  const clientIp =
-    req.headers?.["x-forwarded-for"]?.split(",")[0]?.trim() ||
-    req.socket?.remoteAddress ||
-    "unknown";
+  const { getClientIp } = require("./overload-protection");
+  const clientIp = getClientIp(req);
 
   if (req.method === "GET") {
     const session = resolveCustomerSession(req);
@@ -409,59 +412,8 @@ module.exports = async function handler(req, res) {
   }
 
   if (action === "reset_password") {
-    const username = String(body.username || "").trim().toLowerCase();
-    const verifyContact = String(body.verifyContact || body.email || body.phone || "").trim();
-    const newPassword = String(body.newPassword || body.password || "");
-
-    if (!username) {
-      return res.status(400).json({ error: "Username is required." });
-    }
-    if (!verifyContact) {
-      return res.status(400).json({
-        error: "Registered email address or phone number is required to verify your identity.",
-      });
-    }
-    if (!newPassword || newPassword.length < 8 || newPassword.length > 128) {
-      return res.status(400).json({
-        error: "New password must be at least 8 characters.",
-      });
-    }
-
-    const user = await findCustomerByUsername(username);
-    if (!user) {
-      return res.status(404).json({ error: "Account not found with that username." });
-    }
-
-    // Verify identity: verifyContact must match either registered email or phone
-    const cleanVerify = verifyContact.toLowerCase();
-    const userEmail = String(user.email || "").toLowerCase();
-    const isEmailMatch = Boolean(userEmail && (cleanVerify === userEmail || cleanVerify === userEmail.trim()));
-
-    // Check phone match
-    const variants = typeof phoneMatchVariants === "function" ? phoneMatchVariants(user.phone) : [user.phone];
-    const normPhone = normalizePhoneNumber(verifyContact, body.countryCode);
-    const cleanContactDigits = verifyContact.replace(/\D/g, "");
-    const isPhoneMatch = Boolean(
-      (normPhone && variants.includes(normPhone)) ||
-      variants.some((v) => {
-        const vDigits = String(v).replace(/\D/g, "");
-        return cleanContactDigits.length >= 7 && (vDigits.endsWith(cleanContactDigits) || cleanContactDigits.endsWith(vDigits));
-      })
-    );
-
-    if (!isEmailMatch && !isPhoneMatch) {
-      return res.status(403).json({
-        error: "Verification failed. The email or phone number provided does not match our records for this account.",
-      });
-    }
-
-    const passwordHash = hashPassword(newPassword);
-    await updateCustomerProfile(username, { passwordHash });
-
-    recordVisitorHit(`pwreset:${username}`);
-    return res.status(200).json({
-      success: true,
-      message: "Password reset successfully. You can now sign in with your new password.",
+    return res.status(501).json({
+      error: "Self-service password reset is disabled until out-of-band email/SMS verification is enabled. Please contact support.",
     });
   }
 
