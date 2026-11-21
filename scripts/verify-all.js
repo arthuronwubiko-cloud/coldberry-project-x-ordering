@@ -2127,6 +2127,66 @@ async function checkLegalAndDealsCompliance() {
     complaintPostRes.statusCode === 200 && complaintPostRes.body?.record?.feedback_type === "complaint" && hasComplaintUi,
     `status=${complaintPostRes.statusCode}, type=${complaintPostRes.body?.record?.feedback_type}, ui=${hasComplaintUi}`
   );
+
+  // 6y. Redis Login Session Store, Instant Revocation & Failed-Login Lockout
+  const redisMod = require(path.join(ROOT_DIR, "api", "redis.js"));
+  const testJti = `jti-test-${Date.now()}`;
+  await redisMod.storeSession(testJti, { jti: testJti, username: "redis_tester", exp: Date.now() + 60_000 }, 60_000);
+  const loadedSess = await redisMod.getSession(testJti);
+  await redisMod.revokeSession(testJti, 60_000);
+  const revokedAfter = await redisMod.isSessionRevoked(testJti);
+
+  const lockId = `lock-test-${Date.now()}`;
+  let lastFail = null;
+  for (let i = 0; i < redisMod.LOCKOUT_MAX_ATTEMPTS; i++) {
+    lastFail = await redisMod.recordFailedLogin(lockId);
+  }
+  const lockedState = await redisMod.isLoginLockedOut(lockId);
+  await redisMod.clearFailedLogins(lockId);
+  const unlockedState = await redisMod.isLoginLockedOut(lockId);
+
+  record(
+    "redis-login-store-and-lockout",
+    "Redis login store tracks active sessions, enforces instant logout revocation, and locks out repeated failed logins",
+    Boolean(loadedSess && loadedSess.username === "redis_tester") &&
+      revokedAfter === true &&
+      Boolean(lastFail && lastFail.locked === true) &&
+      lockedState.locked === true &&
+      unlockedState.locked === false,
+    `provider=${redisMod.getProvider()}, sessionStored=${Boolean(loadedSess)}, revoked=${revokedAfter}, locked=${lockedState.locked}, unlocked=${!unlockedState.locked}`
+  );
+
+  // 6z. Load Balancer Pool Distribution (Least-Connections / Round-Robin) & Automatic Failover
+  const { createLoadBalancerPool } = require(path.join(ROOT_DIR, "api", "load-balancer.js"));
+  const lbPool = createLoadBalancerPool(
+    ["http://node1.local:3000", "http://node2.local:3000", "http://node3.local:3000"],
+    { name: "test-lb-pool", strategy: "round-robin", failureThreshold: 1, cooldownMs: 5000 }
+  );
+  const n1 = lbPool.acquireNode();
+  const n2 = lbPool.acquireNode();
+  lbPool.releaseNode(n1, { success: true, latencyMs: 4 });
+  lbPool.releaseNode(n2, { success: true, latencyMs: 5 });
+
+  let failoverCalls = 0;
+  const failoverRes = await lbPool.executeWithFailover(async (node) => {
+    failoverCalls += 1;
+    if (failoverCalls === 1) {
+      throw new Error(`Simulated failure on ${node.id}`);
+    }
+    return { ok: true, servedBy: node.id };
+  });
+  const lbStats = lbPool.getStats();
+
+  record(
+    "load-balancer-failover",
+    "Load balancer distributes requests across upstream nodes and automatically fails over when a node errors",
+    n1.id !== n2.id &&
+      failoverRes.result?.ok === true &&
+      failoverRes.attempts === 2 &&
+      lbStats.totalFailovers === 1 &&
+      lbStats.healthyCount === 2,
+    `n1=${n1.id}, n2=${n2.id}, attempts=${failoverRes.attempts}, failovers=${lbStats.totalFailovers}, healthy=${lbStats.healthyCount}/${lbStats.totalNodes}`
+  );
 }
 
 // ---------------------------------------------------------------------------

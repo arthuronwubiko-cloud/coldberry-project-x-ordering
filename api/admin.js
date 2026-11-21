@@ -29,6 +29,17 @@ const {
   savePromotionalEmail,
   getPromotionalEmails,
 } = require("./db");
+const {
+  checkRedisRateLimit,
+  isLoginLockedOut,
+  recordFailedLogin,
+  clearFailedLogins,
+  storeSession,
+  revokeSession,
+  revokeAllUserSessions,
+  isSessionRevokedSync,
+  isSessionRevoked,
+} = require("./redis");
 
 const CREDENTIAL_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{14}$/;
 const STAFF_ALLOWED_STATUSES = ["confirmed", "preparing", "out_for_delivery", "ready", "completed"];
@@ -252,9 +263,11 @@ function authenticateCredentials(username, password) {
   return null;
 }
 
-function issueSessionToken(username, role) {
+function issueSessionToken(username, role, customJti) {
+  const jti = customJti || (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex"));
   const payload = Buffer.from(
     JSON.stringify({
+      jti,
       u: username,
       r: role,
       exp: Date.now() + SESSION_TTL_MS,
@@ -280,7 +293,10 @@ function verifySessionToken(token) {
     if (!decoded || !decoded.r || !decoded.u || Date.now() > Number(decoded.exp || 0)) {
       return null;
     }
-    return { username: decoded.u, role: decoded.r };
+    if (decoded.jti && isSessionRevokedSync(decoded.jti)) {
+      return null;
+    }
+    return { username: decoded.u, role: decoded.r, jti: decoded.jti || null };
   } catch (_) {
     return null;
   }
@@ -611,15 +627,34 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    if (action === "logout") {
+      const auth = resolveAuthFromRequest(req);
+      if (auth && auth.jti) {
+        await revokeSession(auth.jti, SESSION_TTL_MS);
+      }
+      return res.status(200).json({ success: true, authenticated: false });
+    }
+
     // Default POST: Login / verify 14-character alphanumeric username + password
+    const redisRate = await checkRedisRateLimit(`admin_login:${clientIp}`, 15, 60_000);
     const loginRate = checkRateLimit(`admin_login:${clientIp}`, 15, 60_000);
-    if (!loginRate.allowed) {
-      res.setHeader("Retry-After", String(loginRate.retryAfter));
+    if (!redisRate.allowed || !loginRate.allowed) {
+      res.setHeader("Retry-After", String(redisRate.retryAfter || loginRate.retryAfter || 60));
       return res.status(429).json({ error: "Too many login attempts. Please wait a minute." });
     }
 
     const username = String(body.username || "").trim();
     const password = String(body.password || "").trim();
+
+    const lockoutKey = `console:${clientIp}:${username.toLowerCase()}`;
+    const lockout = await isLoginLockedOut(lockoutKey);
+    if (lockout.locked) {
+      res.setHeader("Retry-After", String(lockout.retryAfter));
+      return res.status(429).json({
+        error: "Account temporarily locked due to repeated failed login attempts. Please try again later.",
+        retryAfter: lockout.retryAfter,
+      });
+    }
 
     const result = authenticateCredentials(username, password);
     if (result && result.invalidFormat) {
@@ -628,10 +663,25 @@ module.exports = async function handler(req, res) {
       });
     }
     if (!result) {
+      const failStatus = await recordFailedLogin(lockoutKey);
+      if (failStatus.locked) {
+        res.setHeader("Retry-After", String(failStatus.retryAfter));
+        return res.status(429).json({
+          error: "Account temporarily locked due to repeated failed login attempts. Please try again later.",
+          retryAfter: failStatus.retryAfter,
+        });
+      }
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
-    const token = issueSessionToken(result.username, result.role);
+    await clearFailedLogins(lockoutKey);
+    const jti = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex");
+    const token = issueSessionToken(result.username, result.role, jti);
+    await storeSession(
+      jti,
+      { jti, u: result.username, r: result.role, exp: Date.now() + SESSION_TTL_MS },
+      SESSION_TTL_MS
+    );
     return res.status(200).json({
       authenticated: true,
       username: result.username,
@@ -642,7 +692,7 @@ module.exports = async function handler(req, res) {
   }
 
   const auth = resolveAuthFromRequest(req);
-  if (!auth) {
+  if (!auth || (auth.jti && await isSessionRevoked(auth.jti))) {
     return res.status(401).json({ error: "Unauthorized. Valid username and password session required." });
   }
 
@@ -793,6 +843,7 @@ module.exports = async function handler(req, res) {
       if (userRes.error) {
         return res.status(404).json({ error: userRes.error });
       }
+      await revokeAllUserSessions(userRes.username);
       return res.status(200).json({
         deleted: true,
         customerUsername: userRes.username,

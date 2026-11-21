@@ -13,21 +13,30 @@ const API_ORIGIN = (
   (process.env.VERCEL ? "https://coldberry-project-x.vercel.app" : "http://localhost:3000")
 ).replace(/\/+$/, "");
 const CONSOLE_DIR = __dirname;
+const { createLoadBalancerPool, parseOriginsFromEnv } = require("../api/load-balancer");
+const upstreamPool = createLoadBalancerPool(parseOriginsFromEnv(API_ORIGIN), {
+  name: "driver-console-upstream",
+  strategy: process.env.LB_STRATEGY || "least-connections",
+});
 
 function requestHandler(req, res) {
   const parsed = url.parse(req.url, false);
   const pathname = parsed.pathname || "/";
 
-  // Proxy /api/* to main storefront API origin
+  // Proxy /api/* to main storefront API origin via load balancer pool
   if (pathname.startsWith("/api/")) {
-    const expectedOrigin = new URL(API_ORIGIN).origin;
-    const targetUrl = new URL(pathname + (parsed.search || ""), API_ORIGIN);
+    const node = upstreamPool.acquireNode();
+    const selectedOrigin = node ? node.url : API_ORIGIN;
+    const expectedOrigin = new URL(selectedOrigin).origin;
+    const targetUrl = new URL(pathname + (parsed.search || ""), selectedOrigin);
     if (targetUrl.origin !== expectedOrigin) {
+      if (node) upstreamPool.releaseNode(node, { success: false });
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "Invalid proxy target." }));
       return;
     }
     const proxyModule = targetUrl.protocol === "https:" ? require("https") : http;
+    const startMs = Date.now();
 
     const proxyReq = proxyModule.request(
       targetUrl,
@@ -39,16 +48,23 @@ function requestHandler(req, res) {
         },
       },
       (proxyRes) => {
+        if (node) {
+          upstreamPool.releaseNode(node, {
+            success: (proxyRes.statusCode || 502) < 500,
+            latencyMs: Date.now() - startMs,
+          });
+        }
         res.writeHead(proxyRes.statusCode || 502, proxyRes.headers);
         proxyRes.pipe(res);
       }
     );
 
     proxyReq.on("error", (err) => {
+      if (node) upstreamPool.releaseNode(node, { success: false, latencyMs: Date.now() - startMs });
       res.writeHead(502, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({
-          error: `Main API server unreachable at ${API_ORIGIN}. Ensure the main ordering site is running.`,
+          error: `Main API server unreachable at ${selectedOrigin}. Ensure the main ordering site is running.`,
           details: err.message,
         })
       );

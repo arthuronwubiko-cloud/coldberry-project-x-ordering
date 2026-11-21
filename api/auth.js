@@ -13,6 +13,16 @@ const {
   recordVisitorHit,
   phoneMatchVariants,
 } = require("./db");
+const {
+  checkRedisRateLimit,
+  isLoginLockedOut,
+  recordFailedLogin,
+  clearFailedLogins,
+  storeSession,
+  revokeSession,
+  isSessionRevokedSync,
+  isSessionRevoked,
+} = require("./redis");
 
 const SESSION_COOKIE = "romeos_user_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -78,7 +88,9 @@ function verifyPassword(password, storedHash) {
 }
 
 function signSessionToken(payload) {
-  const data = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+  const jti = payload.jti || (typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex"));
+  const fullPayload = { ...payload, jti };
+  const data = Buffer.from(JSON.stringify(fullPayload), "utf8").toString("base64url");
   const sig = crypto.createHmac("sha256", getAuthSecret()).update(data).digest("base64url");
   return `${data}.${sig}`;
 }
@@ -94,6 +106,7 @@ function verifySessionToken(token) {
   try {
     const parsed = JSON.parse(Buffer.from(data, "base64url").toString("utf8"));
     if (!parsed || !parsed.username || Date.now() > Number(parsed.exp || 0)) return null;
+    if (parsed.jti && isSessionRevokedSync(parsed.jti)) return null;
     return parsed;
   } catch (_) {
     return null;
@@ -225,7 +238,7 @@ module.exports = async function handler(req, res) {
 
   if (req.method === "GET") {
     const session = resolveCustomerSession(req);
-    if (!session) {
+    if (!session || (session.jti && await isSessionRevoked(session.jti))) {
       return res.status(200).json({
         authenticated: false,
         avatars: Array.from(AVATAR_ICONS.values()),
@@ -272,7 +285,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed." });
   }
 
-  if (isRateLimited(clientIp)) {
+  const rl = await checkRedisRateLimit(`auth:${clientIp}`, 30, 60_000);
+  if (!rl.allowed || isRateLimited(clientIp)) {
     return res.status(429).json({ error: "Too many authentication attempts. Please wait a minute." });
   }
 
@@ -280,6 +294,10 @@ module.exports = async function handler(req, res) {
   const action = String(body.action || "").trim().toLowerCase();
 
   if (action === "logout") {
+    const session = resolveCustomerSession(req);
+    if (session && session.jti) {
+      await revokeSession(session.jti, SESSION_TTL_MS);
+    }
     clearSessionCookie(req, res);
     return res.status(200).json({ success: true, authenticated: false });
   }
@@ -333,10 +351,14 @@ module.exports = async function handler(req, res) {
       return res.status(created.conflict ? 409 : 400).json({ error: created.error });
     }
 
-    const token = signSessionToken({
+    const jti = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex");
+    const sessionPayload = {
+      jti,
       username,
       exp: Date.now() + SESSION_TTL_MS,
-    });
+    };
+    const token = signSessionToken(sessionPayload);
+    await storeSession(jti, sessionPayload, SESSION_TTL_MS);
     setSessionCookie(req, res, token);
 
     const refunds = await findRefundsByPhone(phone);
@@ -356,16 +378,39 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: "Username and password are required." });
     }
 
+    const lockoutKey = `customer:${clientIp}:${username}`;
+    const lockout = await isLoginLockedOut(lockoutKey);
+    if (lockout.locked) {
+      res.setHeader("Retry-After", String(lockout.retryAfter));
+      return res.status(429).json({
+        error: "Account temporarily locked due to repeated failed login attempts. Please try again later.",
+        retryAfter: lockout.retryAfter,
+      });
+    }
+
     const user = await findCustomerByUsername(username);
     if (!user || !verifyPassword(password, user.password_hash)) {
+      const failStatus = await recordFailedLogin(lockoutKey);
+      if (failStatus.locked) {
+        res.setHeader("Retry-After", String(failStatus.retryAfter));
+        return res.status(429).json({
+          error: "Account temporarily locked due to repeated failed login attempts. Please try again later.",
+          retryAfter: failStatus.retryAfter,
+        });
+      }
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
+    await clearFailedLogins(lockoutKey);
     await updateCustomerProfile(username, { lastLoginAt: new Date().toISOString() });
-    const token = signSessionToken({
+    const jti = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex");
+    const sessionPayload = {
+      jti,
       username: user.username,
       exp: Date.now() + SESSION_TTL_MS,
-    });
+    };
+    const token = signSessionToken(sessionPayload);
+    await storeSession(jti, sessionPayload, SESSION_TTL_MS);
     setSessionCookie(req, res, token);
 
     recordVisitorHit(`user:${user.username}`);
@@ -387,7 +432,7 @@ module.exports = async function handler(req, res) {
 
   if (action === "update_profile") {
     const session = resolveCustomerSession(req);
-    if (!session) {
+    if (!session || (session.jti && await isSessionRevoked(session.jti))) {
       return res.status(401).json({ error: "Sign in required to update your profile." });
     }
     const updates = {};
@@ -419,7 +464,7 @@ module.exports = async function handler(req, res) {
 
   if (action === "change_password") {
     const session = resolveCustomerSession(req);
-    if (!session) {
+    if (!session || (session.jti && await isSessionRevoked(session.jti))) {
       return res.status(401).json({ error: "Sign in required." });
     }
     const currentPassword = String(body.currentPassword || "");

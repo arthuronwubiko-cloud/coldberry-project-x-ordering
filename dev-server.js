@@ -111,6 +111,12 @@ const server = http.createServer(async (req, res) => {
         } else if (pathname === "/api/auth") {
           const handler = require("./api/auth.js");
           await handler(vReq, vRes);
+        } else if (pathname === "/api/load-balancer") {
+          const handler = require("./api/load-balancer.js");
+          await handler(vReq, vRes);
+        } else if (pathname === "/api/redis") {
+          const handler = require("./api/redis.js");
+          await handler(vReq, vRes);
         } else {
           res.writeHead(404, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Endpoint not found" }));
@@ -203,10 +209,31 @@ const server = http.createServer(async (req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Romeo's Pizza Server running at http://localhost:${PORT}`);
-  console.log(`- Order page: http://localhost:${PORT}/order.html`);
-  console.log(`- Menu: http://localhost:${PORT}/890b.html`);
-  console.log(`- Deals: http://localhost:${PORT}/pizzadeals.html`);
-  console.log(`- Database: ${require("./api/db").isConfigured() ? "configured" : "not configured (orders not stored)"}`);
-});
+const cluster = require("cluster");
+const os = require("os");
+
+const CLUSTER_WORKERS = Number(process.env.CLUSTER_WORKERS || 1);
+
+if (require.main === module) {
+  if (CLUSTER_WORKERS > 1 && cluster.isPrimary) {
+    const workerCount = Math.min(CLUSTER_WORKERS, os.cpus().length || 4);
+    console.log(`[LoadBalancer] Primary PID ${process.pid} starting ${workerCount} load-balanced workers on port ${PORT}...`);
+    for (let i = 0; i < workerCount; i++) {
+      cluster.fork();
+    }
+    cluster.on("exit", (worker) => {
+      console.warn(`[LoadBalancer] Worker ${worker.process.pid} exited — spawning replacement worker...`);
+      cluster.fork();
+    });
+  } else {
+    server.listen(PORT, () => {
+      console.log(`Romeo's Pizza Server (PID ${process.pid}) running at http://localhost:${PORT}`);
+      console.log(`- Order page: http://localhost:${PORT}/order.html`);
+      console.log(`- Menu: http://localhost:${PORT}/890b.html`);
+      console.log(`- Deals: http://localhost:${PORT}/pizzadeals.html`);
+      console.log(`- Database: ${require("./api/db").isConfigured() ? "configured" : "not configured (orders not stored)"}`);
+    });
+  }
+}
+
+module.exports = server;
