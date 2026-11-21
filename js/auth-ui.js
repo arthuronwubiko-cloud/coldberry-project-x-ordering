@@ -4,15 +4,19 @@
   window.__romeosAuthUiLoaded = true;
 
   const AVATARS = [
-    { id: "pizza", label: "Pizza Lover", emoji: "🍕" },
-    { id: "crown", label: "VIP Crown", emoji: "👑" },
-    { id: "fire", label: "Hot & Spicy", emoji: "🔥" },
-    { id: "rocket", label: "Express", emoji: "🚀" },
-    { id: "cool", label: "Chill", emoji: "😎" },
-    { id: "star", label: "5-Star Fan", emoji: "🌟" },
-    { id: "rider", label: "Delivery", emoji: "🛵" },
-    { id: "heart", label: "Sauce Fan", emoji: "❤️" },
+    { id: "pizza", label: "Scoop", icon: "fa-ice-cream" },
+    { id: "crown", label: "VIP", icon: "fa-crown" },
+    { id: "fire", label: "Berry", icon: "fa-leaf" },
+    { id: "rocket", label: "Express", icon: "fa-bolt" },
+    { id: "cool", label: "Chill", icon: "fa-glasses" },
+    { id: "star", label: "Star", icon: "fa-star" },
+    { id: "rider", label: "Rider", icon: "fa-motorcycle" },
+    { id: "heart", label: "Classic", icon: "fa-heart" },
   ];
+  function avatarHtml(iconId) {
+    const found = AVATARS.find((a) => a.id === iconId) || AVATARS[0];
+    return `<i class="fa-solid ${found.icon}" aria-hidden="true"></i>`;
+  }
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -30,9 +34,9 @@
         align-items: center;
         gap: 0.45rem;
         padding: 0.45rem 0.95rem;
-        border-radius: 9999px;
-        border: 1px solid #db2777;
-        background: #db2777;
+        border-radius: 6px;
+        border: 1px solid #8C1D40;
+        background: #8C1D40;
         color: #ffffff;
         font-weight: 700;
         font-size: 0.86rem;
@@ -42,22 +46,21 @@
         white-space: nowrap;
         transition: transform 0.15s ease, background 0.15s ease;
       }
-      .nav-auth-btn:hover { transform: translateY(-1px); background: #be185d; border-color: #be185d; }
-      :root[data-theme="dark"] .nav-auth-btn { border-color: #f472b6; background: #db2777; color: #ffffff; }
+      .nav-auth-btn:hover { transform: translateY(-1px); background: #6F1632; border-color: #6F1632; }
+      :root[data-theme="dark"] .nav-auth-btn { border-color: #f472b6; background: #8C1D40; color: #ffffff; }
       .nav-auth-avatar {
         width: 24px; height: 24px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        background: #ff5733; color: #fff; font-size: 0.85rem; line-height: 1;
+        background: #8C1D40; color: #fff; font-size: 0.85rem; line-height: 1;
       }
       .nav-refund-dot {
         display: inline-flex; align-items: center; justify-content: center;
         min-width: 18px; height: 18px; padding: 0 5px;
-        border-radius: 9999px; background: #198754; color: #fff;
+        border-radius: 6px; background: #198754; color: #fff;
         font-size: 0.7rem; font-weight: 800;
       }
       .auth-drawer-backdrop {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-        backdrop-filter: blur(3px); z-index: 10020; display: flex; justify-content: flex-end;
+        position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10020; display: flex; justify-content: flex-end;
       }
       .auth-drawer {
         width: min(420px, 95vw); height: 100%; overflow-y: auto;
@@ -68,20 +71,20 @@
       :root[data-theme="dark"] .auth-drawer { background: #1e161b; color: #faf6f2; }
       .auth-avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
       .auth-avatar-opt {
-        border: 1px solid rgba(128,128,128,0.28); border-radius: 10px;
+        border: 1px solid rgba(128,128,128,0.28); border-radius: 6px;
         background: transparent; color: inherit; padding: 0.5rem 0.25rem;
         cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 0.2rem;
         font-size: 0.72rem; font-weight: 600;
       }
       .auth-avatar-opt[aria-pressed="true"] {
-        border-color: #ff5733; background: rgba(255, 87, 51, 0.14);
+        border-color: #8C1D40; background: rgba(255, 87, 51, 0.14);
       }
       .auth-drawer-card {
-        border: 1px solid rgba(128,128,128,0.22); border-radius: 12px; padding: 0.85rem;
+        border: 1px solid rgba(128,128,128,0.22); border-radius: 6px; padding: 0.85rem;
         background: rgba(128,128,128,0.05);
       }
       .auth-refund-alert {
-        border: 2px solid #20c997; border-radius: 12px; padding: 0.9rem;
+        border: 2px solid #20c997; border-radius: 6px; padding: 0.9rem;
         background: rgba(32, 201, 151, 0.12);
       }
     `;
@@ -126,7 +129,7 @@
           .slice(0, 8)
           .map(
             (m) => `
-          <div class="auth-drawer-card" style="margin-bottom:0.55rem;border-left:3px solid #ff5733;">
+          <div class="auth-drawer-card" style="margin-bottom:0.55rem;border:1px solid rgba(184, 58, 27, 0.35);">
             <div style="display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:0.86rem;">
               <span><i class="fa-solid fa-envelope"></i> ${esc(m.title || "Message from Romeo's Pizza")}</span>
               <span style="font-size:0.72rem;opacity:0.7;">${m.recipient_username === "ALL" ? "Broadcast" : "Direct"}</span>
@@ -166,10 +169,10 @@
           <div class="auth-drawer-card" style="margin-bottom:0.5rem;font-size:0.84rem;">
             <div style="display:flex;justify-content:space-between;font-weight:700;">
               <span>PIN: ${esc(o.order_pin || "—")}</span>
-              <span style="text-transform:uppercase;color:#ff5733;">${esc((o.status || "pending").replace(/_/g, " "))}</span>
+              <span style="text-transform:uppercase;color:#8C1D40;">${esc((o.status || "pending").replace(/_/g, " "))}</span>
             </div>
             <div style="opacity:0.85;margin-top:0.2rem;">${esc(o.items || "")}</div>
-            ${o.order_pin ? `<a href="track.html?phone=${encodeURIComponent(user.phone)}&pin=${encodeURIComponent(o.order_pin)}" style="display:inline-block;margin-top:0.3rem;font-size:0.78rem;color:#ff5733;font-weight:700;">Track Order →</a>` : ""}
+            ${o.order_pin ? `<a href="track.html?phone=${encodeURIComponent(user.phone)}&pin=${encodeURIComponent(o.order_pin)}" style="display:inline-block;margin-top:0.3rem;font-size:0.78rem;color:#8C1D40;font-weight:700;">Track Order →</a>` : ""}
           </div>`
           )
           .join("")
@@ -179,7 +182,7 @@
       <div class="auth-drawer">
         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(128,128,128,0.2);padding-bottom:0.75rem;">
           <div style="display:flex;align-items:center;gap:0.6rem;">
-            <span class="nav-auth-avatar" style="width:38px;height:38px;font-size:1.3rem;" id="drawer-avatar-preview">${esc(user.avatarEmoji || "🍕")}</span>
+            <span class="nav-auth-avatar" style="width:38px;height:38px;font-size:1.3rem;" id="drawer-avatar-preview">${avatarHtml(user.avatarIcon)}</span>
             <div>
               <div style="font-weight:800;font-size:1.05rem;">@${esc(user.username)}</div>
               <div style="font-size:0.8rem;opacity:0.75;">${esc(user.fullName)} · ${esc(user.phone)}</div>
@@ -194,7 +197,7 @@
             ${AVATARS.map(
               (a) => `
               <button type="button" class="auth-avatar-opt" data-avatar-pick="${a.id}" aria-pressed="${a.id === user.avatarIcon ? "true" : "false"}">
-                <span style="font-size:1.35rem;">${a.emoji}</span>
+                <i class="fa-solid ${a.icon}" style="font-size:1.1rem;" aria-hidden="true"></i>
                 <span>${a.label}</span>
               </button>`
             ).join("")}
@@ -216,7 +219,7 @@
           ${ordersHtml}
         </div>
 
-        <button type="button" id="auth-signout-btn" style="margin-top:auto;padding:0.75rem;border-radius:10px;border:1px solid #dc3545;background:rgba(220,53,69,0.12);color:#dc3545;font-weight:800;cursor:pointer;">
+        <button type="button" id="auth-signout-btn" style="margin-top:auto;padding:0.75rem;border-radius: 6px;border:1px solid #dc3545;background:rgba(220,53,69,0.12);color:#dc3545;font-weight:800;cursor:pointer;">
           <i class="fa-solid fa-right-from-bracket"></i> Sign Out
         </button>
       </div>
@@ -233,7 +236,7 @@
       btn.onclick = () => {
         const tok = btn.dataset.copyRefund;
         if (navigator.clipboard) navigator.clipboard.writeText(tok).catch(() => {});
-        btn.textContent = "✓ Copied!";
+        btn.textContent = "Copied";
         setTimeout(() => { btn.textContent = "Copy Token"; }, 1800);
       };
     });
@@ -249,7 +252,7 @@
         if (res && res.ok) {
           const data = await res.json();
           state.user = data.user;
-          document.getElementById("drawer-avatar-preview").textContent = data.user.avatarEmoji;
+          document.getElementById("drawer-avatar-preview").innerHTML = avatarHtml(data.user.avatarIcon);
           backdrop.querySelectorAll("[data-avatar-pick]").forEach((b) => {
             b.setAttribute("aria-pressed", b.dataset.avatarPick === iconId ? "true" : "false");
           });
@@ -294,7 +297,7 @@
       const unclaimedCount = (state.refunds || []).filter((r) => r.status !== "claimed").length;
       const alertCount = unclaimedCount + (state.messages || []).length;
       btn.innerHTML = `
-        <span class="nav-auth-avatar">${esc(state.user.avatarEmoji || "🍕")}</span>
+        <span class="nav-auth-avatar">${avatarHtml(state.user.avatarIcon)}</span>
         <span>@${esc(state.user.username)}</span>
         ${alertCount > 0 ? `<span class="nav-refund-dot" title="${unclaimedCount} refund(s), ${(state.messages || []).length} message(s)">${alertCount}</span>` : ""}
       `;

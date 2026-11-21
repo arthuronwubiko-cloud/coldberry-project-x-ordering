@@ -290,4 +290,73 @@
   } else {
     initThemeSwitcher();
   }
+
+  // Three-Dots ("Burger") Navigation Controller for Client Storefront
+  const initDotsNavigation = () => {
+    const navBar = document.querySelector(".nav-bar");
+    const navMenu = document.getElementById("nav-links-menu") || (navBar && navBar.querySelector(".nav-links"));
+    let dotsBtn = document.getElementById("nav-dots-toggle");
+
+    if (navBar && navMenu && !dotsBtn && document.createElement) {
+      dotsBtn = document.createElement("button");
+      dotsBtn.type = "button";
+      dotsBtn.id = "nav-dots-toggle";
+      dotsBtn.className = "nav-dots-toggle";
+      dotsBtn.setAttribute("aria-label", "Open navigation menu");
+      dotsBtn.setAttribute("aria-haspopup", "true");
+      dotsBtn.setAttribute("aria-expanded", "false");
+      dotsBtn.setAttribute("aria-controls", navMenu.id || "nav-links-menu");
+      dotsBtn.innerHTML = "<i class=\"fa-solid fa-ellipsis-vertical\" aria-hidden=\"true\"></i>";
+      navBar.appendChild(dotsBtn);
+    }
+
+    let openState = false;
+    const setOpen = (nextOpen) => {
+      openState = Boolean(nextOpen);
+      if (navMenu && navMenu.classList) {
+        navMenu.classList.toggle("is-open", openState);
+      }
+      if (dotsBtn) {
+        dotsBtn.setAttribute("aria-expanded", String(openState));
+        dotsBtn.setAttribute("aria-label", openState ? "Close navigation menu" : "Open navigation menu");
+      }
+      return openState;
+    };
+
+    const DotsMenuController = {
+      isOpen: () => openState,
+      open: () => setOpen(true),
+      close: () => setOpen(false),
+      toggle: () => setOpen(!openState),
+    };
+    window.DotsMenuController = DotsMenuController;
+
+    document.addEventListener("click", (e) => {
+      const toggleTarget = e.target && e.target.closest ? e.target.closest("#nav-dots-toggle, .nav-dots-toggle") : null;
+      if (toggleTarget) {
+        e.preventDefault();
+        DotsMenuController.toggle();
+        return;
+      }
+      if (!openState) return;
+      const clickedLink = e.target && e.target.closest ? e.target.closest("#nav-links-menu a, .nav-links a") : null;
+      if (clickedLink) {
+        DotsMenuController.close();
+        return;
+      }
+      const insideMenu = e.target && e.target.closest ? e.target.closest("#nav-links-menu, .nav-links") : null;
+      if (!insideMenu) {
+        DotsMenuController.close();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && openState) {
+        DotsMenuController.close();
+        if (dotsBtn && typeof dotsBtn.focus === "function") dotsBtn.focus();
+      }
+    });
+  };
+  initDotsNavigation();
+
 })();

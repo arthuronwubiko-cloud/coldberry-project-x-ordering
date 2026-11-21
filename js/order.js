@@ -775,7 +775,7 @@
     const orderPin = payload.orderPin || null;
 
     const lines = [
-      "🍦 *New Order Request - Coldberry Ice Cream Nigeria*",
+      "*New Order Request - Coldberry Ice Cream Nigeria*",
       "",
       "*Customer Details:*",
       `• Name: ${customerName}`,
@@ -1510,7 +1510,7 @@
                 clearInterval(window._romeosCancelTimerInterval);
                 cancelBtn.hidden = true;
                 if (cancelFeedback) {
-                  cancelFeedback.textContent = "✓ Your order has been cancelled.";
+                  cancelFeedback.textContent = "Your order has been cancelled.";
                   cancelFeedback.classList.add("is-cancelled");
                   cancelFeedback.hidden = false;
                 }

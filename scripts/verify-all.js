@@ -2187,6 +2187,48 @@ async function checkLegalAndDealsCompliance() {
       lbStats.healthyCount === 2,
     `n1=${n1.id}, n2=${n2.id}, attempts=${failoverRes.attempts}, failovers=${lbStats.totalFailovers}, healthy=${lbStats.healthyCount}/${lbStats.totalNodes}`
   );
+
+  // 6aa. Three-Dots ("Burger") Navigation Menu on Client Storefront & Admin Console
+  const clientNavPages = ["index.html", "890b.html", "pizzadeals.html", "order.html", "track.html", "login.html", "privacy.html", "terms.html"];
+  const clientDotsPagesOk = clientNavPages.every((p) => {
+    const h = fs.readFileSync(path.join(ROOT_DIR, p), "utf8");
+    return (
+      h.includes('id="nav-dots-toggle"') &&
+      h.includes("fa-ellipsis-vertical") &&
+      h.includes('id="nav-links-menu"') &&
+      h.includes('aria-controls="nav-links-menu"')
+    );
+  });
+  const siteJsContent = fs.readFileSync(path.join(ROOT_DIR, "js", "site.js"), "utf8");
+  const cssContent = fs.readFileSync(path.join(ROOT_DIR, "peter890.css"), "utf8");
+  const clientDotsLogicOk =
+    siteJsContent.includes("DotsMenuController") &&
+    cssContent.includes(".nav-dots-toggle") &&
+    cssContent.includes(".nav-links.is-open");
+
+  const adminHtmlContent = fs.readFileSync(path.join(ROOT_DIR, "admin.html"), "utf8");
+  const adminPkgContent = fs.readFileSync(path.join(ROOT_DIR, "admin-console", "index.html"), "utf8");
+  const feedbackHtmlContent = fs.readFileSync(path.join(ROOT_DIR, "feedback.html"), "utf8");
+  const refundsHtmlContent = fs.readFileSync(path.join(ROOT_DIR, "refunds.html"), "utf8");
+  const adminDotsOk =
+    [adminHtmlContent, adminPkgContent].every(
+      (h) =>
+        h.includes('id="admin-dots-toggle"') &&
+        h.includes('id="admin-dots-menu"') &&
+        h.includes("fa-ellipsis-vertical") &&
+        h.includes("console-nav-tabs") &&
+        h.includes("setAdminDotsOpen")
+    ) &&
+    feedbackHtmlContent.includes('id="admin-dots-toggle"') &&
+    refundsHtmlContent.includes('id="admin-dots-toggle"');
+
+  record(
+    "three-dots-burger-navigation",
+    "Client storefront (8 pages) and Admin Console (admin, admin-console, feedback, refunds) house navigation inside the three-dots (fa-ellipsis-vertical) menu",
+    clientDotsPagesOk && clientDotsLogicOk && adminDotsOk,
+    `clientPages=${clientDotsPagesOk}, clientController=${clientDotsLogicOk}, adminConsole=${adminDotsOk}`
+  );
+
 }
 
 // ---------------------------------------------------------------------------

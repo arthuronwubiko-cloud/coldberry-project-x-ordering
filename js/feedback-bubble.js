@@ -14,32 +14,32 @@
   }
 
   const QUICK_TAGS = [
-    "🍦 Rich & Creamy",
-    "⚡ Fast Cold-Bag Delivery",
-    "😋 Authentic Flavours",
-    "🛵 Friendly Courier",
-    "🧇 Crispy Waffle Bowl",
-    "🍓 Fresh Berry Swirls",
-    "🍧 Perfect 2-in-1 Tub",
-    "❄️ Perfectly Chilled"
+    "Rich & Creamy",
+    "Fast Cold-Bag Delivery",
+    "Authentic Flavours",
+    "Friendly Courier",
+    "Crispy Waffle Bowl",
+    "Fresh Berry Swirls",
+    "Perfect 2-in-1 Tub",
+    "Perfectly Chilled"
   ];
 
   const COMPLAINT_TAGS = [
-    "🐢 Delayed Delivery",
-    "🍨 Melted / Wrong Scoop",
-    "🧇 Missing Waffle / Cone",
-    "💳 Payment / Refund Issue",
-    "🥄 Missing Spoons / Napkins",
-    "🍓 Wrong Scoop Flavour"
+    "Delayed Delivery",
+    "Melted / Wrong Scoop",
+    "Missing Waffle / Cone",
+    "Payment / Refund Issue",
+    "Missing Spoons / Napkins",
+    "Wrong Scoop Flavour"
   ];
 
   const RATING_DESCRIPTIONS = [
     "Tap a star to rate",
-    "1 - Needs Improvement 😞",
-    "2 - Fair / Okay 😐",
-    "3 - Sweet & Good 😊",
-    "4 - Delicious Scoop! 🍨",
-    "5 - Outstanding Indulgence! 🍦"
+    "1 - Needs Improvement",
+    "2 - Fair / Okay",
+    "3 - Sweet & Good",
+    "4 - Delicious Scoop!",
+    "5 - Outstanding Indulgence!"
   ];
 
   function getAutoFillData() {
@@ -119,7 +119,7 @@
         bottom: 1.5rem;
         left: 1.5rem;
         z-index: 9990;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         box-sizing: border-box;
       }
       #romeos-feedback-bubble-root * {
@@ -144,8 +144,7 @@
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
         outline: none;
         user-select: none;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        -webkit-
       }
       .rfb-trigger-btn:hover {
         transform: translateY(-2px) scale(1.03);
@@ -509,65 +508,65 @@
     root.id = "romeos-feedback-bubble-root";
 
     root.innerHTML = `
-      <div id="rfb-popover" class="rfb-popover-card" role="dialog" aria-modal="true" aria-labelledby="rfb-title">
+      <div id="rfb-popover"class="rfb-popover-card"role="dialog"aria-modal="true"aria-labelledby="rfb-title">
         <div id="rfb-form-view">
           <div class="rfb-header">
             <div class="rfb-title-group">
-              <h3 id="rfb-title">🍦 Customer Feedback</h3>
+              <h3 id="rfb-title">Customer Feedback</h3>
               <p>Help us keep Coldberry Ice Cream fresh, rich &amp; creamy!</p>
             </div>
-            <button type="button" class="rfb-close-btn" id="rfb-close-btn" aria-label="Close feedback window">
-              <i class="fa-solid fa-xmark" aria-hidden="true">✕</i>
+            <button type="button"class="rfb-close-btn"id="rfb-close-btn"aria-label="Close feedback window">
+              <i class="fa-solid fa-xmark"aria-hidden="true"></i>
             </button>
           </div>
 
-          <div id="rfb-error" class="rfb-error-alert" role="alert"></div>
+          <div id="rfb-error"class="rfb-error-alert"role="alert"></div>
 
           <!-- Feedback vs Complaint Switcher -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.75rem;" role="tablist" aria-label="Feedback type">
-            <button type="button" id="rfb-mode-feedback" data-rfb-mode="feedback" aria-selected="true" style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:#ff5733;color:#fff;font-weight:700;font-size:0.8rem;cursor:pointer;">⭐ Sweet Review</button>
-            <button type="button" id="rfb-mode-complaint" data-rfb-mode="complaint" aria-selected="false" style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:var(--rfb-chip-bg,#f3f4f6);color:var(--rfb-text,#1f2937);font-weight:700;font-size:0.8rem;cursor:pointer;">⚠️ Scoop Issue</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.75rem;"role="tablist"aria-label="Feedback type">
+            <button type="button"id="rfb-mode-feedback"data-rfb-mode="feedback"aria-selected="true"style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:#ff5733;color:#fff;font-weight:700;font-size:0.8rem;cursor:pointer;">⭐ Sweet Review</button>
+            <button type="button"id="rfb-mode-complaint"data-rfb-mode="complaint"aria-selected="false"style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:var(--rfb-chip-bg,#f3f4f6);color:var(--rfb-text,#1f2937);font-weight:700;font-size:0.8rem;cursor:pointer;"> Scoop Issue</button>
           </div>
 
           <!-- Interactive Star Rating -->
           <div class="rfb-stars-container">
-            <div class="rfb-stars-row" id="rfb-stars-row" role="radiogroup" aria-label="Rating out of 5 stars">
-              <button type="button" class="rfb-star-btn" data-star="1" aria-label="1 star">★</button>
-              <button type="button" class="rfb-star-btn" data-star="2" aria-label="2 stars">★</button>
-              <button type="button" class="rfb-star-btn" data-star="3" aria-label="3 stars">★</button>
-              <button type="button" class="rfb-star-btn" data-star="4" aria-label="4 stars">★</button>
-              <button type="button" class="rfb-star-btn" data-star="5" aria-label="5 stars">★</button>
+            <div class="rfb-stars-row"id="rfb-stars-row"role="radiogroup"aria-label="Rating out of 5 stars">
+              <button type="button"class="rfb-star-btn"data-star="1"aria-label="1 star"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
+              <button type="button"class="rfb-star-btn"data-star="2"aria-label="2 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
+              <button type="button"class="rfb-star-btn"data-star="3"aria-label="3 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
+              <button type="button"class="rfb-star-btn"data-star="4"aria-label="4 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
+              <button type="button"class="rfb-star-btn"data-star="5"aria-label="5 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
             </div>
-            <div class="rfb-star-label" id="rfb-star-label">Tap a star to rate</div>
+            <div class="rfb-star-label"id="rfb-star-label">Tap a star to rate</div>
           </div>
 
           <!-- Quick Tags -->
           <div class="rfb-tags-label">Quick Flavour &amp; Delivery Tags:</div>
-          <div class="rfb-tags-grid" id="rfb-tags-grid">
-            ${QUICK_TAGS.map(tag => `<button type="button" class="rfb-tag-chip" data-tag="${tag}">${tag}</button>`).join("")}
+          <div class="rfb-tags-grid"id="rfb-tags-grid">
+            ${QUICK_TAGS.map(tag => `<button type="button"class="rfb-tag-chip"data-tag="${tag}">${tag}</button>`).join("")}
           </div>
 
           <!-- Textarea Comments -->
           <div class="rfb-field">
-            <textarea id="rfb-comments" class="rfb-textarea" rows="3" maxlength="1000" placeholder="Tell us how your ice cream scoops or delivery were..."></textarea>
+            <textarea id="rfb-comments"class="rfb-textarea"rows="3"maxlength="1000"placeholder="Tell us how your ice cream scoops or delivery were..."></textarea>
           </div>
 
           <!-- Customer Name & Optional Order PIN -->
           <div class="rfb-inputs-row">
-            <input type="text" id="rfb-name" class="rfb-input" placeholder="Your name (optional)" maxlength="100" autocomplete="name" />
-            <input type="text" id="rfb-pin" class="rfb-input" placeholder="Order PIN (optional)" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
+            <input type="text"id="rfb-name"class="rfb-input"placeholder="Your name (optional)"maxlength="100"autocomplete="name" />
+            <input type="text"id="rfb-pin"class="rfb-input"placeholder="Order PIN (optional)"maxlength="6"inputmode="numeric"pattern="[0-9]*" />
           </div>
 
           <!-- Submit Button -->
-          <button type="button" id="rfb-submit-btn" class="rfb-submit-btn">
-            <span>Send Ice Cream Feedback</span> 🍦
+          <button type="button"id="rfb-submit-btn"class="rfb-submit-btn">
+            <span>Send Ice Cream Feedback</span> 
           </button>
         </div>
 
         <!-- Thank-You Animated Confirmation -->
-        <div id="rfb-success-view" class="rfb-success-view">
+        <div id="rfb-success-view"class="rfb-success-view">
           <div class="rfb-checkmark-wrap">
-            <i class="fa-solid fa-check" aria-hidden="true">✓</i>
+            <i class="fa-solid fa-check"aria-hidden="true"></i>
           </div>
           <h4>Thank You!</h4>
           <p>Your feedback was received and synced directly to our creamery &amp; couriers. We appreciate you!</p>
@@ -575,10 +574,10 @@
       </div>
 
       <!-- Trigger Bubble Button -->
-      <button type="button" id="rfb-trigger" class="rfb-trigger-btn" aria-haspopup="dialog" aria-expanded="false" aria-label="Open client feedback form">
-        <i class="fa-solid fa-star rfb-trigger-star" style="color: #FFD700;" aria-hidden="true">★</i>
+      <button type="button"id="rfb-trigger"class="rfb-trigger-btn"aria-haspopup="dialog"aria-expanded="false"aria-label="Open client feedback form">
+        <i class="fa-solid fa-star rfb-trigger-star"style="color: #FFD700;"aria-hidden="true"></i>
         <span>Feedback</span>
-        <span class="rfb-badge" style="background:#db2777;color:#fff;">Chilled</span>
+        <span class="rfb-badge"style="background:#db2777;color:#fff;">Chilled</span>
       </button>
     `;
 
@@ -635,12 +634,12 @@
       modeComplaintBtn.style.color = isComplaint ? "#fff" : "var(--rfb-text,#1f2937)";
       selectedTags.clear();
       const activeList = isComplaint ? COMPLAINT_TAGS : QUICK_TAGS;
-      tagsGrid.innerHTML = activeList.map((tag) => `<button type="button" class="rfb-tag-chip" data-tag="${tag}">${tag}</button>`).join("");
+      tagsGrid.innerHTML = activeList.map((tag) => `<button type="button"class="rfb-tag-chip"data-tag="${tag}">${tag}</button>`).join("");
       bindTagChips();
       commentsInput.placeholder = isComplaint
         ? "Describe your complaint (melted scoop, missing cone, delay, refund, etc.)..."
         : "Tell us how your ice cream scoops or delivery were...";
-      submitBtn.innerHTML = isComplaint ? `<span>Submit Complaint</span> ⚠️` : `<span>Send Feedback</span> 🚀`;
+      submitBtn.innerHTML = isComplaint ? `<span>Submit Complaint</span> ` : `<span>Send Feedback</span> `;
     }
 
     modeFeedbackBtn.addEventListener("click", () => setFeedbackMode("feedback"));
@@ -812,7 +811,7 @@
             updateStarVisuals(0);
             commentsInput.value = "";
             submitBtn.disabled = false;
-            submitBtn.innerHTML = `<span>Send Feedback</span> 🚀`;
+            submitBtn.innerHTML = `<span>Send Feedback</span> `;
           }, 300);
         }, 2800);
 
@@ -820,7 +819,7 @@
         errorAlert.textContent = err.message || "Failed to send feedback. Please try again.";
         errorAlert.style.display = "block";
         submitBtn.disabled = false;
-        submitBtn.innerHTML = `<span>Send Feedback</span> 🚀`;
+        submitBtn.innerHTML = `<span>Send Feedback</span> `;
       }
     });
   }

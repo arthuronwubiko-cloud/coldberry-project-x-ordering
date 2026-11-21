@@ -18,10 +18,10 @@
         max-width: 500px;
         margin: 2.5rem auto 4rem;
         padding: 1.75rem;
-        border-radius: 18px;
+        border-radius: 8px;
         border: 1px solid rgba(92, 26, 43, 0.16);
         background: var(--surface, #ffffff);
-        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
       }
       :root[data-theme="dark"] .login-shell {
         background: #20171d;
@@ -34,19 +34,19 @@
         margin-bottom: 1.25rem;
         background: rgba(128, 128, 128, 0.1);
         padding: 0.3rem;
-        border-radius: 12px;
+        border-radius: 6px;
       }
       .auth-tab-btn {
         border: 0;
         background: transparent;
         color: inherit;
         padding: 0.65rem;
-        border-radius: 9px;
+        border-radius: 6px;
         font-weight: 800;
         cursor: pointer;
       }
       .auth-tab-btn[aria-selected="true"] {
-        background: #db2777;
+        background: #8C1D40;
         color: #fff;
       }
       .form-row { margin-bottom: 0.95rem; }
@@ -54,7 +54,7 @@
       .form-row input, .form-row select {
         width: 100%;
         padding: 0.72rem 0.85rem;
-        border-radius: 10px;
+        border-radius: 6px;
         border: 1px solid rgba(128, 128, 128, 0.32);
         background: transparent;
         color: inherit;
@@ -69,7 +69,7 @@
       }
       .icon-pick-btn {
         border: 1px solid rgba(128, 128, 128, 0.3);
-        border-radius: 10px;
+        border-radius: 6px;
         background: transparent;
         color: inherit;
         padding: 0.55rem 0.25rem;
@@ -82,27 +82,27 @@
         font-weight: 600;
       }
       .icon-pick-btn[aria-pressed="true"] {
-        border-color: #ff5733;
+        border-color: #8C1D40;
         background: rgba(255, 87, 51, 0.15);
       }
       .auth-submit-btn {
         width: 100%;
         padding: 0.85rem;
-        border-radius: 12px;
+        border-radius: 6px;
         border: 0;
-        background: #db2777;
+        background: #8C1D40;
         color: #fff;
         font-weight: 800;
         font-size: 1rem;
         cursor: pointer;
         transition: background 0.15s ease;
       }
-      .auth-submit-btn:hover { background: #be185d; }
+      .auth-submit-btn:hover { background: #6F1632; }
       .auth-msg { font-size: 0.88rem; margin: 0.65rem 0; font-weight: 700; color: #dc3545; }
       .auth-msg.ok { color: #198754; }
       .region-acc-group {
         border: 1px solid rgba(128, 128, 128, 0.22);
-        border-radius: 9px;
+        border-radius: 6px;
         margin-bottom: 0.35rem;
         overflow: hidden;
       }
@@ -151,7 +151,7 @@
           />
         </a>
       </div>
-      <nav class="nav-links" aria-label="Main navigation">
+      <nav class="nav-links" id="nav-links-menu" aria-label="Main navigation">
         <a href="index.html">Home</a>
         <a href="890b.html">Menu</a>
         <a href="pizzadeals.html">Deals</a>
@@ -163,6 +163,7 @@
         <span class="nav-cart-badge" id="cart-count" data-nav-cart-count aria-live="polite">0</span>
       </a>
       <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to dark theme" aria-pressed="false"><i class="fa-solid fa-moon" aria-hidden="true"></i></button>
+      <button type="button" class="nav-dots-toggle" id="nav-dots-toggle" aria-label="Open navigation menu" aria-haspopup="true" aria-expanded="false" aria-controls="nav-links-menu" title="Navigation menu"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button>
     </header>
 
     <main style="padding: 0 1rem;">
@@ -189,21 +190,21 @@
             <input id="signin-password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required />
           </div>
           <div style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
-            <button type="button" id="forgot-password-link" style="background:none;border:none;color:#db2777;font-weight:700;font-size:0.84rem;cursor:pointer;padding:0;">
+            <button type="button" id="forgot-password-link" style="background:none;border:none;color:#8C1D40;font-weight:700;font-size:0.84rem;cursor:pointer;padding:0;">
               <i class="fa-solid fa-key" aria-hidden="true"></i> Forgot Password?
             </button>
           </div>
           <p id="signin-msg" class="auth-msg" role="alert" hidden></p>
           <p style="font-size:0.8rem;opacity:0.78;margin:0 0 0.85rem;">
-            By signing in, you agree to our <a href="terms.html" style="color:#ff5733;">Terms &amp; Conditions</a> and <a href="privacy.html" style="color:#ff5733;">Privacy Policy</a>.
+            By signing in, you agree to our <a href="terms.html" style="color:#8C1D40;">Terms &amp; Conditions</a> and <a href="privacy.html" style="color:#8C1D40;">Privacy Policy</a>.
           </p>
           <button type="submit" class="auth-submit-btn">Sign In</button>
         </form>
 
         <!-- Reset Password Form -->
         <form id="reset-form" novalidate hidden>
-          <div style="margin-bottom:1rem;padding:0.75rem;border-radius:10px;background:rgba(219,39,119,0.08);border:1px solid rgba(219,39,119,0.2);">
-            <div style="font-weight:800;font-size:0.9rem;color:#db2777;margin-bottom:0.25rem;">
+          <div style="margin-bottom:1rem;padding:0.75rem;border-radius: 6px;background:rgba(219,39,119,0.08);border:1px solid rgba(219,39,119,0.2);">
+            <div style="font-weight:800;font-size:0.9rem;color:#8C1D40;margin-bottom:0.25rem;">
               <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Reset Your Password
             </div>
             <div style="font-size:0.82rem;line-height:1.4;opacity:0.85;">
@@ -246,14 +247,14 @@
           <div class="form-row">
             <label>Choose Your Profile Icon</label>
             <div class="icon-picker-grid" id="reg-icon-picker">
-              <button type="button" class="icon-pick-btn" data-icon="pizza" aria-pressed="true"><span style="font-size:1.4rem;">🍦</span><span>Scoop</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="crown" aria-pressed="false"><span style="font-size:1.4rem;">👑</span><span>VIP</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="fire" aria-pressed="false"><span style="font-size:1.4rem;">🍓</span><span>Berry</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="rocket" aria-pressed="false"><span style="font-size:1.4rem;">🚀</span><span>Express</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="cool" aria-pressed="false"><span style="font-size:1.4rem;">😎</span><span>Chill</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="star" aria-pressed="false"><span style="font-size:1.4rem;">🌟</span><span>Star</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="rider" aria-pressed="false"><span style="font-size:1.4rem;">🛵</span><span>Rider</span></button>
-              <button type="button" class="icon-pick-btn" data-icon="heart" aria-pressed="false"><span style="font-size:1.4rem;">❤️</span><span>Swirl</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="pizza" aria-pressed="true"><i class="fa-solid fa-ice-cream" style="font-size:1.15rem;" aria-hidden="true"></i><span>Scoop</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="crown" aria-pressed="false"><i class="fa-solid fa-crown" style="font-size:1.15rem;" aria-hidden="true"></i><span>VIP</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="fire" aria-pressed="false"><i class="fa-solid fa-leaf" style="font-size:1.15rem;" aria-hidden="true"></i><span>Berry</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="rocket" aria-pressed="false"><i class="fa-solid fa-bolt" style="font-size:1.15rem;" aria-hidden="true"></i><span>Express</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="cool" aria-pressed="false"><i class="fa-solid fa-glasses" style="font-size:1.15rem;" aria-hidden="true"></i><span>Chill</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="star" aria-pressed="false"><i class="fa-solid fa-star" style="font-size:1.15rem;" aria-hidden="true"></i><span>Star</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="rider" aria-pressed="false"><i class="fa-solid fa-motorcycle" style="font-size:1.15rem;" aria-hidden="true"></i><span>Rider</span></button>
+              <button type="button" class="icon-pick-btn" data-icon="heart" aria-pressed="false"><i class="fa-solid fa-heart" style="font-size:1.15rem;" aria-hidden="true"></i><span>Swirl</span></button>
             </div>
           </div>
           <div class="form-row">
@@ -294,7 +295,7 @@
           <div class="form-row" style="display:flex;align-items:flex-start;gap:0.55rem;">
             <input id="reg-consent" type="checkbox" style="width:auto;margin-top:0.2rem;" required />
             <label for="reg-consent" style="margin:0;font-weight:500;font-size:0.84rem;">
-              I agree to the <a href="terms.html" style="color:#ff5733;">Terms &amp; Conditions</a> and <a href="privacy.html" style="color:#ff5733;">Privacy Policy</a>.
+              I agree to the <a href="terms.html" style="color:#8C1D40;">Terms &amp; Conditions</a> and <a href="privacy.html" style="color:#8C1D40;">Privacy Policy</a>.
             </label>
           </div>
           <p id="reg-msg" class="auth-msg" role="alert" hidden></p>

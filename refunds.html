@@ -7,25 +7,25 @@
   <title>Locked Refund Tokens Console | Coldberry Ice Cream Nigeria</title>
   <link rel="icon" href="images/coldberry-favicon.png"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
-  <style>
+  <style>@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
     :root{--bg:#0f1115;--surface:#181b22;--surface-2:#20242d;--text:#f2f3f5;--muted:#9aa1ad;--border:#2c313c;--coral:#ff5a3c;--danger:#dc3545;--success:#198754}
     [data-theme=light]{--bg:#f6f7f9;--surface:#fff;--surface-2:#eef0f3;--text:#14161a;--muted:#5d6572;--border:#dde1e7}
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
     header{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--border)}
     nav{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
     nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:.9rem;padding:.5rem .9rem;border-radius:8px}
     nav a:hover{background:var(--surface-2);color:var(--text)}
     nav a.on{background:var(--coral);color:#fff}
     main{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
-    .auth-card{max-width:440px;margin:3.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+    .auth-card{max-width:440px;margin:3.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:2rem;box-shadow:0 12px 32px rgba(0,0,0,.35)}
     .auth-field{margin-bottom:1rem}
     .auth-field label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:.35rem}
     .char-counter{font-size:.76rem;font-family:monospace;color:var(--muted)}
     .char-counter.valid{color:var(--success);font-weight:700}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:1.25rem;margin-bottom:1rem}
     .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;margin-bottom:1rem}
-    .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.9rem}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:.9rem}
     .stat small{color:var(--muted);text-transform:uppercase;font-size:.72rem;font-weight:700}
     .stat b{display:block;font-size:1.6rem;margin-top:.2rem}
     input,button{font:inherit;font-size:16px}
@@ -46,7 +46,7 @@
     .tok{font-family:monospace;font-weight:800;color:var(--coral);letter-spacing:.06em}
     [hidden]{display:none!important}
     @media(max-width:700px){table,thead,tbody,tr,td{display:block;width:100%}thead{display:none}tr{border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;padding:.5rem}td{border:0;padding:.3rem .5rem}}
-  </style>
+  .dots-wrap{position:relative;display:inline-flex;align-items:center}.dots-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem}#top-nav{display:none;position:absolute;top:calc(100% + 6px);right:0;width:230px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.45rem;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:1200;flex-direction:column;gap:4px}#top-nav.is-open{display:flex !important}#top-nav a,#top-nav button{width:100%;text-align:left;justify-content:flex-start;min-height:38px}</style>
 </head>
 <body>
   <header>
@@ -54,12 +54,12 @@
       <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream" style="height:36px;width:auto;max-width:130px;object-fit:contain"/>
       <span>Coldberry Ice Cream · Refund Tokens Console</span>
     </div>
-    <nav id="top-nav" hidden>
+    <div class="dots-wrap"><button type="button" id="admin-dots-toggle" class="dots-btn" aria-label="Open console navigation menu" aria-haspopup="true" aria-expanded="false" aria-controls="top-nav"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><nav id="top-nav" hidden>
       <a href="/admin"><i class="fa-solid fa-list-check"></i> Orders Console</a>
       <a href="/feedback" id="n-fb"><i class="fa-solid fa-comments"></i> Customer Feedback</a>
       <a href="/refunds" id="n-rf" class="on"><i class="fa-solid fa-ticket"></i> Refund Tokens</a>
       <button type="button" class="btn sec" id="lock-btn" style="padding:.45rem .85rem;font-size:.84rem"><i class="fa-solid fa-right-from-bracket"></i> Lock / Logout</button>
-    </nav>
+    </nav></div>
   </header>
   <main>
     <!-- Strict Password Gate: always required before accessing Refund Tokens -->
@@ -140,7 +140,7 @@
 
     function updCnt(inp,el){
       var v=inp.value,ok=CRED_RE.test(v);
-      el.textContent=v.length+" / 14"+(ok?" ✓":"");
+      el.textContent=v.length+" / 14";
       el.classList.toggle("valid",ok);
     }
     userIn.addEventListener("input",function(){updCnt(userIn,userCnt);});
@@ -240,8 +240,8 @@
       if(v.length!==15){o.innerHTML='<span class="err">Token must be exactly 15 characters.</span>';return;}
       try{
         var r=await fetch(getOrigin()+"/api/admin?verifyRefundToken="+encodeURIComponent(v),{cache:"no-store",headers:{Authorization:"Bearer "+activeToken}}),d=await r.json().catch(function(){return{};});
-        if(!r.ok||!d.valid){o.innerHTML='<span class="err">✗ '+esc(d.error||"Invalid token")+'</span>';return;}
-        o.innerHTML='<b style="color:#20c997">✓ Valid — '+(d.checkedIn?"already checked in":"unclaimed")+'</b><div>Order '+esc(d.orderId)+' · '+esc(d.customerName)+' · <b>'+money(d.refundedAmount)+'</b></div>'+(d.checkedIn?'':'<button class="btn ok sm" id="vc" style="margin-top:.5rem">Check in</button>');
+        if(!r.ok||!d.valid){o.innerHTML='<span class="err"> '+esc(d.error||"Invalid token")+'</span>';return;}
+        o.innerHTML='<b style="color:#20c997"> Valid — '+(d.checkedIn?"already checked in":"unclaimed")+'</b><div>Order '+esc(d.orderId)+' · '+esc(d.customerName)+' · <b>'+money(d.refundedAmount)+'</b></div>'+(d.checkedIn?'':'<button class="btn ok sm" id="vc" style="margin-top:.5rem">Check in</button>');
         var c=document.getElementById("vc");
         if(c)c.onclick=async function(){if(await claim(v)){load();document.getElementById("vbtn").click();}};
       }catch(_){
@@ -284,6 +284,7 @@
     document.getElementById("lock-btn").addEventListener("click",function(){lockPage();});
     document.getElementById("refresh").addEventListener("click",load);
   })();
-  </script>
+  var dt=document.getElementById("admin-dots-toggle"),tn=document.getElementById("top-nav");if(dt&&tn){dt.addEventListener("click",function(e){e.stopPropagation();var o=tn.classList.toggle("is-open");dt.setAttribute("aria-expanded",String(o));});document.addEventListener("click",function(e){if(!e.target.closest("#top-nav")&&!e.target.closest("#admin-dots-toggle")){tn.classList.remove("is-open");dt.setAttribute("aria-expanded","false");}});}
+</script>
 </body>
 </html>

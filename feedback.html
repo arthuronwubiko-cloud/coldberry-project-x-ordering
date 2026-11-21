@@ -7,25 +7,25 @@
   <title>Locked Customer Feedback Console | Coldberry Ice Cream Nigeria</title>
   <link rel="icon" href="images/coldberry-favicon.png"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
-  <style>
+  <style>@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
     :root{--bg:#0f1115;--surface:#181b22;--surface-2:#20242d;--text:#f2f3f5;--muted:#9aa1ad;--border:#2c313c;--coral:#ff5a3c;--danger:#dc3545;--success:#198754}
     [data-theme=light]{--bg:#f6f7f9;--surface:#fff;--surface-2:#eef0f3;--text:#14161a;--muted:#5d6572;--border:#dde1e7}
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+    body{margin:0;font-family:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
     header{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:var(--surface);border-bottom:1px solid var(--border)}
     nav{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
     nav a{color:var(--muted);text-decoration:none;font-weight:700;font-size:.9rem;padding:.5rem .9rem;border-radius:8px}
     nav a:hover{background:var(--surface-2);color:var(--text)}
     nav a.on{background:var(--coral);color:#fff}
     main{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
-    .auth-card{max-width:440px;margin:3.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+    .auth-card{max-width:440px;margin:3.5rem auto;background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:2rem;box-shadow:0 12px 32px rgba(0,0,0,.35)}
     .auth-field{margin-bottom:1rem}
     .auth-field label{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700;margin-bottom:.35rem}
     .char-counter{font-size:.76rem;font-family:monospace;color:var(--muted)}
     .char-counter.valid{color:var(--success);font-weight:700}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:1.25rem;margin-bottom:1rem}
     .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem;margin-bottom:1rem}
-    .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.9rem}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius: 8px;padding:.9rem}
     .stat small{color:var(--muted);text-transform:uppercase;font-size:.72rem;font-weight:700}
     .stat b{display:block;font-size:1.6rem;margin-top:.2rem}
     input,button{font:inherit;font-size:16px}
@@ -37,7 +37,7 @@
     .muted{color:var(--muted)}
     .err{color:var(--danger)}
     [hidden]{display:none!important}
-  </style>
+  .dots-wrap{position:relative;display:inline-flex;align-items:center}.dots-btn{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem}#top-nav{display:none;position:absolute;top:calc(100% + 6px);right:0;width:230px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.45rem;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:1200;flex-direction:column;gap:4px}#top-nav.is-open{display:flex !important}#top-nav a,#top-nav button{width:100%;text-align:left;justify-content:flex-start;min-height:38px}</style>
 </head>
 <body>
   <header>
@@ -45,12 +45,12 @@
       <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream" style="height:36px;width:auto;max-width:140px;object-fit:contain"/>
       <span>Coldberry Ice Cream · Customer Feedback Console</span>
     </div>
-    <nav id="top-nav" hidden>
+    <div class="dots-wrap"><button type="button" id="admin-dots-toggle" class="dots-btn" aria-label="Open console navigation menu" aria-haspopup="true" aria-expanded="false" aria-controls="top-nav"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><nav id="top-nav" hidden>
       <a href="/admin"><i class="fa-solid fa-list-check"></i> Orders Console</a>
       <a href="/feedback" id="n-fb" class="on"><i class="fa-solid fa-comments"></i> Customer Feedback</a>
       <a href="/refunds" id="n-rf"><i class="fa-solid fa-ticket"></i> Refund Tokens</a>
       <button type="button" class="btn sec" id="lock-btn" style="padding:.45rem .85rem;font-size:.84rem"><i class="fa-solid fa-right-from-bracket"></i> Lock / Logout</button>
-    </nav>
+    </nav></div>
   </header>
   <main>
     <!-- Strict Password Gate: always required before accessing Customer Feedback -->
@@ -115,7 +115,7 @@
 
     function updCnt(inp,el){
       var v=inp.value,ok=CRED_RE.test(v);
-      el.textContent=v.length+" / 14"+(ok?" ✓":"");
+      el.textContent=v.length+" / 14";
       el.classList.toggle("valid",ok);
     }
     userIn.addEventListener("input",function(){updCnt(userIn,userCnt);});
@@ -159,7 +159,7 @@
         if(!r.ok)throw new Error(d.error||"Unable to load customer feedback");
         var a=d.feedback||[];
         var avg=a.length?a.reduce(function(s,f){return s+Number(f.rating||0);},0)/a.length:0;
-        document.getElementById("avg").textContent=a.length?avg.toFixed(1)+" ★":"–";
+        document.getElementById("avg").textContent=a.length?avg.toFixed(1)+" / 5":"–";
         document.getElementById("total").textContent=a.length;
         document.getElementById("complaints").textContent=a.filter(function(f){return (f.feedback_type||"").toLowerCase()==="complaint";}).length;
         document.getElementById("five").textContent=a.filter(function(f){return Number(f.rating)===5;}).length;
@@ -168,7 +168,7 @@
         l.innerHTML=a.map(function(f){
           var r=Math.max(0,Math.min(5,Number(f.rating)||0));
           var isC=(f.feedback_type||"").toLowerCase()==="complaint";
-          return '<div class="card" style="margin:0;'+(isC?'border-left:4px solid var(--danger)':'')+'"><div style="display:flex;justify-content:space-between;gap:.5rem"><span><b>'+esc(f.customer_name||"Anonymous")+'</b>'+(isC?' <span style="background:rgba(220,53,69,.18);color:var(--danger);padding:2px 7px;border-radius:999px;font-size:.7rem;font-weight:800">⚠️ COMPLAINT</span>':'')+'</span><span style="color:#ffc107">'+"★".repeat(r)+"☆".repeat(5-r)+'</span></div>'+(f.tags?'<div class="muted" style="font-size:.8rem;margin:.3rem 0">'+esc(f.tags)+'</div>':'')+'<p style="margin:.5rem 0">'+esc(f.comments||f.comment||"(no comment)")+'</p><div class="muted" style="font-size:.75rem">'+date(f.created_at)+(f.order_pin?" · PIN "+esc(f.order_pin):"")+'</div></div>';
+          return '<div class="card" style="margin:0;'+(isC?'border-color:var(--danger)':'')+'"><div style="display:flex;justify-content:space-between;gap:.5rem"><span><b>'+esc(f.customer_name||"Anonymous")+'</b>'+(isC?' <span style="background:rgba(220,53,69,.18);color:var(--danger);padding:2px 7px;border-radius:999px;font-size:.7rem;font-weight:800"> COMPLAINT</span>':'')+'</span><span style="color:#ffc107">'+"".repeat(r)+"".repeat(5-r)+'</span></div>'+(f.tags?'<div class="muted" style="font-size:.8rem;margin:.3rem 0">'+esc(f.tags)+'</div>':'')+'<p style="margin:.5rem 0">'+esc(f.comments||f.comment||"(no comment)")+'</p><div class="muted" style="font-size:.75rem">'+date(f.created_at)+(f.order_pin?" · PIN "+esc(f.order_pin):"")+'</div></div>';
         }).join("");
       }catch(e){
         m.hidden=false;m.className="err";m.textContent=e.message;
@@ -212,6 +212,7 @@
     document.getElementById("lock-btn").addEventListener("click",function(){lockPage();});
     document.getElementById("refresh").addEventListener("click",load);
   })();
-  </script>
+  var dt=document.getElementById("admin-dots-toggle"),tn=document.getElementById("top-nav");if(dt&&tn){dt.addEventListener("click",function(e){e.stopPropagation();var o=tn.classList.toggle("is-open");dt.setAttribute("aria-expanded",String(o));});document.addEventListener("click",function(e){if(!e.target.closest("#top-nav")&&!e.target.closest("#admin-dots-toggle")){tn.classList.remove("is-open");dt.setAttribute("aria-expanded","false");}});}
+</script>
 </body>
 </html>

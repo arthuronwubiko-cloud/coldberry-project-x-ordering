@@ -235,7 +235,7 @@
             // Provide visual feedback
             const originalText = btn.dataset.btnText || btn.textContent;
             btn.dataset.btnText = originalText;
-            btn.textContent = "✓ Selected";
+            btn.textContent = "Selected";
             btn.style.backgroundColor = "#2e7d32";
             setTimeout(() => {
               btn.textContent = btn.dataset.btnText || originalText || "Select";
