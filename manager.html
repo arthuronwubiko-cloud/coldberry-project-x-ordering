@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#161114" />
+    <title>Manager Orders &amp; Refunds Console | Coldberry Ice Cream Nigeria</title>
+    <meta name="description" content="Dedicated, role-locked Manager Console for Coldberry Ice Cream Nigeria: Order Console, Delete Orders for Refund, and 15-Character Refund Tokens." />
+    <link rel="icon" href="images/coldberry-favicon.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+      :root { --bg: #FFF8F5; --surface: #FFFFFF; --surface-2: #FDEEF1; --text: #2A1218; --muted: #6E5560; --border: #F0D9DF; --coral: #8C1D40; --coral-hover: #6F1632; --brand-text: #FFFFFF; --header-bg: #5C1A2B; --header-text: #FFF4F6; --saffron: #B7791F; --danger: #B3261E; --success: #2F7D4F; --info: #2563A8; }
+      :root[data-theme="dark"] { --bg: #150B0E; --surface: #221317; --surface-2: #2D1A20; --text: #F6E9EC; --muted: #C4A9B1; --border: #3D2830; --coral: #F0708F; --coral-hover: #F58AA3; --brand-text: #2A0A14; --header-bg: #2A0F18; --header-text: #FFF4F6; --saffron: #F5C451; --danger: #FF7B72; --success: #5CC98A; --info: #6CB2FF; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+      }
+      .mgr-header {
+        background: var(--header-bg);
+        color: var(--header-text);
+        border-bottom: 1px solid var(--border);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .mgr-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-weight: 800;
+        font-size: 1.02rem;
+        color: var(--header-text);
+        text-decoration: none;
+      }
+      .mgr-logo { height: 38px; width: auto; max-width: 130px; object-fit: contain; border-radius: 6px; display: block; }
+      .mgr-header-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .role-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        padding: 0.3rem 0.65rem; border-radius: 4px;
+        font-size: 0.74rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+        background: rgba(245, 196, 81, 0.16); color: var(--saffron); border: 1px solid rgba(245, 196, 81, 0.35);
+      }
+      .mgr-container { max-width: 1120px; margin: 1.75rem auto; padding: 0 1.1rem; }
+      .mgr-auth-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+        padding: 1.75rem; max-width: 450px; margin: 3rem auto;
+      }
+      .auth-field { margin-bottom: 1rem; text-align: left; }
+      .auth-field label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem; }
+      .char-counter { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); }
+      .char-counter.valid { color: var(--success); }
+      .mgr-input {
+        width: 100%; padding: 0.72rem 0.85rem; border-radius: 6px;
+        border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px;
+      }
+      .mgr-input:focus { outline: 2px solid var(--coral); outline-offset: 1px; }
+      .mgr-btn {
+        background: var(--coral); color: var(--brand-text); border: 1px solid transparent;
+        padding: 0.6rem 1rem; min-height: 38px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;
+        cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; text-decoration: none;
+      }
+      .mgr-btn:hover { background: var(--coral-hover); }
+      .mgr-btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+      .mgr-btn-secondary:hover { border-color: var(--coral); color: var(--coral); background: var(--surface-2); }
+      .mgr-btn-danger { background: var(--danger); color: #fff; }
+      .mgr-section { border-top: 1px solid var(--border); padding: 1.35rem 0; margin-bottom: 1rem; }
+      .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 0.9rem; }
+      .order-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+        padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem;
+      }
+      .mono { font-family: "JetBrains Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+      .status-pill {
+        display: inline-block; padding: 0.22rem 0.55rem; border-radius: 4px;
+        font-size: 0.72rem; font-weight: 800; text-transform: uppercase; border: 1px solid var(--border);
+      }
+      .ticket-items { background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 0.65rem 0.75rem; font-size: 0.85rem; }
+      .action-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: auto; }
+      .qbtn {
+        min-height: 34px; padding: 0.34rem 0.65rem; border-radius: 6px;
+        border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+        font-size: 0.76rem; font-weight: 700; cursor: pointer;
+      }
+      .qbtn:hover { background: var(--coral); border-color: var(--coral); color: var(--brand-text); }
+      .qbtn.danger { color: var(--danger); border-color: rgba(179, 38, 30, 0.35); }
+      .qbtn.danger:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+      th, td { padding: 0.65rem; border-bottom: 1px solid var(--border); text-align: left; }
+      th { color: var(--muted); font-size: 0.74rem; text-transform: uppercase; }
+      .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9999;
+        display: flex; align-items: center; justify-content: center; padding: 1rem;
+      }
+      .modal-box {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+        padding: 1.5rem; max-width: 440px; width: 100%;
+      }
+      .toast {
+        position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--surface); color: var(--text);
+        border: 1px solid var(--border); padding: 0.65rem 1.05rem; border-radius: 6px;
+        font-size: 0.85rem; font-weight: 700; z-index: 9999; display: none;
+      }
+      /* Mobile-only Three-Dots menu */
+      .mgr-dots-wrap { position: relative; display: inline-flex; align-items: center; }
+      .mgr-dots-toggle {
+        display: none; width: 44px; height: 44px; min-width: 44px; min-height: 44px;
+        border-radius: 6px; border: 1px solid rgba(255,244,246,0.25); background: rgba(255,244,246,0.1);
+        color: var(--header-text); align-items: center; justify-content: center; cursor: pointer; font-size: 1.05rem;
+      }
+      .mgr-dots-menu { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+      .mgr-nav-btn {
+        min-height: 36px; padding: 0.4rem 0.75rem; border-radius: 6px;
+        border: 1px solid rgba(255,244,246,0.18); background: rgba(255,244,246,0.08);
+        color: var(--header-text); font-size: 0.8rem; font-weight: 700; text-decoration: none;
+        display: inline-flex; align-items: center; gap: 0.4rem; cursor: pointer; white-space: nowrap;
+      }
+      .mgr-nav-btn.active { background: var(--coral); border-color: var(--coral); color: var(--brand-text); }
+      @media (max-width: 900px) {
+        .mgr-dots-toggle { display: inline-flex; }
+        .mgr-dots-menu {
+          display: none; position: absolute; top: calc(100% + 6px); right: 0; width: 250px;
+          background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+          padding: 0.5rem; flex-direction: column; align-items: stretch;
+          box-shadow: 0 10px 28px rgba(0,0,0,0.28); z-index: 1400;
+        }
+        .mgr-dots-menu.is-open { display: flex; }
+        .mgr-nav-btn { width: 100%; border: 0; background: transparent; color: var(--text); justify-content: flex-start; min-height: 40px; }
+        .mgr-nav-btn.active { background: var(--coral); color: var(--brand-text); }
+      }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header class="mgr-header" role="banner">
+      <a href="#top" class="mgr-brand">
+        <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream Nigeria" class="mgr-logo" />
+        <span>Coldberry Ice Cream Nigeria · Manager Console</span>
+      </a>
+      <div class="mgr-header-actions">
+        <span id="mgr-role-badge" class="role-badge" hidden>Manager · Orders &amp; Refunds</span>
+        <span id="mgr-user-label" style="font-size:0.84rem;color:var(--header-text);" hidden></span>
+        <button id="mgr-theme-btn" class="mgr-btn mgr-btn-secondary" type="button" aria-label="Toggle dark or light theme">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </button>
+        <div class="mgr-dots-wrap" id="mgr-nav-wrap" hidden>
+          <button type="button" id="mgr-dots-toggle" class="mgr-dots-toggle" aria-label="Open manager menu" aria-haspopup="true" aria-expanded="false" aria-controls="mgr-dots-menu">
+            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+          </button>
+          <nav id="mgr-dots-menu" class="mgr-dots-menu" aria-label="Manager Navigation">
+            <button type="button" class="mgr-nav-btn active" id="mgr-tab-orders" data-tab="orders"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Order Console</button>
+            <button type="button" class="mgr-nav-btn" id="mgr-tab-completed" data-tab="completed"><i class="fa-solid fa-box-archive" aria-hidden="true"></i> Completed (7d)</button>
+            <button type="button" class="mgr-nav-btn" id="mgr-tab-refunds" data-tab="refunds"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Refund Tokens</button>
+            <a href="/refunds" class="mgr-nav-btn"><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Refunds Page</a>
+            <button type="button" id="mgr-refresh-btn" class="mgr-nav-btn"><i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh</button>
+            <button type="button" id="mgr-logout-btn" class="mgr-nav-btn" style="color:var(--danger);"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Lock / Logout</button>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="mgr-container" id="top">
+      <section id="mgr-auth-panel" class="mgr-auth-card" aria-labelledby="mgr-login-heading">
+        <div style="text-align:center;margin-bottom:1.25rem;">
+          <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream Nigeria" style="height:48px;width:auto;max-width:160px;object-fit:contain;margin:0 auto 0.6rem;display:block;" />
+          <h1 id="mgr-login-heading" style="margin:0 0 0.3rem;font-size:1.4rem;">Manager Orders &amp; Refunds Console</h1>
+          <p style="margin:0;color:var(--muted);font-size:0.86rem;">
+            Strictly locked to Manager accounts. Manage orders, delete orders for refunds, and verify 15-character refund tokens.
+          </p>
+        </div>
+        <form id="mgr-auth-form" novalidate>
+          <div class="auth-field">
+            <label for="login-username"><span>Manager Username</span><span id="username-counter" class="char-counter">0 / 14</span></label>
+            <input type="text" id="login-username" class="mgr-input" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric username" required autofocus />
+          </div>
+          <div class="auth-field">
+            <label for="login-password"><span>Manager Password</span><span id="password-counter" class="char-counter">0 / 14</span></label>
+            <input type="password" id="login-password" class="mgr-input" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric password" required />
+          </div>
+          <p id="mgr-auth-error" role="alert" style="color:var(--danger);font-size:0.85rem;margin:0 0 0.85rem;" hidden></p>
+          <button type="submit" class="mgr-btn" style="width:100%;">
+            <i class="fa-solid fa-unlock-keyhole" aria-hidden="true"></i> Sign In to Manager Console
+          </button>
+        </form>
+      </section>
+
+      <section id="mgr-workspace" hidden>
+        <!-- Panel 1: Orders -->
+        <div id="mgr-panel-orders">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+            <div>
+              <h1 style="margin:0 0 0.2rem;font-size:1.5rem;">Manager Order Console</h1>
+              <p style="margin:0;color:var(--muted);font-size:0.88rem;">Update order state, verify payments, or delete orders to issue 15-character refund tokens.</p>
+            </div>
+            <input type="search" id="mgr-search" class="mgr-input" aria-label="Search orders" style="max-width:260px;" placeholder="Search Ref ID, PIN, Customer..." />
+          </div>
+          <div id="mgr-orders-loading" style="text-align:center;padding:2rem;color:var(--muted);">Loading orders...</div>
+          <div id="mgr-orders-empty" style="text-align:center;padding:2rem;color:var(--muted);" hidden>No matching orders found.</div>
+          <div id="mgr-orders-grid" class="orders-grid" hidden></div>
+        </div>
+
+        <!-- Panel 1B: Completed Console (7-Day Window) -->
+        <div id="mgr-panel-completed" hidden>
+          <div style="margin-bottom:1rem;">
+            <h1 style="margin:0 0 0.2rem;font-size:1.5rem;">Completed Console (Last 7 Days)</h1>
+            <p style="margin:0;color:var(--muted);font-size:0.88rem;">Orders marked Done or Handed Over to Driver shift here automatically and remain visible to Managers for 7 days.</p>
+          </div>
+          <div id="mgr-completed-empty" style="text-align:center;padding:2rem;color:var(--muted);" hidden>No completed or handed-over orders in the last 7 days.</div>
+          <div id="mgr-completed-grid" class="orders-grid" hidden></div>
+        </div>
+
+        <!-- Panel 2: Refunds -->
+        <div id="mgr-panel-refunds" hidden>
+          <div style="margin-bottom:1rem;">
+            <h1 style="margin:0 0 0.2rem;font-size:1.5rem;">15-Character Refund Tokens</h1>
+            <p style="margin:0;color:var(--muted);font-size:0.88rem;">Verify and check in 15-character refund tokens issued for deleted or cancelled orders.</p>
+          </div>
+          <div class="mgr-section">
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;max-width:600px;">
+              <input type="text" id="mgr-verify-input" class="mgr-input mono" maxlength="15" style="flex:1;min-width:220px;text-transform:uppercase;font-weight:700;" placeholder="Enter 15-character refund token..." />
+              <button type="button" id="mgr-verify-btn" class="mgr-btn">Verify Token</button>
+            </div>
+            <div id="mgr-verify-result" style="margin-top:0.85rem;" hidden></div>
+          </div>
+          <div class="mgr-section" style="overflow-x:auto;">
+            <table>
+              <thead><tr><th>15-Char Token</th><th>Order</th><th>Customer</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="mgr-refunds-body"><tr><td colspan="6" style="text-align:center;color:var(--muted);">Loading refund tokens...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Delete Order for Refund Confirmation Modal -->
+    <div id="mgr-delete-modal" class="modal-overlay" hidden>
+      <div class="modal-box">
+        <h3 style="margin:0 0 0.4rem;">Delete Order &amp; Issue Refund Token</h3>
+        <p id="mgr-delete-desc" style="color:var(--muted);font-size:0.86rem;margin:0 0 1rem;"></p>
+        <div style="margin-bottom:1rem;">
+          <label for="mgr-delete-reason" style="display:block;font-size:0.82rem;font-weight:700;margin-bottom:0.3rem;">Refund Reason</label>
+          <input type="text" id="mgr-delete-reason" class="mgr-input" value="Order Deleted by Manager for Refund" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:0.6rem;">
+          <button type="button" id="mgr-delete-cancel" class="mgr-btn mgr-btn-secondary">Keep Order</button>
+          <button type="button" id="mgr-delete-confirm" class="mgr-btn mgr-btn-danger">Delete &amp; Issue Refund</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        const TOKEN_KEY = "romeos_manager_token";
+        const USER_KEY = "romeos_manager_user";
+        const ROLE_KEY = "romeos_manager_role";
+        const CRED_RE = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{14}$/;
+
+        const authPanel = document.getElementById("mgr-auth-panel");
+        const workspace = document.getElementById("mgr-workspace");
+        const authForm = document.getElementById("mgr-auth-form");
+        const userInput = document.getElementById("login-username");
+        const passInput = document.getElementById("login-password");
+        const userCnt = document.getElementById("username-counter");
+        const passCnt = document.getElementById("password-counter");
+        const authErr = document.getElementById("mgr-auth-error");
+        const roleBadge = document.getElementById("mgr-role-badge");
+        const userLabel = document.getElementById("mgr-user-label");
+        const navWrap = document.getElementById("mgr-nav-wrap");
+        const dotsToggle = document.getElementById("mgr-dots-toggle");
+        const dotsMenu = document.getElementById("mgr-dots-menu");
+        const ordersGrid = document.getElementById("mgr-orders-grid");
+        const ordersLoading = document.getElementById("mgr-orders-loading");
+        const ordersEmpty = document.getElementById("mgr-orders-empty");
+        const searchEl = document.getElementById("mgr-search");
+        const deleteModal = document.getElementById("mgr-delete-modal");
+        const deleteDesc = document.getElementById("mgr-delete-desc");
+        const deleteReason = document.getElementById("mgr-delete-reason");
+        const toastEl = document.getElementById("toast");
+
+        let orders = [];
+        let pendingDeleteOrderId = null;
+
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
+        function showToast(msg, isErr) {
+          toastEl.textContent = msg;
+          toastEl.style.borderColor = isErr ? "var(--danger)" : "var(--success)";
+          toastEl.style.display = "block";
+          setTimeout(() => { toastEl.style.display = "none"; }, 3500);
+        }
+        function updateCounter(inp, el) {
+          el.textContent = inp.value.length + " / 14";
+          el.classList.toggle("valid", CRED_RE.test(inp.value));
+        }
+        userInput.addEventListener("input", () => updateCounter(userInput, userCnt));
+        passInput.addEventListener("input", () => updateCounter(passInput, passCnt));
+
+        document.getElementById("mgr-theme-btn").addEventListener("click", () => {
+          const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+        });
+
+        dotsToggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const open = dotsMenu.classList.toggle("is-open");
+          dotsToggle.setAttribute("aria-expanded", String(open));
+        });
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest("#mgr-dots-menu") && !e.target.closest("#mgr-dots-toggle")) {
+            dotsMenu.classList.remove("is-open");
+            dotsToggle.setAttribute("aria-expanded", "false");
+          }
+        });
+
+        function lockManager(reason) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          sessionStorage.removeItem(USER_KEY);
+          sessionStorage.removeItem(ROLE_KEY);
+          authPanel.hidden = false;
+          workspace.hidden = true;
+          roleBadge.hidden = true;
+          userLabel.hidden = true;
+          navWrap.hidden = true;
+          if (reason) { authErr.textContent = reason; authErr.hidden = false; }
+        }
+
+        function switchTab(tab) {
+          document.getElementById("mgr-panel-orders").hidden = tab !== "orders";
+          document.getElementById("mgr-panel-completed").hidden = tab !== "completed";
+          document.getElementById("mgr-panel-refunds").hidden = tab !== "refunds";
+          document.getElementById("mgr-tab-orders").classList.toggle("active", tab === "orders");
+          document.getElementById("mgr-tab-completed").classList.toggle("active", tab === "completed");
+          document.getElementById("mgr-tab-refunds").classList.toggle("active", tab === "refunds");
+          dotsMenu.classList.remove("is-open");
+          if (tab === "completed") renderCompletedOrders();
+          if (tab === "refunds") loadRefunds();
+        }
+        document.getElementById("mgr-tab-orders").addEventListener("click", () => switchTab("orders"));
+        document.getElementById("mgr-tab-completed").addEventListener("click", () => switchTab("completed"));
+        document.getElementById("mgr-tab-refunds").addEventListener("click", () => switchTab("refunds"));
+
+        function enterManager(username) {
+          authPanel.hidden = true;
+          workspace.hidden = false;
+          roleBadge.hidden = false;
+          userLabel.hidden = false;
+          userLabel.textContent = username;
+          navWrap.hidden = false;
+          loadOrders();
+        }
+
+        async function loadOrders(silent) {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          if (!token) return lockManager();
+          if (!silent) { ordersLoading.hidden = false; ordersGrid.hidden = true; ordersEmpty.hidden = true; }
+          try {
+            const res = await fetch("/api/admin?limit=100", { headers: { Authorization: "Bearer " + token } });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401 || res.status === 403 || data.role !== "manager") {
+              return lockManager(data.error || "Session locked: Manager role required.");
+            }
+            orders = Array.isArray(data.orders) ? data.orders : [];
+            renderOrders();
+          } catch (_) {
+            if (!silent) showToast("Unable to load orders.", true);
+          } finally {
+            ordersLoading.hidden = true;
+          }
+        }
+
+        function renderOrders() {
+          const q = (searchEl.value || "").trim().toLowerCase();
+          renderCompletedOrders();
+          const list = orders.filter((o) => {
+            const st = String(o.status || "pending").toLowerCase();
+            if (st === "completed" || st === "out_for_delivery") return false;
+            if (!q) return true;
+            return (
+              String(o.order_id || "").toLowerCase().includes(q) ||
+              String(o.order_pin || "").toLowerCase().includes(q) ||
+              String(o.customer_name || "").toLowerCase().includes(q)
+            );
+          });
+          if (!list.length) { ordersGrid.hidden = true; ordersEmpty.hidden = false; return; }
+          ordersEmpty.hidden = true;
+          ordersGrid.hidden = false;
+          ordersGrid.innerHTML = list.map((o) => {
+            const id = esc(o.order_id || "");
+            const st = esc((o.status || "pending").toLowerCase());
+            const total = Number(o.grand_total || o.grandTotal || 0).toLocaleString("en-NG");
+            return `
+              <article class="order-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+                  <div>
+                    <div class="mono" style="font-weight:700;color:var(--coral);">${id}</div>
+                    <div class="mono" style="font-size:0.78rem;color:var(--muted);">PIN: ${esc(o.order_pin || "—")} · ₦${total}</div>
+                  </div>
+                  <span class="status-pill">${st.replace(/_/g, " ")}</span>
+                </div>
+                <div style="font-size:0.84rem;color:var(--muted);">
+                  <strong style="color:var(--text);">${esc(o.customer_name || "Customer")}</strong> · ${esc(o.customer_phone || "")} · ${esc(o.location || "")}
+                </div>
+                <div class="ticket-items">${esc(typeof o.items === "string" ? o.items : JSON.stringify(o.items || ""))}</div>
+                <div class="action-row">
+                  <button type="button" class="qbtn" data-st="confirmed" data-id="${id}">Confirm</button>
+                  <button type="button" class="qbtn" data-st="preparing" data-id="${id}">Kitchen</button>
+                  <button type="button" class="qbtn" data-st="ready" data-id="${id}">Ready</button>
+                  <button type="button" class="qbtn" data-st="out_for_delivery" data-id="${id}">Hand Over to Driver</button>
+                  <button type="button" class="qbtn" data-st="completed" data-id="${id}">Done</button>
+                  <button type="button" class="qbtn danger" data-st="cancelled" data-id="${id}">Cancel Order</button>
+                  <button type="button" class="qbtn danger" data-del="${id}">Delete for Refund</button>
+                </div>
+              </article>
+            `;
+          }).join("");
+        }
+
+        function renderCompletedOrders() {
+          const cGrid = document.getElementById("mgr-completed-grid");
+          const cEmpty = document.getElementById("mgr-completed-empty");
+          const completedList = orders.filter((o) => {
+            const st = String(o.status || "").toLowerCase();
+            return st === "completed" || st === "out_for_delivery";
+          });
+          if (!completedList.length) { cGrid.hidden = true; cEmpty.hidden = false; return; }
+          cEmpty.hidden = true;
+          cGrid.hidden = false;
+          cGrid.innerHTML = completedList.map((o) => `
+            <article class="order-card">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;">
+                <div>
+                  <div class="mono" style="font-weight:700;color:var(--coral);">${esc(o.order_id || "")}</div>
+                  <div class="mono" style="font-size:0.78rem;color:var(--muted);">PIN: ${esc(o.order_pin || "—")} · ₦${Number(o.grand_total || o.grandTotal || 0).toLocaleString("en-NG")}</div>
+                </div>
+                <span class="status-pill">${esc((o.status || "completed").replace(/_/g, " "))}</span>
+              </div>
+              <div style="font-size:0.84rem;color:var(--muted);"><strong style="color:var(--text);">${esc(o.customer_name || "Customer")}</strong> · ${esc(o.location || "")}</div>
+              <div class="ticket-items">${esc(typeof o.items === "string" ? o.items : JSON.stringify(o.items || ""))}</div>
+            </article>
+          `).join("");
+        }
+
+        ordersGrid.addEventListener("click", async (e) => {
+          const stBtn = e.target.closest("[data-st]");
+          if (stBtn) {
+            const token = sessionStorage.getItem(TOKEN_KEY);
+            const res = await fetch("/api/admin", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({ orderId: stBtn.dataset.id, status: stBtn.dataset.st }),
+            });
+            if (res.ok) { showToast("Order updated."); loadOrders(true); }
+            else showToast("Update failed.", true);
+            return;
+          }
+          const delBtn = e.target.closest("[data-del]");
+          if (delBtn) {
+            pendingDeleteOrderId = delBtn.dataset.del;
+            deleteDesc.textContent = "Permanently delete order " + pendingDeleteOrderId + " and issue an authentic 15-character refund token?";
+            deleteModal.hidden = false;
+          }
+        });
+
+        document.getElementById("mgr-delete-cancel").addEventListener("click", () => {
+          pendingDeleteOrderId = null;
+          deleteModal.hidden = true;
+        });
+
+        document.getElementById("mgr-delete-confirm").addEventListener("click", async () => {
+          if (!pendingDeleteOrderId) return;
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          const res = await fetch("/api/admin", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({ orderId: pendingDeleteOrderId, reason: deleteReason.value.trim() || "Order Deleted by Manager for Refund" }),
+          });
+          const data = await res.json().catch(() => ({}));
+          deleteModal.hidden = true;
+          pendingDeleteOrderId = null;
+          if (!res.ok) { showToast(data.error || "Failed to delete order.", true); return; }
+          showToast("Order deleted. Refund token issued: " + (data.refundToken || ""));
+          loadOrders(true);
+        });
+
+        async function loadRefunds() {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          const tbody = document.getElementById("mgr-refunds-body");
+          const res = await fetch("/api/admin?tab=refunds&limit=100", { headers: { Authorization: "Bearer " + token } });
+          const data = await res.json().catch(() => ({}));
+          const rows = Array.isArray(data.tokens) ? data.tokens : [];
+          if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No refund tokens issued yet.</td></tr>';
+            return;
+          }
+          tbody.innerHTML = rows.map((t) => `
+            <tr>
+              <td class="mono" style="font-weight:700;color:var(--coral);">${esc(t.token)}</td>
+              <td class="mono">${esc(t.order_id)}</td>
+              <td>${esc(t.customer_name)}</td>
+              <td class="mono">₦${Number(t.amount || 0).toLocaleString("en-NG")}</td>
+              <td>${esc(t.status)}</td>
+              <td>${t.status === "claimed" ? "Checked in" : `<button type="button" class="qbtn" data-claim="${esc(t.token)}">Check In</button>`}</td>
+            </tr>
+          `).join("");
+        }
+
+        document.getElementById("mgr-refunds-body").addEventListener("click", async (e) => {
+          const btn = e.target.closest("[data-claim]");
+          if (!btn) return;
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          const res = await fetch("/api/admin", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+            body: JSON.stringify({ action: "claim_refund", token: btn.dataset.claim }),
+          });
+          if (res.ok) { showToast("Refund token checked in."); loadRefunds(); }
+          else showToast("Unable to check in refund token.", true);
+        });
+
+        document.getElementById("mgr-verify-btn").addEventListener("click", async () => {
+          const val = document.getElementById("mgr-verify-input").value.trim().toUpperCase();
+          const out = document.getElementById("mgr-verify-result");
+          if (val.length !== 15) { out.hidden = false; out.textContent = "Enter a valid 15-character token."; return; }
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          const res = await fetch("/api/admin?verifyRefundToken=" + encodeURIComponent(val), { headers: { Authorization: "Bearer " + token } });
+          const d = await res.json().catch(() => ({}));
+          out.hidden = false;
+          if (!res.ok || !d.valid) { out.textContent = d.error || "Invalid token."; return; }
+          out.innerHTML = `<strong style="color:var(--success);">Valid Token</strong> · Order ${esc(d.orderId)} · ₦${Number(d.amount || 0).toLocaleString("en-NG")} · ${d.checkedIn ? "Already checked in" : "Unclaimed"}`;
+        });
+
+        searchEl.addEventListener("input", renderOrders);
+        document.getElementById("mgr-refresh-btn").addEventListener("click", () => loadOrders(false));
+        document.getElementById("mgr-logout-btn").addEventListener("click", () => lockManager());
+
+        authForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          authErr.hidden = true;
+          const username = userInput.value.trim();
+          const password = passInput.value.trim();
+          if (!CRED_RE.test(username) || !CRED_RE.test(password)) {
+            authErr.textContent = "Username and password must each be exactly 14 alphanumeric characters.";
+            authErr.hidden = false;
+            return;
+          }
+          try {
+            const res = await fetch("/api/admin", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "login", username, password, requiredRole: "manager" }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.token || data.role !== "manager") {
+              authErr.textContent = data.error || "Access denied: This console is strictly locked to Manager accounts.";
+              authErr.hidden = false;
+              return;
+            }
+            sessionStorage.setItem(TOKEN_KEY, data.token);
+            sessionStorage.setItem(USER_KEY, data.username);
+            sessionStorage.setItem(ROLE_KEY, "manager");
+            enterManager(data.username);
+          } catch (_) {
+            authErr.textContent = "Unable to connect to authentication server.";
+            authErr.hidden = false;
+          }
+        });
+
+        if (sessionStorage.getItem(TOKEN_KEY) && sessionStorage.getItem(ROLE_KEY) === "manager") {
+          enterManager(sessionStorage.getItem(USER_KEY) || "Manager");
+        }
+      })();
+    </script>
+  </body>
+</html>

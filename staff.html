@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#161114" />
+    <title>Staff Kitchen Console | Coldberry Ice Cream Nigeria</title>
+    <meta name="description" content="Dedicated, role-locked Staff Operational Console for Coldberry Ice Cream Nigeria." />
+    <link rel="icon" href="images/coldberry-favicon.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+      :root { --bg: #FFF8F5; --surface: #FFFFFF; --surface-2: #FDEEF1; --text: #2A1218; --muted: #6E5560; --border: #F0D9DF; --coral: #8C1D40; --coral-hover: #6F1632; --brand-text: #FFFFFF; --header-bg: #5C1A2B; --header-text: #FFF4F6; --saffron: #B7791F; --danger: #B3261E; --success: #2F7D4F; --info: #2563A8; }
+      :root[data-theme="dark"] { --bg: #150B0E; --surface: #221317; --surface-2: #2D1A20; --text: #F6E9EC; --muted: #C4A9B1; --border: #3D2830; --coral: #F0708F; --coral-hover: #F58AA3; --brand-text: #2A0A14; --header-bg: #2A0F18; --header-text: #FFF4F6; --saffron: #F5C451; --danger: #FF7B72; --success: #5CC98A; --info: #6CB2FF; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+        padding-bottom: calc(2.5rem + env(safe-area-inset-bottom, 0px));
+      }
+      .staff-header {
+        background: var(--header-bg);
+        color: var(--header-text);
+        border-bottom: 1px solid var(--border);
+        padding: 0.85rem 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .staff-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-weight: 800;
+        font-size: 1.02rem;
+        color: var(--header-text);
+        text-decoration: none;
+      }
+      .staff-logo {
+        height: 38px;
+        width: auto;
+        max-width: 130px;
+        object-fit: contain;
+        border-radius: 6px;
+        display: block;
+      }
+      .staff-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        flex-wrap: wrap;
+      }
+      .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 4px;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: rgba(108, 178, 255, 0.16);
+        color: var(--info);
+        border: 1px solid rgba(108, 178, 255, 0.35);
+      }
+      .staff-container {
+        max-width: 1080px;
+        margin: 1.75rem auto;
+        padding: 0 1.1rem;
+      }
+      .staff-auth-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.75rem;
+        max-width: 440px;
+        margin: 3rem auto;
+      }
+      .auth-field { margin-bottom: 1rem; text-align: left; }
+      .auth-field label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+      }
+      .char-counter {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .char-counter.valid { color: var(--success); }
+      .staff-input {
+        width: 100%;
+        padding: 0.72rem 0.85rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 16px;
+      }
+      .staff-input:focus {
+        outline: 2px solid var(--coral);
+        outline-offset: 1px;
+      }
+      .staff-btn {
+        background: var(--coral);
+        color: var(--brand-text);
+        border: 1px solid transparent;
+        padding: 0.68rem 1.05rem;
+        min-height: 40px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.86rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+      }
+      .staff-btn:hover { background: var(--coral-hover); }
+      .staff-btn-secondary {
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .staff-btn-secondary:hover {
+        border-color: var(--coral);
+        color: var(--coral);
+        background: var(--surface-2);
+      }
+      .staff-section {
+        border-top: 1px solid var(--border);
+        padding: 1.35rem 0;
+        margin-bottom: 1rem;
+      }
+      .staff-filter-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+      .filter-chips {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .filter-chip {
+        min-height: 36px;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .filter-chip.active {
+        background: var(--coral);
+        border-color: var(--coral);
+        color: var(--brand-text);
+      }
+      .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+        gap: 0.9rem;
+      }
+      .order-ticket {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .ticket-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .ticket-id {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--coral);
+      }
+      .ticket-pin {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+      .status-pill {
+        display: inline-block;
+        padding: 0.22rem 0.55rem;
+        border-radius: 4px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        border: 1px solid var(--border);
+      }
+      .status-pending { background: rgba(245, 196, 81, 0.14); color: var(--saffron); }
+      .status-confirmed { background: rgba(108, 178, 255, 0.14); color: var(--info); }
+      .status-preparing { background: rgba(242, 107, 78, 0.14); color: var(--coral); }
+      .status-ready, .status-completed { background: rgba(92, 201, 138, 0.14); color: var(--success); }
+      .status-out_for_delivery { background: rgba(245, 196, 81, 0.14); color: var(--saffron); }
+      .ticket-items {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.86rem;
+      }
+      .ticket-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: auto;
+      }
+      .state-btn {
+        min-height: 36px;
+        padding: 0.38rem 0.68rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .state-btn:hover {
+        background: var(--coral);
+        border-color: var(--coral);
+        color: var(--brand-text);
+      }
+      .toast {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        padding: 0.65rem 1.05rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        z-index: 9999;
+        display: none;
+      }
+      /* Mobile-only Three-Dots menu */
+      .staff-dots-wrap { position: relative; display: inline-flex; align-items: center; }
+      .staff-dots-toggle {
+        display: none;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 244, 246, 0.25);
+        background: rgba(255, 244, 246, 0.1);
+        color: var(--header-text);
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.05rem;
+      }
+      .staff-dots-menu {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      @media (max-width: 768px) {
+        .staff-dots-toggle { display: inline-flex; }
+        .staff-dots-menu {
+          display: none;
+          position: absolute;
+          top: calc(100% + 6px);
+          right: 0;
+          width: 220px;
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          padding: 0.45rem;
+          flex-direction: column;
+          align-items: stretch;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+          z-index: 1200;
+        }
+        .staff-dots-menu.is-open { display: flex; }
+        .staff-dots-menu button { width: 100%; justify-content: flex-start; }
+      }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header class="staff-header" role="banner">
+      <a href="#top" class="staff-brand">
+        <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream Nigeria" class="staff-logo" />
+        <span>Coldberry Ice Cream Nigeria · Staff Kitchen Console</span>
+      </a>
+      <div class="staff-header-actions">
+        <span id="staff-role-badge" class="role-badge" hidden>Staff · State Change Only</span>
+        <span id="staff-user-label" style="font-size: 0.84rem; color: var(--header-text);" hidden></span>
+        <button id="staff-theme-btn" class="staff-btn staff-btn-secondary" type="button" aria-label="Toggle dark or light theme">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+        </button>
+        <div class="staff-dots-wrap" id="staff-nav-wrap" hidden>
+          <button type="button" id="staff-dots-toggle" class="staff-dots-toggle" aria-label="Open staff menu" aria-haspopup="true" aria-expanded="false" aria-controls="staff-dots-menu">
+            <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+          </button>
+          <div id="staff-dots-menu" class="staff-dots-menu">
+            <button id="staff-refresh-btn" class="staff-btn staff-btn-secondary" type="button">
+              <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh Queue
+            </button>
+            <button id="staff-logout-btn" class="staff-btn staff-btn-secondary" type="button" style="color: var(--danger);">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Lock / Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="staff-container" id="top">
+      <!-- Dedicated Staff Login Gate -->
+      <section id="staff-auth-panel" class="staff-auth-card" aria-labelledby="staff-login-heading">
+        <div style="text-align: center; margin-bottom: 1.25rem;">
+          <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream Nigeria" style="height: 48px; width: auto; max-width: 160px; object-fit: contain; margin: 0 auto 0.6rem; display: block;" />
+          <h1 id="staff-login-heading" style="margin: 0 0 0.3rem; font-size: 1.4rem;">Staff Operational Console</h1>
+          <p style="margin: 0; color: var(--muted); font-size: 0.86rem;">
+            Strictly locked to Staff accounts. Sign in with your 14-character Staff Username and Password.
+          </p>
+        </div>
+
+        <form id="staff-auth-form" novalidate>
+          <div class="auth-field">
+            <label for="login-username"><span>Staff Username</span><span id="username-counter" class="char-counter">0 / 14</span></label>
+            <input type="text" id="login-username" class="staff-input" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric username" required autofocus />
+          </div>
+          <div class="auth-field">
+            <label for="login-password"><span>Staff Password</span><span id="password-counter" class="char-counter">0 / 14</span></label>
+            <input type="password" id="login-password" class="staff-input" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric password" required />
+          </div>
+          <p id="staff-auth-error" role="alert" style="color: var(--danger); font-size: 0.85rem; margin: 0 0 0.85rem;" hidden></p>
+          <button type="submit" id="staff-login-submit" class="staff-btn" style="width: 100%;">
+            <i class="fa-solid fa-unlock-keyhole" aria-hidden="true"></i> Sign In to Staff Console
+          </button>
+        </form>
+      </section>
+
+      <!-- Staff Order Queue Workspace -->
+      <section id="staff-workspace" hidden>
+        <div style="margin-bottom: 1rem;">
+          <h1 style="margin: 0 0 0.2rem; font-size: 1.5rem;">Kitchen &amp; Fulfillment Queue</h1>
+          <p style="margin: 0; color: var(--muted); font-size: 0.88rem;">
+            Advance active orders through Confirmed, Preparing, Ready, Out for Delivery, and Completed. Customer contact details are masked.
+          </p>
+        </div>
+
+        <div class="staff-section">
+          <h2 style="font-size: 1rem; margin: 0 0 0.65rem;"><i class="fa-solid fa-sliders" style="color: var(--coral);" aria-hidden="true"></i> Quick State Update</h2>
+          <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; max-width: 660px;">
+            <input type="text" id="quick-order-id" class="staff-input" aria-label="Order Reference ID" style="flex: 1.4; min-width: 190px;" placeholder="Order Reference ID..." />
+            <select id="quick-status-select" class="staff-input" aria-label="Select next order state" style="flex: 1; min-width: 170px;">
+              <option value="confirmed">Confirmed</option>
+              <option value="preparing">In the Kitchen</option>
+              <option value="ready">Ready for Pickup</option>
+              <option value="out_for_delivery">Out for Delivery</option>
+              <option value="completed">Delivered / Completed</option>
+            </select>
+            <button id="quick-update-btn" class="staff-btn" type="button">Update State</button>
+          </div>
+        </div>
+
+        <div class="staff-section">
+          <div class="staff-filter-bar">
+            <div class="filter-chips" role="tablist" aria-label="Filter order queue">
+              <button type="button" class="filter-chip active" data-filter="active">Order Console (Active)</button>
+              <button type="button" class="filter-chip" data-filter="preparing">In Kitchen</button>
+              <button type="button" class="filter-chip" data-filter="ready">Ready</button>
+              <button type="button" class="filter-chip" data-filter="completed">Completed Console (48h)</button>
+            </div>
+            <input type="search" id="staff-search" class="staff-input" aria-label="Search orders" style="max-width: 260px;" placeholder="Search Ref ID, PIN, Name..." />
+          </div>
+
+          <div id="staff-loading" style="text-align: center; padding: 2rem; color: var(--muted);">
+            <i class="fa-solid fa-circle-notch fa-spin" aria-hidden="true"></i> Loading order queue...
+          </div>
+          <div id="staff-empty" style="text-align: center; padding: 2rem; color: var(--muted);" hidden>
+            No orders match this filter.
+          </div>
+          <div id="staff-orders-grid" class="orders-grid" hidden></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        const TOKEN_KEY = "romeos_staff_token";
+        const USER_KEY = "romeos_staff_user";
+        const ROLE_KEY = "romeos_staff_role";
+        const CRED_RE = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{14}$/;
+
+        const authPanel = document.getElementById("staff-auth-panel");
+        const workspace = document.getElementById("staff-workspace");
+        const authForm = document.getElementById("staff-auth-form");
+        const userInput = document.getElementById("login-username");
+        const passInput = document.getElementById("login-password");
+        const userCnt = document.getElementById("username-counter");
+        const passCnt = document.getElementById("password-counter");
+        const authErr = document.getElementById("staff-auth-error");
+        const roleBadge = document.getElementById("staff-role-badge");
+        const userLabel = document.getElementById("staff-user-label");
+        const navWrap = document.getElementById("staff-nav-wrap");
+        const dotsToggle = document.getElementById("staff-dots-toggle");
+        const dotsMenu = document.getElementById("staff-dots-menu");
+        const gridEl = document.getElementById("staff-orders-grid");
+        const loadingEl = document.getElementById("staff-loading");
+        const emptyEl = document.getElementById("staff-empty");
+        const searchEl = document.getElementById("staff-search");
+        const toastEl = document.getElementById("toast");
+
+        let orders = [];
+        let activeFilter = "active";
+
+        function esc(s) {
+          return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+        }
+        function showToast(msg, isErr) {
+          toastEl.textContent = msg;
+          toastEl.style.borderColor = isErr ? "var(--danger)" : "var(--success)";
+          toastEl.style.display = "block";
+          setTimeout(() => { toastEl.style.display = "none"; }, 2800);
+        }
+        function updateCounter(inp, el) {
+          el.textContent = inp.value.length + " / 14";
+          el.classList.toggle("valid", CRED_RE.test(inp.value));
+        }
+        userInput.addEventListener("input", () => updateCounter(userInput, userCnt));
+        passInput.addEventListener("input", () => updateCounter(passInput, passCnt));
+
+        document.getElementById("staff-theme-btn").addEventListener("click", () => {
+          const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+        });
+
+        dotsToggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const open = dotsMenu.classList.toggle("is-open");
+          dotsToggle.setAttribute("aria-expanded", String(open));
+        });
+        document.addEventListener("click", (e) => {
+          if (!e.target.closest("#staff-dots-menu") && !e.target.closest("#staff-dots-toggle")) {
+            dotsMenu.classList.remove("is-open");
+            dotsToggle.setAttribute("aria-expanded", "false");
+          }
+        });
+
+        function lockStaff(reason) {
+          sessionStorage.removeItem(TOKEN_KEY);
+          sessionStorage.removeItem(USER_KEY);
+          sessionStorage.removeItem(ROLE_KEY);
+          authPanel.hidden = false;
+          workspace.hidden = true;
+          roleBadge.hidden = true;
+          userLabel.hidden = true;
+          navWrap.hidden = true;
+          if (reason) {
+            authErr.textContent = reason;
+            authErr.hidden = false;
+          }
+        }
+
+        function enterStaff(username) {
+          authPanel.hidden = true;
+          workspace.hidden = false;
+          roleBadge.hidden = false;
+          userLabel.hidden = false;
+          userLabel.textContent = username;
+          navWrap.hidden = false;
+          loadOrders();
+        }
+
+        async function loadOrders(silent) {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          if (!token) return lockStaff();
+          if (!silent) { loadingEl.hidden = false; gridEl.hidden = true; emptyEl.hidden = true; }
+          try {
+            const res = await fetch("/api/admin?limit=100", { headers: { Authorization: "Bearer " + token } });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401 || res.status === 403 || data.role !== "staff") {
+              return lockStaff(data.error || "Session locked: Staff role required.");
+            }
+            orders = Array.isArray(data.orders) ? data.orders : [];
+            renderOrders();
+          } catch (_) {
+            if (!silent) showToast("Unable to load orders.", true);
+          } finally {
+            loadingEl.hidden = true;
+          }
+        }
+
+        async function updateState(orderId, status) {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          if (!token) return lockStaff();
+          try {
+            const res = await fetch("/api/admin", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({ orderId, status }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              showToast(data.error || "State update blocked.", true);
+              return;
+            }
+            showToast("Order " + orderId + " updated to " + status.replace(/_/g, " "));
+            loadOrders(true);
+          } catch (_) {
+            showToast("Network error updating order state.", true);
+          }
+        }
+
+        function renderOrders() {
+          const q = (searchEl.value || "").trim().toLowerCase();
+          const filtered = orders.filter((o) => {
+            const st = (o.status || "pending").toLowerCase();
+            if (activeFilter === "active" && (st === "completed" || st === "out_for_delivery" || st === "cancelled")) return false;
+            if (activeFilter === "preparing" && st !== "preparing" && st !== "confirmed") return false;
+            if (activeFilter === "ready" && st !== "ready") return false;
+            if (activeFilter === "completed" && st !== "completed" && st !== "out_for_delivery") return false;
+            if (!q) return true;
+            return (
+              String(o.order_id || "").toLowerCase().includes(q) ||
+              String(o.order_pin || "").toLowerCase().includes(q) ||
+              String(o.customer_name || "").toLowerCase().includes(q)
+            );
+          });
+
+          if (!filtered.length) {
+            gridEl.hidden = true;
+            emptyEl.hidden = false;
+            return;
+          }
+          emptyEl.hidden = true;
+          gridEl.hidden = false;
+          gridEl.innerHTML = filtered.map((o) => {
+            const id = esc(o.order_id || "");
+            const st = esc((o.status || "pending").toLowerCase());
+            const itemsText = Array.isArray(o.items)
+              ? o.items.map((it) => esc((it.quantity || 1) + "x " + (it.name || it))).join("<br/>")
+              : esc(o.items || "—");
+            return `
+              <article class="order-ticket">
+                <div class="ticket-head">
+                  <div>
+                    <div class="ticket-id">${id}</div>
+                    <div class="ticket-pin">PIN: ${esc(o.order_pin || "—")} · ${esc(o.fulfilment || "Delivery")}</div>
+                  </div>
+                  <span class="status-pill status-${st}">${st.replace(/_/g, " ")}</span>
+                </div>
+                <div style="font-size:0.84rem;color:var(--muted);">
+                  <strong style="color:var(--text);">${esc(o.customer_name || "Customer")}</strong> · ${esc(o.customer_phone || "Masked")} · ${esc(o.location || "")}
+                </div>
+                <div class="ticket-items">${itemsText}</div>
+                <div class="ticket-actions">
+                  <button type="button" class="state-btn" data-id="${id}" data-st="confirmed">Confirm</button>
+                  <button type="button" class="state-btn" data-id="${id}" data-st="preparing">Kitchen</button>
+                  <button type="button" class="state-btn" data-id="${id}" data-st="ready">Ready</button>
+                  <button type="button" class="state-btn" data-id="${id}" data-st="out_for_delivery">Out for Delivery</button>
+                  <button type="button" class="state-btn" data-id="${id}" data-st="completed">Completed</button>
+                </div>
+              </article>
+            `;
+          }).join("");
+        }
+
+        gridEl.addEventListener("click", (e) => {
+          const btn = e.target.closest(".state-btn");
+          if (!btn) return;
+          updateState(btn.dataset.id, btn.dataset.st);
+        });
+
+        document.querySelectorAll(".filter-chip").forEach((chip) => {
+          chip.addEventListener("click", () => {
+            document.querySelectorAll(".filter-chip").forEach((c) => c.classList.remove("active"));
+            chip.classList.add("active");
+            activeFilter = chip.dataset.filter;
+            renderOrders();
+          });
+        });
+
+        searchEl.addEventListener("input", renderOrders);
+        document.getElementById("quick-update-btn").addEventListener("click", () => {
+          const id = document.getElementById("quick-order-id").value.trim();
+          const st = document.getElementById("quick-status-select").value;
+          if (!id) return showToast("Enter an Order Reference ID.", true);
+          updateState(id, st);
+        });
+        document.getElementById("staff-refresh-btn").addEventListener("click", () => loadOrders(false));
+        document.getElementById("staff-logout-btn").addEventListener("click", () => lockStaff());
+
+        authForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          authErr.hidden = true;
+          const username = userInput.value.trim();
+          const password = passInput.value.trim();
+          if (!CRED_RE.test(username) || !CRED_RE.test(password)) {
+            authErr.textContent = "Username and password must each be exactly 14 alphanumeric characters.";
+            authErr.hidden = false;
+            return;
+          }
+          try {
+            const res = await fetch("/api/admin", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "login", username, password, requiredRole: "staff" }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.token || data.role !== "staff") {
+              authErr.textContent = data.error || "Access denied: This console is strictly locked to Staff accounts.";
+              authErr.hidden = false;
+              return;
+            }
+            sessionStorage.setItem(TOKEN_KEY, data.token);
+            sessionStorage.setItem(USER_KEY, data.username);
+            sessionStorage.setItem(ROLE_KEY, "staff");
+            enterStaff(data.username);
+          } catch (_) {
+            authErr.textContent = "Unable to connect to authentication server.";
+            authErr.hidden = false;
+          }
+        });
+
+        setInterval(() => {
+          if (!workspace.hidden && document.visibilityState === "visible" && sessionStorage.getItem(TOKEN_KEY)) {
+            loadOrders(true);
+          }
+        }, 8000);
+
+        if (sessionStorage.getItem(TOKEN_KEY) && sessionStorage.getItem(ROLE_KEY) === "staff") {
+          enterStaff(sessionStorage.getItem(USER_KEY) || "Staff");
+        }
+      })();
+    </script>
+  </body>
+</html>

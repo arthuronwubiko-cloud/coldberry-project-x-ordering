@@ -749,6 +749,10 @@
                 <span><i class="fa-solid fa-list-check" aria-hidden="true"></i> Orders Database</span>
                 <span class="tab-badge" id="tab-orders-badge">0</span>
               </button>
+              <button type="button" class="console-tab-btn" id="tab-btn-completed" data-tab="completed" data-label="Completed Console">
+                <span><i class="fa-solid fa-box-archive" aria-hidden="true"></i> Completed Console</span>
+                <span class="tab-badge" id="tab-completed-badge">0</span>
+              </button>
               <button type="button" class="console-tab-btn" id="tab-btn-refunds" data-tab="refunds" data-label="15-Char Refund Tokens">
                 <span><i class="fa-solid fa-ticket" aria-hidden="true"></i> 15-Char Refund Tokens</span>
                 <span class="tab-badge" id="tab-refunds-badge">0</span>
@@ -766,7 +770,6 @@
             <div class="admin-dots-section-label">Pages &amp; Actions</div>
             <a href="/feedback" id="header-feedback-link" class="admin-dots-item"><span style="display:inline-flex;align-items:center;gap:0.45rem;"><i class="fa-solid fa-comments" aria-hidden="true"></i> Feedback Page</span><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75rem;opacity:0.65;" aria-hidden="true"></i></a>
             <a href="/refunds" id="header-refunds-link" class="admin-dots-item"><span style="display:inline-flex;align-items:center;gap:0.45rem;"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Refunds Page</span><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75rem;opacity:0.65;" aria-hidden="true"></i></a>
-            <a href="/driver" class="admin-dots-item"><span style="display:inline-flex;align-items:center;gap:0.45rem;"><i class="fa-solid fa-motorcycle" aria-hidden="true"></i> Driver Console</span><i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.75rem;opacity:0.65;" aria-hidden="true"></i></a>
             <button id="export-csv-btn" class="admin-dots-item" type="button" hidden>
               <span style="display:inline-flex;align-items:center;gap:0.45rem;"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> Export CSV</span>
             </button>
@@ -998,6 +1001,22 @@
             <tbody id="orders-body"></tbody>
           </table>
         </div>
+        </div>
+
+        <!-- Panel 1B: Completed Console (Full Permanent DB Archive with Ready & Delivery Attribution) -->
+        <div id="panel-completed" class="admin-card" hidden>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+            <div>
+              <h2 style="font-size:1.25rem;margin:0 0 0.2rem;"><i class="fa-solid fa-box-archive" style="color:var(--coral);" aria-hidden="true"></i> Completed &amp; Handed-Over Orders (<span id="completed-count">0</span>)</h2>
+              <small style="color:var(--muted);">Full permanent database archive (unlimited Admin access). Shows who confirmed food ready and who completed delivery.</small>
+            </div>
+            <button type="button" id="refresh-completed-btn" class="admin-btn admin-btn-secondary" style="padding:0.4rem 0.85rem;font-size:0.85rem;">
+              <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh Completed
+            </button>
+          </div>
+          <div id="completed-loading" style="text-align:center;padding:2rem;color:var(--muted);" hidden>Loading completed archive...</div>
+          <div id="completed-empty" style="text-align:center;padding:2rem;color:var(--muted);" hidden>No completed or handed-over orders recorded yet.</div>
+          <div id="completed-orders-grid" class="receipt-grid" hidden></div>
         </div>
 
         <!-- Panel 2: 15-Character Refund Tokens Panel (Verification & Check-in) -->
@@ -2326,7 +2345,58 @@
           }
         });
 
-        const panels = { orders: "panel-orders", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users" };
+        const panels = { orders: "panel-orders", completed: "panel-completed", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users" };
+        async function loadCompletedOrders() {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          if (!token) return;
+          const cLoad = document.getElementById("completed-loading");
+          const cEmpty = document.getElementById("completed-empty");
+          const cGrid = document.getElementById("completed-orders-grid");
+          const cCount = document.getElementById("completed-count");
+          const cBadge = document.getElementById("tab-completed-badge");
+          if (cLoad) cLoad.hidden = false;
+          try {
+            const res = await fetch(`${getApiBase()}/api/admin?tab=completed&limit=1000`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const data = await res.json().catch(() => ({}));
+            const rows = Array.isArray(data.orders) ? data.orders : [];
+            if (cCount) cCount.textContent = String(rows.length);
+            if (cBadge) cBadge.textContent = String(rows.length);
+            if (!rows.length) {
+              if (cEmpty) cEmpty.hidden = false;
+              if (cGrid) cGrid.hidden = true;
+              return;
+            }
+            if (cEmpty) cEmpty.hidden = true;
+            if (cGrid) {
+              cGrid.hidden = false;
+              cGrid.innerHTML = rows.map((o) => `
+                <div class="receipt-card">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;margin-bottom:0.5rem;">
+                    <div>
+                      <strong style="font-family:'JetBrains Mono',monospace;color:var(--coral);">${esc(o.order_id || "")}</strong>
+                      <div style="font-size:0.78rem;color:var(--muted);">PIN: ${esc(o.order_pin || "—")} · ${o.created_at ? new Date(o.created_at).toLocaleString() : ""}</div>
+                    </div>
+                    <span class="status-pill status-${esc((o.status || "completed").toLowerCase())}">${esc((o.status || "completed").replace(/_/g, " "))}</span>
+                  </div>
+                  <div style="font-size:0.86rem;margin-bottom:0.5rem;">
+                    <strong>${esc(o.customer_name || "Customer")}</strong> · ${esc(o.customer_phone || "")} · ${esc(o.location || "")}
+                  </div>
+                  <div style="font-size:0.83rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:0.55rem;margin-bottom:0.55rem;">${esc(typeof o.items === "string" ? o.items : JSON.stringify(o.items || ""))}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:0.45rem;font-size:0.78rem;color:var(--muted);border-top:1px solid var(--border);padding-top:0.5rem;">
+                    <span><i class="fa-solid fa-fire-burner" aria-hidden="true"></i> <strong>Ready Confirmed By:</strong> ${esc(o.ready_confirmed_by || "Not recorded")}</span>
+                    <span><i class="fa-solid fa-motorcycle" aria-hidden="true"></i> <strong>Delivery Completed By:</strong> ${esc(o.completed_by || "Not recorded")}</span>
+                  </div>
+                </div>
+              `).join("");
+            }
+          } catch (_) {
+            if (cEmpty) { cEmpty.textContent = "Unable to load completed archive."; cEmpty.hidden = false; }
+          } finally {
+            if (cLoad) cLoad.hidden = true;
+          }
+        }
         const adminDotsToggle = document.getElementById("admin-dots-toggle");
         const adminDotsMenu = document.getElementById("admin-dots-menu");
         const adminCurrentTabText = document.getElementById("admin-current-tab-text");
@@ -2371,11 +2441,14 @@
             }
           });
           setAdminDotsOpen(false);
+          if (name === "completed") loadCompletedOrders();
           if (name === "refunds") loadRefunds();
           if (name === "feedback") loadFeedback();
           if (name === "users") loadUsers();
         }
         document.querySelectorAll(".console-tab-btn").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+        const refreshCompletedBtn = document.getElementById("refresh-completed-btn");
+        if (refreshCompletedBtn) refreshCompletedBtn.addEventListener("click", loadCompletedOrders);
         document.getElementById("refresh-feedback-btn").addEventListener("click", loadFeedback);
         const fbFilterEl = document.getElementById("feedback-type-filter");
         if (fbFilterEl) fbFilterEl.addEventListener("change", loadFeedback);
@@ -2435,10 +2508,11 @@
             const res = await fetch(`${getApiBase()}/api/admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ action: "login", username, password }),
+              body: JSON.stringify({ action: "login", username, password, requiredRole: "admin" }),
             });
             const data = await res.json().catch(() => ({}));
-            if (!res.ok || !data.token) {
+            if (!res.ok || !data.token || data.role !== "admin") {
+              if (res.ok && data.role && data.role !== "admin") { authError.textContent = "Access denied: This console is strictly locked to Admin accounts."; authError.hidden = false; return; }
               authError.textContent = data.error || "Invalid username or password.";
               authError.hidden = false;
               return;
@@ -2475,7 +2549,7 @@
 
         // Init API origin input from session or current host
         apiOriginInput.value = sessionStorage.getItem(ORIGIN_KEY) || "";
-        if (sessionStorage.getItem(TOKEN_KEY) && sessionStorage.getItem(ROLE_KEY)) {
+        if (sessionStorage.getItem(TOKEN_KEY) && sessionStorage.getItem(ROLE_KEY) === "admin") {
           authPanel.hidden = true;
           dashboardPanel.hidden = false;
           fetchOrders();

@@ -126,12 +126,22 @@ function findLocalOrder(phone, pin) {
   );
 }
 
-function updateLocalOrderStatus(orderId, status, paymentStatus) {
+function updateLocalOrderStatus(orderId, status, paymentStatus, actor) {
   const list = readLocalOrdersFile();
   const idx = list.findIndex((o) => o.order_id === orderId);
   if (idx < 0) return false;
   if (status) list[idx].status = status;
   if (paymentStatus) list[idx].payment_status = paymentStatus;
+  const actorName = actor && actor.username ? String(actor.username) : null;
+  const nowIso = new Date().toISOString();
+  if (status === "ready" && actorName) {
+    list[idx].ready_confirmed_by = actorName;
+    list[idx].ready_confirmed_at = nowIso;
+  }
+  if (status === "completed" && actorName) {
+    list[idx].completed_by = actorName;
+    list[idx].completed_at = nowIso;
+  }
   writeLocalOrdersFile(list);
   return true;
 }
@@ -581,7 +591,7 @@ async function findOrderForTracking(phone, pin) {
   return local ? { order: local, provider: "local" } : dbRes;
 }
 
-async function updateOrderStatus(orderId, status, paymentStatus) {
+async function updateOrderStatus(orderId, status, paymentStatus, actor) {
   if (status && !ORDER_STATUSES.includes(status)) return { error: "Invalid status." };
   const validPaymentStatuses = ["pending", "paid", "received", "unpaid"];
   if (paymentStatus && !validPaymentStatuses.includes(String(paymentStatus).toLowerCase())) {
@@ -590,13 +600,23 @@ async function updateOrderStatus(orderId, status, paymentStatus) {
   const normPayment = paymentStatus
     ? (String(paymentStatus).toLowerCase() === "received" ? "paid" : String(paymentStatus).toLowerCase())
     : null;
-  const localUpdated = updateLocalOrderStatus(orderId, status, normPayment);
+  const localUpdated = updateLocalOrderStatus(orderId, status, normPayment, actor);
 
   if (!isConfigured()) return { updated: localUpdated, localOnly: true };
 
   const patchFields = {};
+  const actorName = actor && actor.username ? String(actor.username) : null;
+  const nowIso = new Date().toISOString();
   if (status) patchFields.status = status;
   if (normPayment) patchFields.payment_status = normPayment;
+  if (status === "ready" && actorName) {
+    patchFields.ready_confirmed_by = actorName;
+    patchFields.ready_confirmed_at = nowIso;
+  }
+  if (status === "completed" && actorName) {
+    patchFields.completed_by = actorName;
+    patchFields.completed_at = nowIso;
+  }
 
   const supabase = getSupabaseConfig();
   if (supabase) {
@@ -615,6 +635,8 @@ async function updateOrderStatus(orderId, status, paymentStatus) {
               await sql`UPDATE orders SET status = ${status}, payment_status = ${normPayment} WHERE order_id = ${orderId}`;
             } else if (status) {
               await sql`UPDATE orders SET status = ${status} WHERE order_id = ${orderId}`;
+              if (status === "ready" && actorName) await sql`UPDATE orders SET ready_confirmed_by = ${actorName}, ready_confirmed_at = ${nowIso} WHERE order_id = ${orderId}`;
+              if (status === "completed" && actorName) await sql`UPDATE orders SET completed_by = ${actorName}, completed_at = ${nowIso} WHERE order_id = ${orderId}`;
             } else if (normPayment) {
               await sql`UPDATE orders SET payment_status = ${normPayment} WHERE order_id = ${orderId}`;
             }
@@ -632,6 +654,8 @@ async function updateOrderStatus(orderId, status, paymentStatus) {
       return { updated: rows.length > 0 || localUpdated, provider: "neon" };
     } else if (status) {
       const rows = await sql`UPDATE orders SET status = ${status} WHERE order_id = ${orderId} RETURNING order_id`;
+      if (status === "ready" && actorName) await sql`UPDATE orders SET ready_confirmed_by = ${actorName}, ready_confirmed_at = ${nowIso} WHERE order_id = ${orderId}`;
+      if (status === "completed" && actorName) await sql`UPDATE orders SET completed_by = ${actorName}, completed_at = ${nowIso} WHERE order_id = ${orderId}`;
       return { updated: rows.length > 0 || localUpdated, provider: "neon" };
     } else if (normPayment) {
       const rows = await sql`UPDATE orders SET payment_status = ${normPayment} WHERE order_id = ${orderId} RETURNING order_id`;

@@ -188,10 +188,10 @@
         var r=await fetch(getOrigin()+"/api/admin",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"login",username:u,password:p})
+          body:JSON.stringify({action:"login",username:u,password:p,requiredRole:"admin"})
         });
         var d=await r.json().catch(function(){return{};});
-        if(!r.ok||!d.token){
+        if(!r.ok||!d.token||d.role!=="admin"){
           errEl.textContent=d.error||"Invalid username or password.";
           errEl.hidden=false;
           return;

@@ -30,6 +30,10 @@
     { "source": "/customer-feedback", "destination": "/feedback.html" },
     { "source": "/refunds", "destination": "/refunds.html" },
     { "source": "/refund-tokens", "destination": "/refunds.html" },
+    { "source": "/manager", "destination": "/manager.html" },
+    { "source": "/manager-console", "destination": "/manager.html" },
+    { "source": "/staff", "destination": "/staff.html" },
+    { "source": "/staff-console", "destination": "/staff.html" },
     { "source": "/driver", "destination": "/driver.html" },
     { "source": "/driver-console", "destination": "/driver.html" },
     { "source": "/track", "destination": "/track.html" },
@@ -52,7 +56,7 @@
       ]
     },
     {
-      "source": "/(admin|admin-console|driver|driver-console)(.*)",
+      "source": "/(admin|admin-console|manager|manager-console|staff|staff-console|driver|driver-console)(.*)",
       "headers": [
         { "key": "X-Frame-Options", "value": "DENY" }
       ]

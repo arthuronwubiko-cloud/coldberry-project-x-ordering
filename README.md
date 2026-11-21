@@ -453,6 +453,7 @@ Authenticate via `POST /api/admin` (`{ action: "login", username, password }`) u
 | `SUPABASE_KEY` | Optional | Supabase API key (anon or service_role) |
 | `DATABASE_URL` | Optional | Enables Neon Postgres order storage (alternative to Supabase) |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Optional | Override 14-char alphanumeric Admin console credentials |
+| `MANAGER_USERNAME` / `MANAGER_PASSWORD` | Optional | 14-char alphanumeric Manager Console (`/manager`) & Refunds credentials |
 | `STAFF_USERNAME` / `STAFF_PASSWORD` | Optional | Override 14-char alphanumeric Regular Staff credentials |
 | `ADMIN_SECRET` / `ADMIN_SESSION_SECRET` | Optional | Legacy bearer token secret & HMAC signing secret |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional | Upstash Redis REST endpoint & token for distributed login sessions, instant logout revocation, rate limiting, and failed-login lockouts |
@@ -492,4 +493,5 @@ Returns whether the database is configured and the WhatsApp recipient number in 
 - **Load Balancer & Failover (`api/load-balancer.js`, `dev-server.js`):** Upstream pool routing (`least-connections` / `round-robin`) with circuit-breaker health checks, automatic failover, and multi-worker Node.js cluster support.
 - **Brand Color Palettes & Human-Made UI Polish:** Applied custom light/dark Berry & Cream (Light: `#FFF8F5` / `#8C1D40` / `#5C1A2B`, Dark: `#150B0E` / `#F0708F` / `#2A0F18`) tokens across storefront, Admin Console, and Driver Console; paired `Fraunces`, `Plus Jakarta Sans`, and `JetBrains Mono`; removed all UI emojis and nested card-in-card chrome; enforced `<= 8px` radii and `44px` touch targets.
 - **Three-Dots (`⋮`) Navigation Menu:** Moved primary navigation into an accessible three-dots (`fa-ellipsis-vertical`) menu across all 8 client storefront pages (`#nav-dots-toggle`, `DotsMenuController`) and the Admin Verification Console (`#admin-dots-toggle`, `#admin-dots-menu`, `feedback.html`, `refunds.html`).
-- **Automated Verification:** `npm test` runs **108 / 108** passing end-to-end checks.
+- **Automated Verification:** `npm test` runs **111 / 111** passing end-to-end checks.
+- **Completed Console & Strict 4-Tier Role Isolation:** Dedicated role-locked consoles for **Admin** (`/admin`, `/feedback`, `/refunds`), **Manager** (`/manager`, `/refunds` — can cancel orders & delete orders for refunds), **Staff** (`/staff`), and **Rider** (`/driver`). Orders marked `completed` or `out_for_delivery` shift to the Completed Console with permanent DB persistence and role windows (**3h** Rider, **48h** Staff, **7d** Manager, **unlimited** Admin), recording `ready_confirmed_by` and `completed_by`. Full-database CSV export (`GET /api/admin?export=csv`) is strictly Admin-only (`HTTP 403` for all other roles).

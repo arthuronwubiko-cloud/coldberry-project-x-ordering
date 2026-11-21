@@ -804,3 +804,12 @@ This log records project verification results only; it does not contain private 
   - Added automated check `three-dots-burger-navigation` in `scripts/verify-all.js`.
 - **Automated Verification Result:**
   - Ran `npm test` (`node scripts/verify-all.js`): **108 / 108 checks passed (`0` failed)**.
+
+
+## 2026-11-21 — 4-Tier Role Isolation, Completed Console & Admin-Only Full-DB CSV
+
+- Added dedicated **Staff Console** (`/staff`) and **Manager Console** (`/manager`) alongside **Admin Console** (`/admin`, `/feedback`, `/refunds`) and **Rider Console** (`/driver`), enforcing strict backend `requiredRole` locking (`HTTP 403` on cross-UI login).
+- Implemented **Completed Console** shifting when orders are marked `completed` or `out_for_delivery`, with permanent DB storage and server-enforced retention windows: **3h** Driver, **48h** Staff, **7d** Manager, **unlimited** Admin.
+- Added `ready_confirmed_by`, `ready_confirmed_at`, `completed_by`, and `completed_at` database audit columns in `api/db.js`, displayed in Admin Completed Console and CSV export.
+- Implemented Admin-only full-database CSV export (`GET /api/admin?export=csv`, returning `403` for Manager/Staff/Driver).
+- Ran `npm test` (`scripts/verify-all.js`): **111 / 111 checks passed (`0` failed)**.

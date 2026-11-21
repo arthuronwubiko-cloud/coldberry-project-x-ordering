@@ -55,7 +55,7 @@
       <span>Coldberry Ice Cream · Refund Tokens Console</span>
     </div>
     <div class="dots-wrap"><button type="button" id="admin-dots-toggle" class="dots-btn" aria-label="Open console navigation menu" aria-haspopup="true" aria-expanded="false" aria-controls="top-nav"><i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i></button><nav id="top-nav" hidden>
-      <a href="/admin"><i class="fa-solid fa-list-check"></i> Orders Console</a>
+      <a href="/admin" id="n-adm"><i class="fa-solid fa-list-check"></i> Orders Console</a>
       <a href="/feedback" id="n-fb"><i class="fa-solid fa-comments"></i> Customer Feedback</a>
       <a href="/refunds" id="n-rf" class="on"><i class="fa-solid fa-ticket"></i> Refund Tokens</a>
       <button type="button" class="btn sec" id="lock-btn" style="padding:.45rem .85rem;font-size:.84rem"><i class="fa-solid fa-right-from-bracket"></i> Lock / Logout</button>
@@ -262,10 +262,10 @@
         var r=await fetch(getOrigin()+"/api/admin",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({action:"login",username:u,password:p})
+          body:JSON.stringify({action:"login",username:u,password:p,requiredRole:"admin,manager"})
         });
         var d=await r.json().catch(function(){return{};});
-        if(!r.ok||!d.token){
+        if(!r.ok||!d.token||(d.role!=="admin"&&d.role!=="manager")){
           errEl.textContent=d.error||"Invalid username or password.";
           errEl.hidden=false;
           return;

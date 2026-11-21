@@ -270,7 +270,7 @@ npm test
 # Or: node scripts/verify-all.js
 ```
 
-All 108 automated checks test syntax, assets, pizza sizing, pricing engines, navbar cart icon, API endpoints, RBAC auth, 12-minute cancel window, theme controls, order tracking, and legal compliance.
+All 111 automated checks test syntax, assets, pizza sizing, pricing engines, navbar cart icon, API endpoints, RBAC auth, 12-minute cancel window, theme controls, order tracking, and legal compliance.
 
 To run the 5-round adversarial stress testing suite:
 
@@ -298,3 +298,12 @@ node scripts/stress-test.js
 - **Three-Dots (`⋮`) Navigation:**
   - **Client Storefront:** `#nav-dots-toggle` (`fa-ellipsis-vertical`) toggles `#nav-links-menu` via `window.DotsMenuController` in `js/site.js` with `Escape` and outside-click dismissal.
   - **Admin Console:** `#admin-dots-toggle` in `.console-header-actions` toggles `#admin-dots-menu`, housing all console section tabs (`.console-nav-tabs`), live count badges, page links (`/feedback`, `/refunds`, `/driver`), CSV export, refresh, and lock/logout controls.
+
+
+### 4-Tier Role Isolation, Completed Console & Admin-Only CSV Export
+- **Strict Role-to-UI Locking (`api/admin.js` `requiredRole`):**
+  - **Admin (`/admin`, `/feedback`, `/refunds`):** Full access + unlimited Completed Console + Admin-only full-database CSV export (`GET /api/admin?export=csv`).
+  - **Manager (`/manager`, `/refunds`):** Order Console, Cancel Orders, Delete Orders for 15-char Refund Tokens, Refund Check-in, and **7-day** Completed Console window.
+  - **Staff (`/staff`):** Masked Order Console + operational state updates + **48-hour** Completed Console window.
+  - **Rider / Driver (`/driver`):** Delivery Order Console + **3-hour** completed delivery visibility window.
+- **Database Attribution (`api/db.js`):** Persists `ready_confirmed_by`, `ready_confirmed_at`, `completed_by`, and `completed_at` on every order in Neon Postgres, Supabase, and local fallback storage. All orders remain permanently stored in the database.

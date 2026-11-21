@@ -723,7 +723,7 @@
             const res = await fetch(`${getApiBase()}/api/admin`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ action: "login", username, password }),
+              body: JSON.stringify({ action: "login", username, password, requiredRole: "driver" }),
             });
             const data = await res.json().catch(() => ({}));
 
@@ -735,7 +735,7 @@
               return;
             }
 
-            if (data.role !== "driver" && data.role !== "admin") {
+            if (data.role !== "driver") {
               loginError.textContent = "Access denied: This console is reserved strictly for Delivery Drivers.";
               loginError.hidden = false;
               loginBtn.disabled = false;

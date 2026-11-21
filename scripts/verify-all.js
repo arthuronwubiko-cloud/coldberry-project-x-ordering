@@ -21,6 +21,8 @@ const SELF_PATH = path.resolve(__filename);
 // Configure ephemeral test credentials and signing secrets for the local verification run
 process.env.ADMIN_USERNAME = process.env.ADMIN_USERNAME || "RomeosAdmin890";
 process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Adm94Kx72Qp81Z";
+process.env.MANAGER_USERNAME = process.env.MANAGER_USERNAME || "RomeosMngr8901";
+process.env.MANAGER_PASSWORD = process.env.MANAGER_PASSWORD || "Mgr84Kx52Qp91N";
 process.env.STAFF_USERNAME = process.env.STAFF_USERNAME || "RomeosStaff890";
 process.env.STAFF_PASSWORD = process.env.STAFF_PASSWORD || "Stf63Mp49Lw28R";
 process.env.DRIVER_USERNAME = process.env.DRIVER_USERNAME || "RomeosRider890";
@@ -2227,6 +2229,321 @@ async function checkLegalAndDealsCompliance() {
     "Client storefront (8 pages) and Admin Console (admin, admin-console, feedback, refunds) house navigation inside the three-dots (fa-ellipsis-vertical) menu",
     clientDotsPagesOk && clientDotsLogicOk && adminDotsOk,
     `clientPages=${clientDotsPagesOk}, clientController=${clientDotsLogicOk}, adminConsole=${adminDotsOk}`
+  );
+
+
+  // 6ab. Strict Role-to-UI Locking (Dedicated Staff UI + Cross-UI Role Blocking)
+  const staffUiExists =
+    fs.existsSync(path.join(ROOT_DIR, "staff.html")) &&
+    fs.existsSync(path.join(ROOT_DIR, "staff-console", "index.html"));
+  const staffHtmlContent = staffUiExists ? fs.readFileSync(path.join(ROOT_DIR, "staff.html"), "utf8") : "";
+  const staffUiLocked = staffHtmlContent.includes('requiredRole: "staff"') && staffHtmlContent.includes('data.role !== "staff"');
+  const adminUiLocked =
+    fs.readFileSync(path.join(ROOT_DIR, "admin.html"), "utf8").includes('requiredRole: "admin"') &&
+    fs.readFileSync(path.join(ROOT_DIR, "feedback.html"), "utf8").includes('requiredRole:"admin"') &&
+    fs.readFileSync(path.join(ROOT_DIR, "refunds.html"), "utf8").includes('requiredRole:"admin,manager"');
+  const driverUiLocked =
+    fs.readFileSync(path.join(ROOT_DIR, "driver.html"), "utf8").includes('requiredRole: "driver"') &&
+    !fs.readFileSync(path.join(ROOT_DIR, "driver.html"), "utf8").includes('data.role !== "admin"');
+  const hasStaffRewrite = (rootVercelJson.rewrites || []).some(
+    (rw) => rw.source === "/staff" && rw.destination === "/staff.html"
+  );
+
+  const staffIntoAdminRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosStaff890", password: "Stf63Mp49Lw28R", requiredRole: "admin" } },
+    staffIntoAdminRes
+  );
+  const driverIntoAdminRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosRider890", password: "Rdr72Kp45Lw19Q", requiredRole: "admin" } },
+    driverIntoAdminRes
+  );
+  const adminIntoStaffRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosAdmin890", password: "Adm94Kx72Qp81Z", requiredRole: "staff" } },
+    adminIntoStaffRes
+  );
+  const adminIntoDriverRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosAdmin890", password: "Adm94Kx72Qp81Z", requiredRole: "driver" } },
+    adminIntoDriverRes
+  );
+  const staffIntoStaffRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosStaff890", password: "Stf63Mp49Lw28R", requiredRole: "staff" } },
+    staffIntoStaffRes
+  );
+
+  record(
+    "strict-role-ui-isolation",
+    "Dedicated Staff UI (/staff) exists and Admin, Staff, and Driver accounts are strictly locked to their own UI (HTTP 403 on cross-UI login)",
+    staffUiExists &&
+      staffUiLocked &&
+      adminUiLocked &&
+      driverUiLocked &&
+      hasStaffRewrite &&
+      staffIntoAdminRes.statusCode === 403 &&
+      driverIntoAdminRes.statusCode === 403 &&
+      adminIntoStaffRes.statusCode === 403 &&
+      adminIntoDriverRes.statusCode === 403 &&
+      staffIntoStaffRes.statusCode === 200,
+    `staffUi=${staffUiExists && staffUiLocked}, adminLock=${adminUiLocked}, driverLock=${driverUiLocked}, staffRewrite=${hasStaffRewrite}, crossBlocks=[${staffIntoAdminRes.statusCode},${driverIntoAdminRes.statusCode},${adminIntoStaffRes.statusCode},${adminIntoDriverRes.statusCode}], staffOk=${staffIntoStaffRes.statusCode}`
+  );
+
+
+  // 6ac. Manager Role: Dedicated Manager UI (/manager) + Refunds (/refunds) + Delete Orders for Refund (Blocked from Admin/Feedback/Users/Staff/Driver)
+  const mgrUiExists =
+    fs.existsSync(path.join(ROOT_DIR, "manager.html")) &&
+    fs.existsSync(path.join(ROOT_DIR, "manager-console", "index.html"));
+  const mgrHtml = mgrUiExists ? fs.readFileSync(path.join(ROOT_DIR, "manager.html"), "utf8") : "";
+  const refundsAllowsMgr = fs.readFileSync(path.join(ROOT_DIR, "refunds.html"), "utf8").includes('requiredRole:"admin,manager"');
+  const hasMgrRewrite = (rootVercelJson.rewrites || []).some(
+    (rw) => rw.source === "/manager" && rw.destination === "/manager.html"
+  );
+
+  const mgrLoginOkRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosMngr8901", password: "Mgr84Kx52Qp91N", requiredRole: "manager" } },
+    mgrLoginOkRes
+  );
+  const mgrRefundsLoginRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosMngr8901", password: "Mgr84Kx52Qp91N", requiredRole: "admin,manager" } },
+    mgrRefundsLoginRes
+  );
+  const mgrIntoAdminRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosMngr8901", password: "Mgr84Kx52Qp91N", requiredRole: "admin" } },
+    mgrIntoAdminRes
+  );
+  const mgrToken = mgrLoginOkRes.body?.token;
+
+  const mgrFeedbackBlocked = localMockRes();
+  await adminHandlerLocal(
+    { method: "GET", headers: { authorization: `Bearer ${mgrToken}` }, query: { tab: "feedback" } },
+    mgrFeedbackBlocked
+  );
+  const mgrUsersBlocked = localMockRes();
+  await adminHandlerLocal(
+    { method: "GET", headers: { authorization: `Bearer ${mgrToken}` }, query: { tab: "users" } },
+    mgrUsersBlocked
+  );
+  const mgrRefundsListOk = localMockRes();
+  await adminHandlerLocal(
+    { method: "GET", headers: { authorization: `Bearer ${mgrToken}` }, query: { tab: "refunds" } },
+    mgrRefundsListOk
+  );
+  const staffRefundsBlocked = localMockRes();
+  await adminHandlerLocal(
+    { method: "GET", headers: { authorization: `Bearer ${staffLoginUsersTest.body?.token}` }, query: { tab: "refunds" } },
+    staffRefundsBlocked
+  );
+
+  // Create a temporary order and verify Manager can delete it for a 15-char refund token
+  const mgrOrdRes = localMockRes();
+  await ordersHandlerLocal(
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: {
+        consent: true,
+        customer: { name: "Manager Refund Test", phone: "08011112222" },
+        fulfilment: "Pickup",
+        location: "Garki, Abuja",
+        items: [{ name: "Pepperoni Pizza (Large)", quantity: 1 }],
+      },
+    },
+    mgrOrdRes
+  );
+  const mgrDelOrderRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "DELETE", headers: { authorization: `Bearer ${mgrToken}` }, body: { orderId: mgrOrdRes.body?.orderId } },
+    mgrDelOrderRes
+  );
+  const mgrDelTokenBlocked = localMockRes();
+  await adminHandlerLocal(
+    { method: "DELETE", headers: { authorization: `Bearer ${mgrToken}` }, query: { refundToken: mgrDelOrderRes.body?.refundToken } },
+    mgrDelTokenBlocked
+  );
+
+  record(
+    "manager-orders-and-refunds-rbac",
+    "Manager can access /manager and /refunds and delete orders for 15-char refund tokens, but is blocked (403) from /admin, /feedback, users, and deleting tokens; Staff blocked from refunds",
+    mgrUiExists &&
+      mgrHtml.includes('requiredRole: "manager"') &&
+      refundsAllowsMgr &&
+      hasMgrRewrite &&
+      mgrLoginOkRes.statusCode === 200 &&
+      mgrRefundsLoginRes.statusCode === 200 &&
+      mgrIntoAdminRes.statusCode === 403 &&
+      mgrFeedbackBlocked.statusCode === 403 &&
+      mgrUsersBlocked.statusCode === 403 &&
+      mgrRefundsListOk.statusCode === 200 &&
+      staffRefundsBlocked.statusCode === 403 &&
+      mgrDelOrderRes.statusCode === 200 &&
+      Boolean(mgrDelOrderRes.body?.refundToken) &&
+      mgrDelTokenBlocked.statusCode === 403,
+    `mgrUi=${mgrUiExists}, refundsPage=${refundsAllowsMgr}, mgr200=${mgrLoginOkRes.statusCode}, admin403=${mgrIntoAdminRes.statusCode}, fb403=${mgrFeedbackBlocked.statusCode}, users403=${mgrUsersBlocked.statusCode}, staffRef403=${staffRefundsBlocked.statusCode}, delOrder200=${mgrDelOrderRes.statusCode}, tok=${mgrDelOrderRes.body?.refundToken}, delTok403=${mgrDelTokenBlocked.statusCode}`
+  );
+
+
+  // 6ad. Completed Console Retention Windows (Driver 3h, Staff 48h, Manager 7d, Admin Unlimited), Ready/Delivery Attribution, Manager Cancel & Admin-Only Full-DB CSV Export
+  const dbMod = require(path.join(ROOT_DIR, "api", "db.js"));
+  const attrOrderRes = localMockRes();
+  await ordersHandlerLocal(
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: {
+        consent: true,
+        customer: { name: "Audit Attribution Test", phone: "08022223333" },
+        fulfilment: "Delivery",
+        location: "Garki, Abuja",
+        address: "15 Audit Street",
+        items: [{ name: "Pepperoni Pizza (Large)", quantity: 1 }],
+      },
+    },
+    attrOrderRes
+  );
+  const attrOrderId = attrOrderRes.body?.orderId;
+
+  // Staff confirms food ready -> records ready_confirmed_by
+  await adminHandlerLocal(
+    { method: "PATCH", headers: { "content-type": "application/json", authorization: `Bearer ${staffLoginUsersTest.body?.token}` }, body: { orderId: attrOrderId, status: "ready" } },
+    localMockRes()
+  );
+  // Driver logs in & completes delivery -> records completed_by
+  const drvLoginAttr = localMockRes();
+  await adminHandlerLocal(
+    { method: "POST", headers: { "content-type": "application/json" }, body: { action: "login", username: "RomeosRider890", password: "Rdr72Kp45Lw19Q", requiredRole: "driver" } },
+    drvLoginAttr
+  );
+  const drvTokenAttr = drvLoginAttr.body?.token;
+  await adminHandlerLocal(
+    { method: "PATCH", headers: { "content-type": "application/json", authorization: `Bearer ${drvTokenAttr}` }, body: { orderId: attrOrderId, status: "completed" } },
+    localMockRes()
+  );
+
+  // Manager cancels a separate order -> HTTP 200 + refundToken
+  const mgrCancelOrdRes = localMockRes();
+  await ordersHandlerLocal(
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: {
+        consent: true,
+        customer: { name: "Manager Cancel Test", phone: "08033334444" },
+        fulfilment: "Pickup",
+        location: "Garki, Abuja",
+        items: [{ name: "Pepperoni Pizza (Large)", quantity: 1 }],
+      },
+    },
+    mgrCancelOrdRes
+  );
+  const mgrCancelPatchRes = localMockRes();
+  await adminHandlerLocal(
+    { method: "PATCH", headers: { "content-type": "application/json", authorization: `Bearer ${mgrToken}` }, body: { orderId: mgrCancelOrdRes.body?.orderId, status: "cancelled" } },
+    mgrCancelPatchRes
+  );
+
+  // Seed 4 completed orders at 1h, 5h, 72h, and 10d ages in the local store to test exact retention windows
+  const nowMs = Date.now();
+  const id1h = `ORD-RET-1H-${nowMs}`;
+  const id5h = `ORD-RET-5H-${nowMs}`;
+  const id72h = `ORD-RET-72H-${nowMs}`;
+  const id10d = `ORD-RET-10D-${nowMs}`;
+  const localStoreFile = "/tmp/romeos-orders-store.json";
+  let storeArr = [];
+  try { storeArr = JSON.parse(fs.readFileSync(localStoreFile, "utf8")); } catch (_) {}
+  const mkCompleted = (id, ageMs) => ({
+    order_id: id,
+    order_pin: "123456",
+    customer_name: "Retention Tester",
+    customer_phone: "+2348044445555",
+    fulfilment: "Delivery",
+    location: "Garki, Abuja",
+    address: "1 Test Ave",
+    items: "1x Pepperoni Pizza (Large)",
+    status: "completed",
+    payment_status: "paid",
+    grand_total: 15000,
+    ready_confirmed_by: "RomeosStaff890",
+    completed_by: "RomeosRider890",
+    created_at: new Date(nowMs - ageMs).toISOString(),
+    completed_at: new Date(nowMs - ageMs).toISOString(),
+  });
+  storeArr.unshift(
+    mkCompleted(id1h, 1 * 60 * 60 * 1000),
+    mkCompleted(id5h, 5 * 60 * 60 * 1000),
+    mkCompleted(id72h, 72 * 60 * 60 * 1000),
+    mkCompleted(id10d, 10 * 24 * 60 * 60 * 1000)
+  );
+  fs.writeFileSync(localStoreFile, JSON.stringify(storeArr, null, 2), "utf8");
+
+  const drvCompRes = localMockRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${drvTokenAttr}` }, query: { tab: "completed", limit: "500" } }, drvCompRes);
+  const staffCompRes = localMockRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${staffLoginUsersTest.body?.token}` }, query: { tab: "completed", limit: "500" } }, staffCompRes);
+  const mgrCompRes = localMockRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${mgrToken}` }, query: { tab: "completed", limit: "500" } }, mgrCompRes);
+  const admCompRes = localMockRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${admTokenLocal}` }, query: { tab: "completed", limit: "500" } }, admCompRes);
+
+  const idsOf = (r) => new Set((r.body?.orders || []).map((o) => o.order_id));
+  const drvIds = idsOf(drvCompRes);
+  const staffIds = idsOf(staffCompRes);
+  const mgrIds = idsOf(mgrCompRes);
+  const admIds = idsOf(admCompRes);
+
+  const attrRec = (admCompRes.body?.orders || []).find((o) => o.order_id === attrOrderId);
+  const attributionOk = Boolean(attrRec && attrRec.ready_confirmed_by === "RomeosStaff890" && attrRec.completed_by === "RomeosRider890");
+  const windowsOk =
+    drvIds.has(id1h) && !drvIds.has(id5h) && !drvIds.has(id72h) && !drvIds.has(id10d) &&
+    staffIds.has(id1h) && staffIds.has(id5h) && !staffIds.has(id72h) && !staffIds.has(id10d) &&
+    mgrIds.has(id1h) && mgrIds.has(id5h) && mgrIds.has(id72h) && !mgrIds.has(id10d) &&
+    admIds.has(id1h) && admIds.has(id5h) && admIds.has(id72h) && admIds.has(id10d);
+
+  // Admin-only full-database CSV export
+  const mkCsvRes = () => {
+    const r = localMockRes();
+    r.text = "";
+    r.send = (s) => { r.text = String(s || ""); return r; };
+    return r;
+  };
+  const admCsvRes = mkCsvRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${admTokenLocal}` }, query: { export: "csv" } }, admCsvRes);
+  const mgrCsvRes = mkCsvRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${mgrToken}` }, query: { export: "csv" } }, mgrCsvRes);
+  const staffCsvRes = mkCsvRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${staffLoginUsersTest.body?.token}` }, query: { export: "csv" } }, staffCsvRes);
+  const drvCsvRes = mkCsvRes();
+  await adminHandlerLocal({ method: "GET", headers: { authorization: `Bearer ${drvTokenAttr}` }, query: { export: "csv" } }, drvCsvRes);
+
+  const csvOk =
+    admCsvRes.statusCode === 200 &&
+    admCsvRes.text.includes("ready_confirmed_by") &&
+    admCsvRes.text.includes("completed_by") &&
+    admCsvRes.text.includes(id10d) &&
+    admCsvRes.text.includes("RomeosStaff890") &&
+    admCsvRes.text.includes("RomeosRider890") &&
+    mgrCsvRes.statusCode === 403 &&
+    staffCsvRes.statusCode === 403 &&
+    drvCsvRes.statusCode === 403;
+
+  // Clean up seeded test orders
+  try {
+    const cleaned = JSON.parse(fs.readFileSync(localStoreFile, "utf8")).filter(
+      (o) => ![id1h, id5h, id72h, id10d, attrOrderId, mgrCancelOrdRes.body?.orderId].includes(o.order_id)
+    );
+    fs.writeFileSync(localStoreFile, JSON.stringify(cleaned, null, 2), "utf8");
+  } catch (_) {}
+
+  record(
+    "completed-console-retention-and-csv",
+    "Completed Console enforces 3h Driver / 48h Staff / 7d Manager / Unlimited Admin windows, records ready_confirmed_by & completed_by, allows Manager cancel, and locks full-DB CSV export to Admin only",
+    attributionOk && windowsOk && mgrCancelPatchRes.statusCode === 200 && Boolean(mgrCancelPatchRes.body?.refundToken) && csvOk,
+    `attribution=${attributionOk}, windows=${windowsOk}, mgrCancel=${mgrCancelPatchRes.statusCode}, csvAdmin200=${admCsvRes.statusCode}, csvBlocks=[${mgrCsvRes.statusCode},${staffCsvRes.statusCode},${drvCsvRes.statusCode}]`
   );
 
 }

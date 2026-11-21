@@ -44,6 +44,89 @@ const {
 const CREDENTIAL_REGEX = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z0-9]{14}$/;
 const STAFF_ALLOWED_STATUSES = ["confirmed", "preparing", "out_for_delivery", "ready", "completed"];
 const DRIVER_ALLOWED_STATUSES = ["out_for_delivery", "completed"];
+const COMPLETED_CONSOLE_STATUSES = ["out_for_delivery", "completed"];
+const STAFF_COMPLETED_WINDOW_MS = 48 * 60 * 60 * 1000;       // 48 hours
+const MANAGER_COMPLETED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000; // 7 days (1 week)
+const DRIVER_COMPLETED_WINDOW_MS = 3 * 60 * 60 * 1000;       // 3 hours (2-3 hour window)
+
+function isOrderCompletedForConsole(order) {
+  const st = String(order?.status || "").toLowerCase();
+  return COMPLETED_CONSOLE_STATUSES.includes(st);
+}
+
+function isOrderWithinWindow(order, windowMs, useCompletedAt = false) {
+  const tsStr = useCompletedAt
+    ? (order?.completed_at || order?.created_at || order?.timestamp)
+    : (order?.created_at || order?.timestamp);
+  const ts = Date.parse(tsStr || "");
+  if (!Number.isFinite(ts)) return true;
+  return Date.now() - ts <= windowMs;
+}
+
+function escapeCsvCell(val) {
+  let str = String(val == null ? "" : val).replace(/\r?\n/g, " ");
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = "'" + str;
+  }
+  if (/[",]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
+
+function buildOrdersCsv(orders) {
+  const headers = [
+    "order_id",
+    "order_pin",
+    "created_at",
+    "status",
+    "payment_status",
+    "fulfilment",
+    "location",
+    "customer_name",
+    "customer_phone",
+    "customer_email",
+    "address",
+    "items",
+    "subtotal",
+    "service_fee",
+    "delivery_fee",
+    "grand_total",
+    "ready_confirmed_by",
+    "ready_confirmed_at",
+    "completed_by",
+    "completed_at",
+    "notes",
+  ];
+  const lines = [headers.join(",")];
+  for (const o of orders) {
+    const row = [
+      o.order_id || o.orderId || "",
+      o.order_pin || o.orderPin || "",
+      o.created_at || o.timestamp || "",
+      o.status || "pending",
+      o.payment_status || o.paymentStatus || "pending",
+      o.fulfilment || "",
+      o.location || "",
+      o.customer_name || o.customerName || "",
+      o.customer_phone || o.customerPhone || "",
+      o.customer_email || o.customerEmail || "",
+      o.address || "",
+      typeof o.items === "string" ? o.items : JSON.stringify(o.items || ""),
+      Number(o.subtotal ?? o.sub_total ?? 0),
+      Number(o.service_fee ?? o.serviceFee ?? 0),
+      Number(o.delivery_fee ?? o.deliveryFee ?? 0),
+      Number(o.grand_total ?? o.grandTotal ?? 0),
+      o.ready_confirmed_by || "",
+      o.ready_confirmed_at || "",
+      o.completed_by || "",
+      o.completed_at || "",
+      o.notes || "",
+    ];
+    lines.push(row.map(escapeCsvCell).join(","));
+  }
+  return lines.join("\n");
+}
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -230,6 +313,13 @@ function getConfiguredRoleCredentials() {
       pass: sha256Hex(process.env.ADMIN_PASSWORD),
     });
   }
+  if (process.env.MANAGER_USERNAME && process.env.MANAGER_PASSWORD) {
+    roles.push({
+      role: "manager",
+      user: sha256Hex(process.env.MANAGER_USERNAME),
+      pass: sha256Hex(process.env.MANAGER_PASSWORD),
+    });
+  }
   if (process.env.STAFF_USERNAME && process.env.STAFF_PASSWORD) {
     roles.push({
       role: "staff",
@@ -409,7 +499,10 @@ function sanitizeOrderForDriver(order) {
 
 function getPermissionsForRole(role) {
   if (role === "admin") {
-    return ["read_all", "change_state", "cancel", "delete", "export"];
+    return ["read_all", "change_state", "cancel", "delete", "export", "refunds", "feedback", "users"];
+  }
+  if (role === "manager") {
+    return ["read_orders", "change_state", "cancel", "delete_for_refund", "refunds"];
   }
   if (role === "driver") {
     return ["read_deliveries", "change_delivery_state"];
@@ -471,7 +564,7 @@ module.exports = async function handler(req, res) {
     // 1. Verify Refund Token (Admin / Staff only)
     if (action === "verify_refund_token" || action === "verify_refund") {
       const postAuth = resolveAuthFromRequest(req);
-      if (!postAuth || (postAuth.role !== "admin" && postAuth.role !== "staff")) {
+      if (!postAuth || (postAuth.role !== "admin" && postAuth.role !== "manager")) {
         return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required." });
       }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
@@ -500,7 +593,7 @@ module.exports = async function handler(req, res) {
     // 2. Check-In / Claim Refund Token (Admin / Staff only)
     if (action === "check_in_refund" || action === "claim_refund" || action === "checkin_refund") {
       const auth = resolveAuthFromRequest(req);
-      if (!auth || (auth.role !== "admin" && auth.role !== "staff")) {
+      if (!auth || (auth.role !== "admin" && auth.role !== "manager")) {
         return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required to claim refund tokens." });
       }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
@@ -674,6 +767,18 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: "Invalid username or password." });
     }
 
+    const requiredRoleRaw = String(body.requiredRole || body.consoleRole || "").trim().toLowerCase();
+    const allowedRoles = requiredRoleRaw
+      ? requiredRoleRaw.split(",").map((r) => r.trim()).filter((r) => ["admin", "manager", "staff", "driver"].includes(r))
+      : [];
+    if (allowedRoles.length > 0 && !allowedRoles.includes(result.role)) {
+      return res.status(403).json({
+        error: `Access denied: This console is strictly locked to ${allowedRoles.join(" / ")} accounts. Please sign in through your dedicated ${result.role} UI.`,
+        role: result.role,
+        requiredRole: requiredRoleRaw,
+      });
+    }
+
     await clearFailedLogins(lockoutKey);
     const jti = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : crypto.randomBytes(12).toString("hex");
     const token = issueSessionToken(result.username, result.role, jti);
@@ -701,6 +806,9 @@ module.exports = async function handler(req, res) {
     const body = parseBody(req);
 
     if (body.action === "claim_refund" || body.action === "verify_refund") {
+      if (auth.role !== "admin" && auth.role !== "manager") {
+        return res.status(403).json({ error: "Access denied: Only admin or manager accounts can claim refund tokens." });
+      }
       const token = String(body.token || "").trim().toUpperCase();
       if (!token || token.length !== 15) {
         return res.status(400).json({ error: "Valid 15-character refund token is required." });
@@ -728,7 +836,7 @@ module.exports = async function handler(req, res) {
             error: "Access denied: Driver accounts are only allowed to update delivery status to 'out_for_delivery' or 'completed'.",
           });
         }
-      } else if (auth.role !== "admin" && !STAFF_ALLOWED_STATUSES.includes(status)) {
+      } else if (auth.role !== "admin" && auth.role !== "manager" && !STAFF_ALLOWED_STATUSES.includes(status)) {
         return res.status(403).json({
           error: "Access denied: Regular user accounts are only allowed to change operational order state (confirmed, preparing, out_for_delivery, ready, completed).",
         });
@@ -746,7 +854,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    const updateResult = await updateOrderStatus(orderId, status, paymentStatus);
+    const updateResult = await updateOrderStatus(orderId, status, paymentStatus, { username: auth.username, role: auth.role });
     if (updateResult.error) {
       return res.status(400).json({ error: updateResult.error });
     }
@@ -759,7 +867,7 @@ module.exports = async function handler(req, res) {
       } catch (_) {}
     }
     let refundInfo = null;
-    if (status === "cancelled" && (body.issueRefundToken || auth.role === "admin")) {
+    if (status === "cancelled" && (body.issueRefundToken || auth.role === "admin" || auth.role === "manager")) {
       try {
         const existingOrder = await findOrderById(orderId);
         let refundedAmount = Number(existingOrder?.grand_total ?? existingOrder?.grandTotal ?? body.refundedAmount ?? body.amount ?? 0);
@@ -811,12 +919,13 @@ module.exports = async function handler(req, res) {
 
   // DELETE: Strictly restricted to Admin -> Delete used refund tokens OR delete order & issue 15-char refund token
   if (req.method === "DELETE") {
-    if (auth.role !== "admin") {
-      return res.status(403).json({ error: "Access denied: Only admin accounts can delete orders or refund tokens." });
+    if (auth.role !== "admin" && auth.role !== "manager") {
+      return res.status(403).json({ error: "Access denied: Only admin or manager accounts can delete orders for refunds." });
     }
     const body = parseBody(req);
 
     if (body.deleteUsedTokens === true || req.query?.deleteUsedTokens === "true") {
+      if (auth.role !== "admin") return res.status(403).json({ error: "Access denied: Only admin accounts can delete refund tokens." });
       const bulkRes = await deleteClaimedRefundTokens();
       return res.status(200).json({
         deleted: true,
@@ -827,6 +936,7 @@ module.exports = async function handler(req, res) {
 
     const refundTokenToDelete = body.refundToken || req.query?.refundToken;
     if (refundTokenToDelete) {
+      if (auth.role !== "admin") return res.status(403).json({ error: "Access denied: Only admin accounts can delete refund tokens." });
       const tokRes = await deleteRefundToken(refundTokenToDelete);
       if (tokRes.error) {
         return res.status(400).json({ error: tokRes.error });
@@ -839,6 +949,7 @@ module.exports = async function handler(req, res) {
 
     const customerUsernameToDelete = body.customerUsername || req.query?.customerUsername;
     if (customerUsernameToDelete) {
+      if (auth.role !== "admin") return res.status(403).json({ error: "Access denied: Only admin accounts can delete customer accounts." });
       const userRes = await deleteCustomerUser(customerUsernameToDelete);
       if (userRes.error) {
         return res.status(404).json({ error: userRes.error });
@@ -853,6 +964,7 @@ module.exports = async function handler(req, res) {
     const feedbackIdToDelete = body.feedbackId ?? req.query?.feedbackId;
     const feedbackCreatedAt = body.createdAt || req.query?.createdAt || "";
     if ((feedbackIdToDelete !== undefined && String(feedbackIdToDelete).trim() !== "") || feedbackCreatedAt) {
+      if (auth.role !== "admin") return res.status(403).json({ error: "Access denied: Only admin accounts can delete feedback." });
       const fbRes = await deleteFeedback({ id: feedbackIdToDelete, createdAt: feedbackCreatedAt });
       if (fbRes.error) {
         return res.status(400).json({ error: fbRes.error });
@@ -893,7 +1005,7 @@ module.exports = async function handler(req, res) {
     const issuedAt = new Date().toISOString();
     const customerName = existingOrder?.customer_name || existingOrder?.customerName || body.customerName || "Customer";
     const customerPhone = existingOrder?.customer_phone || existingOrder?.customerPhone || body.customerPhone || "";
-    const reason = body.reason || "Order Deleted by Admin";
+    const reason = body.reason || (auth.role === "manager" ? "Order Deleted by Manager for Refund" : "Order Deleted by Admin");
 
     await saveRefundToken({
       token: refundToken,
@@ -922,8 +1034,69 @@ module.exports = async function handler(req, res) {
   // Record live active visitor hit
   recordVisitorHit(req.headers?.["x-forwarded-for"] || req.socket?.remoteAddress || auth?.username);
 
+  // GET: Admin-Only Full-Database CSV Export (strictly forbidden for Manager, Staff, Driver)
+  if (req.query?.export === "csv" || req.query?.format === "csv") {
+    if (auth.role !== "admin") {
+      return res.status(403).json({
+        error: "Access denied: Full-database CSV export is strictly restricted to Admin accounts.",
+      });
+    }
+    const allRes = await getOrders({ limit: 10000, offset: 0 });
+    const allOrders = Array.isArray(allRes.orders) ? allRes.orders : [];
+    const csv = buildOrdersCsv(allOrders);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="orders-database-export.csv"');
+    if (typeof res.send === "function") {
+      return res.status(200).send(csv);
+    }
+    return res.status(200).json({ csv, count: allOrders.length });
+  }
+
+  // GET: Completed Console (Staff: 48h, Manager: 7d, Driver: 3h, Admin: unlimited full DB)
+  if (req.query?.tab === "completed" || req.query?.view === "completed") {
+    const limit = Math.min(Number(req.query?.limit) || 200, 1000);
+    const offset = Math.max(Number(req.query?.offset) || 0, 0);
+    const result = await getOrders({ limit, offset });
+    const rawOrders = Array.isArray(result.orders) ? result.orders : [];
+    let completedOrders;
+    let retentionWindow = "unlimited";
+    if (auth.role === "admin") {
+      completedOrders = rawOrders.filter(isOrderCompletedForConsole);
+    } else if (auth.role === "manager") {
+      retentionWindow = "7d";
+      completedOrders = rawOrders.filter(
+        (o) => isOrderCompletedForConsole(o) && isOrderWithinWindow(o, MANAGER_COMPLETED_WINDOW_MS, false)
+      );
+    } else if (auth.role === "driver") {
+      retentionWindow = "3h";
+      completedOrders = rawOrders
+        .filter(
+          (o) =>
+            String(o.fulfilment || "").toLowerCase() === "delivery" &&
+            String(o.status || "").toLowerCase() === "completed" &&
+            isOrderWithinWindow(o, DRIVER_COMPLETED_WINDOW_MS, true)
+        )
+        .map(sanitizeOrderForDriver);
+    } else {
+      retentionWindow = "48h";
+      completedOrders = rawOrders
+        .filter((o) => isOrderCompletedForConsole(o) && isOrderWithinWindow(o, STAFF_COMPLETED_WINDOW_MS, false))
+        .map(sanitizeOrderForStaff);
+    }
+    return res.status(200).json({
+      orders: completedOrders,
+      count: completedOrders.length,
+      role: auth.role,
+      retentionWindow,
+      provider: result.provider || "local",
+    });
+  }
+
   // GET: Verify Refund Token
   if (req.query?.verifyRefundToken) {
+    if (auth.role !== "admin" && auth.role !== "manager") {
+      return res.status(403).json({ error: "Access denied: Only admin or manager accounts can verify refund tokens." });
+    }
     const token = String(req.query.verifyRefundToken).trim().toUpperCase();
     const rec = await findRefundToken(token);
     if (!rec) {
@@ -950,6 +1123,9 @@ module.exports = async function handler(req, res) {
 
   // GET: Refund Tokens Tab data
   if (req.query?.tab === "refunds" || req.query?.view === "refunds" || req.query?.refundTokens === "true") {
+    if (auth.role !== "admin" && auth.role !== "manager") {
+      return res.status(403).json({ error: "Access denied: Only admin or manager accounts can view refund tokens." });
+    }
     const limit = Math.min(Number(req.query?.limit) || 50, 200);
     const offset = Math.max(Number(req.query?.offset) || 0, 0);
     const status = req.query?.status || null;
@@ -964,6 +1140,9 @@ module.exports = async function handler(req, res) {
 
   // GET: Customer Feedback Tab data
   if (req.query?.tab === "feedback" || req.query?.view === "feedback") {
+    if (auth.role !== "admin") {
+      return res.status(403).json({ error: "Access denied: Only admin accounts can view customer feedback." });
+    }
     const limit = Math.min(Number(req.query?.limit) || 50, 200);
     const offset = Math.max(Number(req.query?.offset) || 0, 0);
     const result = await getFeedback({ limit, offset });
@@ -1009,12 +1188,24 @@ module.exports = async function handler(req, res) {
   let orders;
   if (auth.role === "admin") {
     orders = rawOrders;
+  } else if (auth.role === "manager") {
+    orders = rawOrders.filter(
+      (o) => !isOrderCompletedForConsole(o) || isOrderWithinWindow(o, MANAGER_COMPLETED_WINDOW_MS, false)
+    );
   } else if (auth.role === "driver") {
     orders = rawOrders
-      .filter((o) => String(o.fulfilment || "").toLowerCase() === "delivery")
+      .filter((o) => {
+        if (String(o.fulfilment || "").toLowerCase() !== "delivery") return false;
+        if (String(o.status || "").toLowerCase() === "completed") {
+          return isOrderWithinWindow(o, DRIVER_COMPLETED_WINDOW_MS, true);
+        }
+        return true;
+      })
       .map(sanitizeOrderForDriver);
   } else {
-    orders = rawOrders.map(sanitizeOrderForStaff);
+    orders = rawOrders
+      .filter((o) => !isOrderCompletedForConsole(o) || isOrderWithinWindow(o, STAFF_COMPLETED_WINDOW_MS, false))
+      .map(sanitizeOrderForStaff);
   }
 
   return res.status(200).json({
@@ -1042,3 +1233,7 @@ module.exports.authenticateCredentials = authenticateCredentials;
 module.exports.issueSessionToken = issueSessionToken;
 module.exports.verifySessionToken = verifySessionToken;
 module.exports.resolveAuthFromRequest = resolveAuthFromRequest;
+module.exports.STAFF_COMPLETED_WINDOW_MS = STAFF_COMPLETED_WINDOW_MS;
+module.exports.MANAGER_COMPLETED_WINDOW_MS = MANAGER_COMPLETED_WINDOW_MS;
+module.exports.DRIVER_COMPLETED_WINDOW_MS = DRIVER_COMPLETED_WINDOW_MS;
+module.exports.buildOrdersCsv = buildOrdersCsv;
