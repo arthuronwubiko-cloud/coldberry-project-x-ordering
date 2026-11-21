@@ -4795,13 +4795,8 @@ a {
 }
 
 /* Three-Dots Burger Navigation Menu (Client Storefront) */
-.nav-bar {
-  position: sticky;
-  top: 0;
-  justify-content: space-between;
-}
 .nav-dots-toggle {
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -4830,55 +4825,67 @@ a {
   outline: 2px solid var(--color-saffron);
   outline-offset: 2px;
 }
-.nav-bar .nav-links,
-header.nav-bar nav.nav-links {
-  display: none !important;
-  position: absolute !important;
-  top: calc(100% + 6px) !important;
-  right: clamp(1rem, 4vw, 3rem) !important;
-  left: auto !important;
-  width: 240px !important;
-  max-width: calc(100vw - 2rem) !important;
-  flex-direction: column !important;
-  align-items: stretch !important;
-  gap: 3px !important;
-  padding: 0.45rem !important;
-  margin: 0 !important;
-  background: var(--cb-surface, #FFFFFF) !important;
-  color: var(--cb-text, #2A1218) !important;
-  border: 1px solid var(--cb-border, #E4D9CA) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important;
-  z-index: 1200 !important;
-}
-.nav-bar .nav-links.is-open,
-header.nav-bar nav.nav-links.is-open {
-  display: flex !important;
-}
-.nav-bar .nav-links a,
-header.nav-bar nav.nav-links a {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  min-height: 40px !important;
-  padding: 0.5rem 0.75rem !important;
-  border-radius: 6px !important;
-  color: var(--cb-text, #2A1218) !important;
-  font-weight: 600 !important;
-  font-size: 0.92rem !important;
-  text-align: left !important;
-  background: transparent !important;
-}
-.nav-bar .nav-links a::after,
-header.nav-bar nav.nav-links a::after {
-  display: none !important;
-}
-.nav-bar .nav-links a:hover,
-.nav-bar .nav-links a:focus-visible,
-.nav-bar .nav-links a.active,
-.nav-bar .nav-links a[aria-current="page"],
-header.nav-bar nav.nav-links a:hover,
-header.nav-bar nav.nav-links a.active {
-  background: var(--cb-surface-soft, rgba(140, 29, 64, 0.1)) !important;
-  color: var(--cb-brand, #8C1D40) !important;
+
+/* Mobile-only Three-Dots ("Burger") Menu */
+@media (max-width: 900px) {
+  .nav-bar {
+    position: sticky;
+    top: 0;
+    justify-content: space-between;
+  }
+  .nav-dots-toggle {
+    display: inline-flex;
+  }
+  .nav-bar .nav-links,
+  header.nav-bar nav.nav-links {
+    display: none !important;
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    right: clamp(0.75rem, 3vw, 1.5rem) !important;
+    left: auto !important;
+    width: 240px !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 3px !important;
+    padding: 0.45rem !important;
+    margin: 0 !important;
+    background: var(--cb-surface, #FFFFFF) !important;
+    color: var(--cb-text, #2A1218) !important;
+    border: 1px solid var(--cb-border, #E4D9CA) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22) !important;
+    z-index: 1200 !important;
+  }
+  .nav-bar .nav-links.is-open,
+  header.nav-bar nav.nav-links.is-open {
+    display: flex !important;
+  }
+  .nav-bar .nav-links a,
+  header.nav-bar nav.nav-links a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 40px !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 6px !important;
+    color: var(--cb-text, #2A1218) !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    text-align: left !important;
+    background: transparent !important;
+  }
+  .nav-bar .nav-links a::after,
+  header.nav-bar nav.nav-links a::after {
+    display: none !important;
+  }
+  .nav-bar .nav-links a:hover,
+  .nav-bar .nav-links a:focus-visible,
+  .nav-bar .nav-links a.active,
+  .nav-bar .nav-links a[aria-current="page"],
+  header.nav-bar nav.nav-links a:hover,
+  header.nav-bar nav.nav-links a.active {
+    background: var(--cb-surface-soft, rgba(140, 29, 64, 0.1)) !important;
+    color: var(--cb-brand, #8C1D40) !important;
+  }
 }
