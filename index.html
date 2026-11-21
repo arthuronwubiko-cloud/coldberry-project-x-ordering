@@ -21,6 +21,100 @@
     <script src="js/site.js" defer></script>
     <script src="js/auth-ui.js" defer></script>
     <script src="js/feedback-bubble.js" defer></script>
+      <meta name="description" content="Order freshly churned artisanal ice cream tubs, waffle bowls, Weekly Creamery Drops, and 3-Tub Party Boxes delivered frozen across Abuja (Garki, Lugbe) and Lagos (Yaba, Surulere, Okota, Festac, Ajao)." />
+    <script type="application/ld+json" data-local-seo="true">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Coldberry Ice Cream Nigeria",
+  "url": "https://coldberry-project-x-ordering.vercel.app",
+  "servesCuisine": [
+    "Artisanal Ice Cream",
+    "Desserts",
+    "Nigerian"
+  ],
+  "priceRange": "₦₦",
+  "acceptsReservations": false,
+  "areaServed": [
+    {
+      "@type": "Place",
+      "name": "Garki, Abuja, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Lugbe, Abuja, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Yaba, Lagos, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Surulere, Lagos, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Okota, Lagos, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Festac, Lagos, Nigeria"
+    },
+    {
+      "@type": "Place",
+      "name": "Ajao, Lagos, Nigeria"
+    }
+  ],
+  "hasMenu": {
+    "@type": "Menu",
+    "url": "https://coldberry-project-x-ordering.vercel.app/890b.html",
+    "hasMenuSection": [
+      {
+        "@type": "MenuSection",
+        "name": "Signature Creamery Tubs & Party Boxes",
+        "hasMenuItem": [
+          {
+            "@type": "MenuItem",
+            "name": "Coldberry Delight Tub (Medium)",
+            "offers": {
+              "@type": "Offer",
+              "price": "12200",
+              "priceCurrency": "NGN"
+            }
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Strawberry Bliss Swirl Tub (Medium)",
+            "offers": {
+              "@type": "Offer",
+              "price": "11200",
+              "priceCurrency": "NGN"
+            }
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Belgian Chocolate Fudge Tub (Medium)",
+            "offers": {
+              "@type": "Offer",
+              "price": "11200",
+              "priceCurrency": "NGN"
+            }
+          },
+          {
+            "@type": "MenuItem",
+            "name": "Coldberry 3-Tub Party Box",
+            "offers": {
+              "@type": "Offer",
+              "price": "30000",
+              "priceCurrency": "NGN"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
+    </script>
   </head>
   <body>
     <!-- Sister Brand Banner -->
@@ -82,6 +176,29 @@
           and crispy waffle bowls made with rich dairy and fresh berries. Every
           scoop is a celebration of creamy indulgence across Abuja and Lagos.
         </p>
+        
+        <div class="fulfilment-strip" data-fulfilment-strip aria-label="Order fulfilment and branch selector">
+          <div class="fulfilment-toggle-group" role="group" aria-label="Delivery or Pickup">
+            <button type="button" class="fulfilment-toggle-btn is-active" data-fulfilment-choice="Delivery" aria-pressed="true">Delivery</button>
+            <button type="button" class="fulfilment-toggle-btn" data-fulfilment-choice="Pickup" aria-pressed="false">Pickup</button>
+          </div>
+          <div class="fulfilment-branch-wrap">
+            <select class="fulfilment-branch-select" data-branch-select aria-label="Select Abuja or Lagos branch">
+              <optgroup label="Abuja">
+                <option value="Garki, Abuja" selected>Garki, Abuja</option>
+                <option value="Lugbe, Abuja">Lugbe, Abuja</option>
+              </optgroup>
+              <optgroup label="Lagos">
+                <option value="Yaba, Lagos">Yaba, Lagos</option>
+                <option value="Surulere, Lagos">Surulere, Lagos</option>
+                <option value="Okota, Lagos">Okota, Lagos</option>
+                <option value="Festac, Lagos">Festac, Lagos</option>
+                <option value="Ajao, Lagos">Ajao, Lagos</option>
+              </optgroup>
+            </select>
+          </div>
+          <span class="fulfilment-eta" data-fulfilment-eta>Est. 30–35 min delivery</span>
+        </div>
         <a href="order.html" class="order-button">ORDER NOW</a>
       </section>
 
@@ -93,6 +210,22 @@
         />
       </section>
     </main>
+
+    <!-- Phase 3: Weekly Creamery Drop & 3-Tub Party Box -->
+    <section class="weekly-drop-section" aria-label="Weekly Creamery Drop">
+      <div class="weekly-drop-banner">
+        <div class="weekly-drop-copy">
+          <span class="weekly-drop-tag">Weekly Creamery Drop · Limited Batch</span>
+          <h2>Strawberry Bliss Swirl + Belgian Chocolate Fudge Champion Bundle</h2>
+          <p>Freshly churned in small batches and packed in insulated cold pouches for Abuja &amp; Lagos delivery.</p>
+        </div>
+        <div class="weekly-drop-actions">
+          <span class="weekly-drop-price">₦21,200</span>
+          <button type="button" class="traction-btn-primary" data-add-bundle="Weekly Creamery Drop">Add Drop to Cart</button>
+          <a href="pizzadeals.html#party-catering" class="traction-btn-secondary">Build 3-Tub Party Box</a>
+        </div>
+      </div>
+    </section>
 
     <!-- Short menu preview; the full-menu link opens the separate menu page. -->
     <section class="menu-section" id="menu" aria-labelledby="menu-heading">

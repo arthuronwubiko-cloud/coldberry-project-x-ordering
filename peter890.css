@@ -4889,3 +4889,376 @@ a {
     color: var(--cb-brand, #8C1D40) !important;
   }
 }
+
+
+/* === HIGH-TRACTION CONVERSION COMPONENTS === */
+/* Phase 1: Delivery / Pickup & Abuja/Lagos Branch Strip */
+.fulfilment-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 1rem 0 1.25rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--cb-surface, #FFFFFF);
+  border: 1px solid var(--cb-border, #F0D9DF);
+  border-radius: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.fulfilment-toggle-group {
+  display: inline-flex;
+  background: var(--cb-surface-soft, #FDEEF1);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.fulfilment-toggle-btn {
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--cb-text, #2A1218);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fulfilment-toggle-btn.is-active {
+  background: var(--cb-brand, #8C1D40);
+  color: var(--cb-brand-text, #FFFFFF);
+}
+
+.fulfilment-branch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1 1 170px;
+  min-width: 0;
+}
+
+.fulfilment-branch-select {
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--cb-border, #F0D9DF);
+  border-radius: 6px;
+  background: var(--cb-surface, #FFFFFF);
+  color: var(--cb-text, #2A1218);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 100%;
+  max-width: 220px;
+}
+
+.fulfilment-eta {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--cb-muted, #6E5560);
+  white-space: nowrap;
+}
+
+/* Phase 1: Sticky Mobile Cart Bar (<= 900px) */
+.sticky-mobile-cart-bar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sticky-mobile-cart-bar.is-visible {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 980;
+    background: var(--cb-header-bg, #5C1A2B);
+    color: #FFF8F5;
+    padding: 0.7rem 1rem max(0.7rem, env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(255, 248, 245, 0.16);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.22);
+    box-sizing: border-box;
+  }
+
+  body.has-sticky-cart {
+    padding-bottom: 76px;
+  }
+
+  .sticky-cart-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .sticky-cart-count {
+    font-size: 0.78rem;
+    font-weight: 700;
+    opacity: 0.88;
+  }
+
+  .sticky-cart-total {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #FFFFFF;
+  }
+
+  .sticky-cart-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0 1.15rem;
+    border-radius: 6px;
+    background: var(--cb-brand, #8C1D40);
+    color: var(--cb-brand-text, #FFFFFF);
+    font-weight: 800;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
+
+/* Phase 2: 1-Tap Hot+Cold Sister-Brand Cross-Sell inside order.html */
+.sister-cross-sell-box {
+  margin: 0.5rem 0 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--cb-surface-soft, #FDEEF1);
+  border: 1.5px solid var(--cb-brand, #8C1D40);
+  border-radius: 8px;
+}
+
+.sister-cross-sell-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cb-brand, #8C1D40);
+  margin: 0 0 0.25rem;
+}
+
+.sister-cross-sell-title {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cb-text, #2A1218);
+}
+
+.sister-cross-sell-sub {
+  margin: 0 0 0.85rem;
+  font-size: 0.84rem;
+  color: var(--cb-muted, #6E5560);
+}
+
+.sister-cross-sell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Phase 3: Weekly Creamery Drop & Quick-Action Strip on index.html */
+.weekly-drop-section {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.weekly-drop-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--cb-surface, #FFFFFF);
+  border: 1.5px solid var(--cb-border, #F0D9DF);
+  border-radius: 8px;
+}
+
+.weekly-drop-copy {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.weekly-drop-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cb-brand, #8C1D40);
+  margin-bottom: 0.2rem;
+}
+
+.weekly-drop-copy h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.15rem;
+  color: var(--cb-text, #2A1218);
+}
+
+.weekly-drop-copy p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--cb-muted, #6E5560);
+}
+
+.weekly-drop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.weekly-drop-price {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cb-brand, #8C1D40);
+}
+
+.traction-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 1.1rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--cb-brand, #8C1D40);
+  color: var(--cb-brand-text, #FFFFFF);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.traction-btn-primary:hover {
+  background: var(--cb-brand-hover, #6F1632);
+}
+
+.traction-btn-primary.is-added {
+  background: #2F7D4F;
+  color: #FFFFFF;
+}
+
+.traction-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--cb-border, #F0D9DF);
+  border-radius: 6px;
+  background: var(--cb-surface-soft, #FDEEF1);
+  color: var(--cb-text, #2A1218);
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Phase 3: Group & Party Catering Section on pizzadeals.html */
+.party-catering-section {
+  max-width: 1200px;
+  margin: 2.5rem auto 3rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.party-catering-header {
+  margin-bottom: 1.25rem;
+}
+
+.party-catering-header h2 {
+  margin: 0.2rem 0 0.4rem;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  color: var(--cb-text, #2A1218);
+}
+
+.party-catering-header p {
+  margin: 0;
+  color: var(--cb-muted, #6E5560);
+  font-size: 0.94rem;
+}
+
+.party-catering-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.15rem;
+}
+
+.party-bundle-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  background: var(--cb-surface, #FFFFFF);
+  border: 1px solid var(--cb-border, #F0D9DF);
+  border-radius: 8px;
+}
+
+.party-bundle-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.party-bundle-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--cb-text, #2A1218);
+}
+
+.party-bundle-price {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--cb-brand, #8C1D40);
+  white-space: nowrap;
+}
+
+.party-bundle-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--cb-muted, #6E5560);
+}
+
+.party-bundle-note {
+  font-size: 0.78rem;
+  color: var(--cb-muted, #6E5560);
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--cb-border, #F0D9DF);
+}
+
+@media (max-width: 600px) {
+  .fulfilment-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .fulfilment-toggle-group {
+    width: 100%;
+  }
+  .fulfilment-toggle-btn {
+    flex: 1;
+  }
+  .fulfilment-branch-select {
+    max-width: 100%;
+  }
+}

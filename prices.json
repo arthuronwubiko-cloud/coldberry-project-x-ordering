@@ -7,12 +7,24 @@
     "deliveryFeeRate": 0.15,
     "halfAndHalfSurchargeRate": 0.05
   },
-  "pizzaSizes": ["Medium", "Large", "Champion"],
+  "pizzaSizes": [
+    "Medium",
+    "Large",
+    "Champion"
+  ],
   "pizzaTiers": {
     "traditional": {
       "name": "Classic Creamery",
-      "prices": { "Medium": 11200, "Large": 14150, "Champion": 21200 },
-      "formatted": { "Medium": "₦11,200", "Large": "₦14,150", "Champion": "₦21,200" },
+      "prices": {
+        "Medium": 11200,
+        "Large": 14150,
+        "Champion": 21200
+      },
+      "formatted": {
+        "Medium": "₦11,200",
+        "Large": "₦14,150",
+        "Champion": "₦21,200"
+      },
       "pizzas": [
         "Coldberry Vanilla Bean",
         "Strawberry Bliss Swirl",
@@ -28,8 +40,16 @@
     },
     "special": {
       "name": "Signature Rolled & Swirl",
-      "prices": { "Medium": 12200, "Large": 14800, "Champion": 22000 },
-      "formatted": { "Medium": "₦12,200", "Large": "₦14,800", "Champion": "₦22,000" },
+      "prices": {
+        "Medium": 12200,
+        "Large": 14800,
+        "Champion": 22000
+      },
+      "formatted": {
+        "Medium": "₦12,200",
+        "Large": "₦14,800",
+        "Champion": "₦22,000"
+      },
       "pizzas": [
         "Coldberry Delight",
         "Oreo & Strawberry Roll",
@@ -43,8 +63,16 @@
     },
     "exclusive": {
       "name": "Supreme Indulgence",
-      "prices": { "Medium": 13500, "Large": 15000, "Champion": 23500 },
-      "formatted": { "Medium": "₦13,500", "Large": "₦15,000", "Champion": "₦23,500" },
+      "prices": {
+        "Medium": 13500,
+        "Large": 15000,
+        "Champion": 23500
+      },
+      "formatted": {
+        "Medium": "₦13,500",
+        "Large": "₦15,000",
+        "Champion": "₦23,500"
+      },
       "pizzas": [
         "Chocolate Romance Supreme",
         "Cheesecake Fantasy Crunch",
@@ -79,12 +107,19 @@
     "Schweppes (Can)": 1000,
     "Schweppes Chapman (Can)": 1000,
     "Schweppes (PET)": 1100,
-    "Schweppes Chapman (PET)": 1100
+    "Schweppes Chapman (PET)": 1100,
+    "Romeo's Pepperoni Pizza (Medium)": 11200,
+    "Romeo's Beef Suya Pizza (Medium)": 12200,
+    "Coldberry Waffle Bowl Scoops": 5500
   },
   "combos": {
     "The Festive Box": 28000,
     "Duo Deal": 22000,
     "Champion Feast": 40000,
-    "Double Delight Treat": 23000
+    "Double Delight Treat": 23000,
+    "Weekly Creamery Drop": 21200,
+    "Coldberry 3-Tub Party Box": 30000,
+    "Office Friday Feast": 98500,
+    "Coldberry Birthday Ice Cream Bar": 72000
   }
 }

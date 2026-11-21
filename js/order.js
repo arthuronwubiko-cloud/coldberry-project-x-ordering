@@ -37,6 +37,15 @@
     "Schweppes (PET)": 1050,
 
     // Combos / Deals
+    // Sister-Brand Cross-Sell & High-Traction Bundles
+    "Romeo's Pepperoni Pizza (Medium)": 11200,
+    "Romeo's Beef Suya Pizza (Medium)": 12200,
+    "Coldberry Waffle Bowl Scoops": 5500,
+    "Weekly Creamery Drop": 21200,
+    "Coldberry 3-Tub Party Box": 30000,
+    "Office Friday Feast": 98500,
+    "Coldberry Birthday Ice Cream Bar": 72000,
+
     "The Festive Box": 28000,
     "The Festive Box (Pepperoni Pizza + BBQ Chicken Pizza)": 28000,
     "Champion Feast": 26500,
