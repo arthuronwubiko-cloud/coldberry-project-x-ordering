@@ -270,10 +270,31 @@ npm test
 # Or: node scripts/verify-all.js
 ```
 
-All 81 automated checks test syntax, assets, pizza sizing, pricing engines, navbar cart icon, API endpoints, RBAC auth, 12-minute cancel window, theme controls, order tracking, and legal compliance.
+All 108 automated checks test syntax, assets, pizza sizing, pricing engines, navbar cart icon, API endpoints, RBAC auth, 12-minute cancel window, theme controls, order tracking, and legal compliance.
 
 To run the 5-round adversarial stress testing suite:
 
 ```bash
 node scripts/stress-test.js
 ```
+
+
+---
+
+## 6. Redis Login Store, Load Balancer & UI Architecture (2026-11-21)
+
+### Redis Login Store (`api/redis.js`)
+- Backs `api/auth.js` (customer logins) and `api/admin.js` (admin/staff/driver console logins) with **Upstash Redis REST** (`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`) and an automatic local in-memory fallback when Redis env vars are unset.
+- Stores active session `jti` records, enforces instant logout revocation (`revokeSession` / `isSessionRevoked`), tracks distributed per-IP login rate limits, and locks out repeated failed login attempts (`recordFailedLogin` / `isLoginLockedOut`).
+
+### Load Balancer & Cluster Failover (`api/load-balancer.js`, `dev-server.js`)
+- `createLoadBalancerPool()` distributes API traffic across configured upstream nodes using `least-connections` or `round-robin` strategies.
+- Tracks per-node latency, consecutive errors, circuit-breaker cooldowns, and automatic retry failover (`executeWithFailover`).
+- `dev-server.js` supports multi-worker Node.js `cluster` mode (`CLUSTER_WORKERS`) and upstream reverse-proxy forwarding (`LOAD_BALANCER_UPSTREAMS`).
+
+### Design System & Three-Dots Navigation
+- **Palette:** Berry & Cream (Light: `#FFF8F5` / `#8C1D40` / `#5C1A2B`, Dark: `#150B0E` / `#F0708F` / `#2A0F18`) across storefront (`peter890.css`), Admin Console (`admin.html`, `admin-console/index.html`), and Driver Console (`driver.html`, `driver-console/index.html`).
+- **Typography & Craft (`human-made`):** `Fraunces` display headings with optical negative tracking, `Plus Jakarta Sans` body UI, `JetBrains Mono` for order references/PINs/refund tokens, tabular numerals on all currency values, `<= 8px` card/popover radii, zero emojis in UI chrome, and unframed operational ledger sections.
+- **Three-Dots (`⋮`) Navigation:**
+  - **Client Storefront:** `#nav-dots-toggle` (`fa-ellipsis-vertical`) toggles `#nav-links-menu` via `window.DotsMenuController` in `js/site.js` with `Escape` and outside-click dismissal.
+  - **Admin Console:** `#admin-dots-toggle` in `.console-header-actions` toggles `#admin-dots-menu`, housing all console section tabs (`.console-nav-tabs`), live count badges, page links (`/feedback`, `/refunds`, `/driver`), CSV export, refresh, and lock/logout controls.

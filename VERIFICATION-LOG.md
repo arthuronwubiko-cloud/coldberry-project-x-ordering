@@ -781,3 +781,26 @@ This log records project verification results only; it does not contain private 
   - Updated `scripts/verify-all.js` to **81 checks** (**81/81 passed, 0 failed**).
   - Updated `scripts/stress-test.js` with RBAC + 12-minute cancel boundary tests across **5/5 rounds** (all passed).
   - Verified live dual-server execution (`dev-server.js` on `:3901` + `admin-console/server.js` on `:4901`).
+
+
+## 2026-11-21 — Security Hardening, Redis & Load Balancer, Human-Made UI & Three-Dots Navigation
+
+### Changes implemented & verified
+
+- **Security Audits (2 Rounds):**
+  - Remediated all 13 initial findings and 5 follow-up findings across `api/auth.js`, `api/admin.js`, `api/orders.js`, `api/track.js`, `api/feedback.js`, and `dev-server.js`.
+  - Authenticated `GET /api/orders?diagnostics=1` (returns `401` without valid admin token), enforced fail-closed production secrets, and verified RBAC & session cookie protections.
+- **Redis Login Session Store & Load Balancer (`api/redis.js`, `api/load-balancer.js`):**
+  - Added distributed login session tracking, instant `jti` revocation on logout, and failed-login lockout enforcement.
+  - Added round-robin / least-connections upstream load balancer pool with automatic failover and circuit breaker.
+  - Added automated checks `redis-login-store-and-lockout` and `load-balancer-failover` in `scripts/verify-all.js`.
+- **Brand Color Palettes & `human-made` UI Overhaul:**
+  - Applied Berry & Cream (Light: `#FFF8F5` / `#8C1D40` / `#5C1A2B`, Dark: `#150B0E` / `#F0708F` / `#2A0F18`) to storefront, Admin Console, and Driver Console.
+  - Replaced system fallback stacks with `Fraunces`, `Plus Jakarta Sans`, and `JetBrains Mono`.
+  - Removed all purple-on-dark badges, colored border-left card accents, canned `135deg` gradients, `backdrop-filter` blur overlays, nested card-in-card framing, and **all UI emojis** (`0` emojis remaining across HTML/CSS/frontend JS).
+- **Three-Dots (`⋮`) Navigation Menu (Client & Admin Console):**
+  - Collapsed storefront navigation links into `#nav-dots-toggle` / `#nav-links-menu` (`fa-ellipsis-vertical`, `44px × 44px`, controlled by `DotsMenuController` in `js/site.js`) across all 8 customer pages.
+  - Moved Admin Console section tabs and page/utility actions into `#admin-dots-toggle` / `#admin-dots-menu` in `admin.html`, `admin-console/index.html`, `feedback.html`, and `refunds.html`.
+  - Added automated check `three-dots-burger-navigation` in `scripts/verify-all.js`.
+- **Automated Verification Result:**
+  - Ran `npm test` (`node scripts/verify-all.js`): **108 / 108 checks passed (`0` failed)**.

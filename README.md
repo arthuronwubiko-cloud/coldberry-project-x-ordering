@@ -455,6 +455,9 @@ Authenticate via `POST /api/admin` (`{ action: "login", username, password }`) u
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | Optional | Override 14-char alphanumeric Admin console credentials |
 | `STAFF_USERNAME` / `STAFF_PASSWORD` | Optional | Override 14-char alphanumeric Regular Staff credentials |
 | `ADMIN_SECRET` / `ADMIN_SESSION_SECRET` | Optional | Legacy bearer token secret & HMAC signing secret |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Optional | Upstash Redis REST endpoint & token for distributed login sessions, instant logout revocation, rate limiting, and failed-login lockouts |
+| `LOAD_BALANCER_ENABLED` / `LOAD_BALANCER_STRATEGY` | Optional | Enable `api/load-balancer.js` upstream routing (`least-connections` or `round-robin`) |
+| `LOAD_BALANCER_UPSTREAMS` / `CLUSTER_WORKERS` | Optional | Comma-separated upstream API origins and Node.js cluster worker count for `dev-server.js` |
 | `ADMIN_PORT` / `API_ORIGIN` | Optional | Port (`4000`) and API backend URL (`http://localhost:3000`) for `admin-console/server.js` |
 
 If no database is configured, order storage is skipped — the WhatsApp handoff works regardless.
@@ -478,3 +481,15 @@ GET /api/orders?diagnostics=1
 ```
 
 Returns whether the database is configured and the WhatsApp recipient number in use.
+
+
+---
+
+## Recent Platform Upgrades (2026-11-21)
+
+- **Security Hardening:** Full two-pass security audit completed across all APIs and consoles (authenticated `/api/orders?diagnostics=1`, fail-closed production session secrets, salted `crypto.scryptSync` hashing, `crypto.timingSafeEqual` verification, HttpOnly/SameSite cookies, CORS & CSP headers, and RBAC isolation).
+- **Redis Login Session Store & Lockout (`api/redis.js`):** Distributed session tracking via Upstash Redis REST (with graceful in-memory fallback), instant `jti` session revocation on logout, distributed login rate limiting, and automatic failed-login lockout protection.
+- **Load Balancer & Failover (`api/load-balancer.js`, `dev-server.js`):** Upstream pool routing (`least-connections` / `round-robin`) with circuit-breaker health checks, automatic failover, and multi-worker Node.js cluster support.
+- **Brand Color Palettes & Human-Made UI Polish:** Applied custom light/dark Berry & Cream (Light: `#FFF8F5` / `#8C1D40` / `#5C1A2B`, Dark: `#150B0E` / `#F0708F` / `#2A0F18`) tokens across storefront, Admin Console, and Driver Console; paired `Fraunces`, `Plus Jakarta Sans`, and `JetBrains Mono`; removed all UI emojis and nested card-in-card chrome; enforced `<= 8px` radii and `44px` touch targets.
+- **Three-Dots (`⋮`) Navigation Menu:** Moved primary navigation into an accessible three-dots (`fa-ellipsis-vertical`) menu across all 8 client storefront pages (`#nav-dots-toggle`, `DotsMenuController`) and the Admin Verification Console (`#admin-dots-toggle`, `#admin-dots-menu`, `feedback.html`, `refunds.html`).
+- **Automated Verification:** `npm test` runs **108 / 108** passing end-to-end checks.

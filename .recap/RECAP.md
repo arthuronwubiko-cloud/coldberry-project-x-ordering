@@ -15,9 +15,15 @@
 - none
 
 ## Decisions (latest 10)
-- none
+- 2026-11-21: Standardize client and admin navigation into an accessible 44px three-dots (fa-ellipsis-vertical) popover menu.
+- 2026-11-21: Enforce human-made UI standards (zero UI emoji, <= 8px radii, unframed operational ledger sections, Fraunces + Plus Jakarta Sans + JetBrains Mono).
+- 2026-11-21: Use Upstash Redis REST (with graceful local fallback) for login session revocation and failed-login lockout.
 
 ## Timeline (latest 10)
+- 2026-11-21 feat(nav): move client storefront & admin console navigation into three-dots (⋮) menu
+- 2026-11-21 style(ui): apply human-made UI polish, brand light/dark palettes, zero UI emojis, and Google Fonts
+- 2026-11-21 feat(infra): add Redis login session/lockout store (api/redis.js) and Load Balancer failover (api/load-balancer.js)
+- 2026-11-21 security: complete two-round security audit remediation across all APIs and consoles
 - 2026-11-18 feat: add 1-click order PIN copy buttons across checkout, t…
 - 2026-11-18 feat: add zero-code Store Manager Portal (admin.html) for o…
 - 2026-11-18 feat: link admin status updates to tracking cache with imme…
