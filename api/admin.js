@@ -29,6 +29,7 @@ const {
   savePromotionalEmail,
   getPromotionalEmails,
 } = require("./db");
+const { listVouchers, upsertVoucher, updateVoucher, deleteVoucher } = require("./vouchers");
 const {
   checkRedisRateLimit,
   isLoginLockedOut,
@@ -412,27 +413,7 @@ function resolveAuthFromRequest(req) {
     }
   }
 
-  // 2. Custom credential headers (X-Auth-Username + X-Auth-Password)
-  const hdrUser = headers["x-auth-username"];
-  const hdrPass = headers["x-auth-password"];
-  if (hdrUser && hdrPass) {
-    const auth = authenticateCredentials(hdrUser, hdrPass);
-    if (auth && !auth.invalidFormat) return auth;
-  }
-
-  // 3. HTTP Basic auth header
-  if (headers.authorization?.startsWith("Basic ")) {
-    try {
-      const decoded = Buffer.from(headers.authorization.slice(6).trim(), "base64").toString("utf8");
-      const sep = decoded.indexOf(":");
-      if (sep > 0) {
-        const u = decoded.slice(0, sep);
-        const p = decoded.slice(sep + 1);
-        const auth = authenticateCredentials(u, p);
-        if (auth && !auth.invalidFormat) return auth;
-      }
-    } catch (_) {}
-  }
+  // Raw credential headers disabled: all console logins must go through POST /api/admin with Redis lockout.
 
   return null;
 }
@@ -720,6 +701,28 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    // 6. Admin Promo Voucher Management (Admin Only — 50% cap enforced in api/vouchers.js)
+    if (action === "create_voucher" || action === "update_voucher" || action === "delete_voucher") {
+      const postAuth = resolveAuthFromRequest(req);
+      if (!postAuth || postAuth.role !== "admin") {
+        return res.status(403).json({ error: "Access denied: Only admin accounts can manage promo vouchers." });
+      }
+      if (action === "delete_voucher") {
+        const delRes = await deleteVoucher(body.code);
+        if (delRes.error) return res.status(400).json({ error: delRes.error });
+        const vouchers = await listVouchers();
+        return res.status(200).json({ ok: true, deleted: delRes.code, vouchers });
+      }
+      const resV = action === "create_voucher"
+        ? await upsertVoucher(body, postAuth.username)
+        : await updateVoucher(body.code, body, postAuth.username);
+      if (resV.error) {
+        return res.status(400).json({ error: resV.error });
+      }
+      const vouchers = await listVouchers();
+      return res.status(200).json({ ok: true, voucher: resV.voucher, vouchers });
+    }
+
     if (action === "logout") {
       const auth = resolveAuthFromRequest(req);
       if (auth && auth.jti) {
@@ -848,6 +851,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (paymentStatus) {
+      if (auth.role !== "admin" && auth.role !== "manager") {
+        return res.status(403).json({ error: "Access denied: Only Admin or Manager accounts can update payment status." });
+      }
       const validPayments = ["pending", "paid", "received", "unpaid"];
       if (!validPayments.includes(String(paymentStatus).toLowerCase())) {
         return res.status(400).json({ error: "Invalid paymentStatus. Allowed: pending, paid, received, unpaid." });
@@ -866,21 +872,27 @@ module.exports = async function handler(req, res) {
         }
       } catch (_) {}
     }
+    // Credit pending loyalty points ONCE when order is both paid and completed
+    try {
+      const latestOrder = await findOrderById(orderId);
+      const isNowPaid = ["paid", "received"].includes(String(latestOrder?.payment_status || paymentStatus || "").toLowerCase());
+      const isNowCompleted = String(latestOrder?.status || status || "").toLowerCase() === "completed";
+      const pendingPts = Math.max(0, Math.floor(Number(latestOrder?.loyalty_points_pending ?? latestOrder?.loyaltyPointsPending ?? Math.floor(Math.max(0, Number(latestOrder?.subtotal || 0) - Number(latestOrder?.promo_discount || 0) - Number(latestOrder?.loyalty_discount || 0)) / 500)) || 0));
+      const acctKey = latestOrder?.customer_username || latestOrder?.customerUsername || "";
+      if (latestOrder && isNowPaid && isNowCompleted && acctKey && pendingPts > 0 && !latestOrder.loyalty_credited && !latestOrder.loyaltyCredited) {
+        const { adjustLoyaltyBalance } = require("./vouchers");
+        await adjustLoyaltyBalance(acctKey, pendingPts);
+        latestOrder.loyalty_credited = true;
+        latestOrder.loyaltyCredited = true;
+      }
+    } catch (_) {}
     let refundInfo = null;
     if (status === "cancelled" && (body.issueRefundToken || auth.role === "admin" || auth.role === "manager")) {
       try {
         const existingOrder = await findOrderById(orderId);
-        let refundedAmount = Number(existingOrder?.grand_total ?? existingOrder?.grandTotal ?? body.refundedAmount ?? body.amount ?? 0);
-        if (!refundedAmount && existingOrder?.items) {
-          const matches = Array.from(String(existingOrder.items).matchAll(/₦([\d,]+)/g));
-          if (matches.length > 0) {
-            const subtotal = matches.reduce((sum, m) => sum + Number(m[1].replace(/,/g, "")), 0);
-            const serviceFee = Number(existingOrder.service_fee ?? 800);
-            const deliveryFee = (existingOrder.fulfilment || "Delivery") === "Delivery" ? Math.round(subtotal * 0.15) : 0;
-            refundedAmount = subtotal + serviceFee + deliveryFee;
-          }
-        }
-        if (!refundedAmount) refundedAmount = 0;
+        const refundedAmount = existingOrder
+          ? Math.max(0, Number(existingOrder.grand_total ?? existingOrder.grandTotal ?? 0) || 0)
+          : 0;
         const refundToken = generate15CharRefundToken();
         const issuedAt = new Date().toISOString();
         const customerName = existingOrder?.customer_name || existingOrder?.customerName || body.customerName || "Customer";
@@ -983,17 +995,9 @@ module.exports = async function handler(req, res) {
     // Lookup existing order to record exact refund amount & customer details
     const existingOrder = await findOrderById(orderId);
 
-    let refundedAmount = Number(existingOrder?.grand_total ?? existingOrder?.grandTotal ?? body.refundedAmount ?? body.amount ?? 0);
-    if (!refundedAmount && existingOrder?.items) {
-      const matches = Array.from(String(existingOrder.items).matchAll(/₦([\d,]+)/g));
-      if (matches.length > 0) {
-        const subtotal = matches.reduce((sum, m) => sum + Number(m[1].replace(/,/g, "")), 0);
-        const serviceFee = Number(existingOrder.service_fee ?? 800);
-        const deliveryFee = (existingOrder.fulfilment || "Delivery") === "Delivery" ? Math.round(subtotal * 0.15) : 0;
-        refundedAmount = subtotal + serviceFee + deliveryFee;
-      }
-    }
-    if (!refundedAmount) refundedAmount = 0;
+    const refundedAmount = existingOrder
+      ? Math.max(0, Number(existingOrder.grand_total ?? existingOrder.grandTotal ?? 0) || 0)
+      : 0;
 
     const delResult = await deleteOrder(orderId);
     if (delResult.error) {
@@ -1155,6 +1159,19 @@ module.exports = async function handler(req, res) {
   }
 
   // GET: Signed-In & Active Customer Accounts + Sent Messages (Admin Only)
+  // GET: Admin Promo Vouchers Tab data (Admin Only)
+  if (req.query?.tab === "vouchers" || req.query?.view === "vouchers") {
+    if (auth.role !== "admin") {
+      return res.status(403).json({ error: "Access denied: Only admin accounts can view promo vouchers." });
+    }
+    const vouchers = await listVouchers();
+    return res.status(200).json({
+      vouchers,
+      count: vouchers.length,
+      activeVisitors: getActiveVisitorCount(),
+    });
+  }
+
   if (req.query?.tab === "users" || req.query?.view === "users") {
     if (auth.role !== "admin") {
       return res.status(403).json({ error: "Access denied: Only admin accounts can view signed-in customer accounts." });

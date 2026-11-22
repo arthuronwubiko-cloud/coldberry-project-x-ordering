@@ -14,6 +14,7 @@
     <script src="js/deals-interactive.js" defer></script>
     <script src="js/site.js" defer></script>
     <script src="js/auth-ui.js" defer></script>
+    <script src="js/qsr-features.js" defer></script>
     <script src="js/feedback-bubble.js" defer></script>
 
     <!-- Font Awesome icons -->
@@ -168,11 +169,38 @@
 
           <p class="breadcrumb">
             <a href="index.html">Home</a>
-            <span> » </span>
+            <span> / </span>
             Coldberry Deals
           </p>
         </div>
       </section>
+
+      <div style="max-width:1200px;margin:1rem auto 0;padding:0 clamp(1rem,4vw,2.5rem);">
+        <div class="fulfilment-strip" data-fulfilment-strip aria-label="Order fulfilment and branch selector">
+          <div class="fulfilment-toggle-group" role="group" aria-label="Delivery or Pickup">
+            <button type="button" class="fulfilment-toggle-btn is-active" data-fulfilment-choice="Delivery" aria-pressed="true">Delivery</button>
+            <button type="button" class="fulfilment-toggle-btn" data-fulfilment-choice="Pickup" aria-pressed="false">Pickup</button>
+            <button type="button" class="fulfilment-toggle-btn" data-fulfilment-choice="Call To Collect" aria-pressed="false">Call &amp; Collect</button>
+          </div>
+          <div class="fulfilment-branch-wrap">
+            <select class="fulfilment-branch-select" data-branch-select aria-label="Select Abuja or Lagos branch">
+              <optgroup label="Abuja">
+                <option value="Garki, Abuja" selected>Garki, Abuja</option>
+                <option value="Lugbe, Abuja">Lugbe, Abuja</option>
+              </optgroup>
+              <optgroup label="Lagos">
+                <option value="Yaba, Lagos">Yaba, Lagos</option>
+                <option value="Surulere, Lagos">Surulere, Lagos</option>
+                <option value="Okota, Lagos">Okota, Lagos</option>
+                <option value="Festac, Lagos">Festac, Lagos</option>
+                <option value="Ajao, Lagos">Ajao, Lagos</option>
+              </optgroup>
+            </select>
+          </div>
+          <span class="fulfilment-status-open" aria-label="Store status: Open Now">● Open Now</span>
+          <span class="fulfilment-eta" data-fulfilment-eta>Est. 30–35 min delivery</span>
+        </div>
+      </div>
 
       <!-- INTRODUCTION -->
       <section class="deals-intro">
@@ -193,7 +221,7 @@
         <article class="deal-card">
           <div class="deal-image">
             <img
-              src="images/coldberry-hero.jpg"
+              src="images/coldberry-combo-feast.jpg"
               alt="Coldberry Ice Cream Festive Box Combo"
             />
           </div>
@@ -202,7 +230,7 @@
             <p class="deal-category">FESTIVE SPECIAL</p>
             <h3>The Festive Box</h3>
             <p class="deal-description">
-              Any 2 Large Tubs (Classic or Signature), 6 pieces of sides and 4 chilled Coca-Cola drinks.
+              Any 2 Large Tubs (Classic or Signature), 6 crispy waffle cones/cups and 4 chilled Coca-Cola drinks.
             </p>
 
             <div class="deal-selector-group">
@@ -251,7 +279,11 @@
 
             <div class="deal-combo-badge">Selected: Coldberry Vanilla Bean + Strawberry Bliss Swirl</div>
 
-            <p class="deal-price">₦28,000</p>
+            <div class="deal-pricing-block">
+              <p class="deal-price">₦28,000</p>
+              <span class="deal-anchor-price">₦36,600</span>
+              <span class="deal-savings-badge">Save ₦8,600 · Serves 6–8</span>
+            </div>
 
             <div class="quantity-control" data-cart-item="The Festive Box (Coldberry Vanilla Bean + Strawberry Bliss Swirl)">
               <button type="button" data-cart-action="decrement" aria-label="Remove one The Festive Box">−</button>
@@ -277,8 +309,8 @@
                         <span class="size-price-tag">Lrg: ₦14,150</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
                     <img src="images/strawberry.jpg" alt="Strawberry Bliss Swirl" class="related-pizza-thumb" loading="lazy" />
@@ -289,8 +321,8 @@
                         <span class="size-price-tag">Lrg: ₦14,150</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
                     <img src="images/coldberry-delight.jpg" alt="Coldberry Delight" class="related-pizza-thumb" loading="lazy" />
@@ -301,11 +333,11 @@
                         <span class="size-price-tag">Lrg: ₦14,800</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
-                    <img src="images/roll-ice-cream.jpg" alt="Oreo &amp; Strawberry Roll" class="related-pizza-thumb" loading="lazy" />
+                    <img src="images/coldberry-combo-feast.jpg" alt="Oreo &amp; Strawberry Roll" class="related-pizza-thumb" loading="lazy" />
                     <div class="related-pizza-meta">
                       <strong>Oreo &amp; Strawberry Roll</strong>
                       <span class="related-category-pill pill-special">Signature</span>
@@ -313,8 +345,8 @@
                         <span class="size-price-tag">Lrg: ₦14,800</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Oreo &amp; Strawberry Roll" aria-label="Select Oreo &amp; Strawberry Roll as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Oreo &amp; Strawberry Roll" aria-label="Select Oreo &amp; Strawberry Roll as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Oreo &amp; Strawberry Roll" aria-label="Select Oreo &amp; Strawberry Roll as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Oreo &amp; Strawberry Roll" aria-label="Select Oreo &amp; Strawberry Roll as Tub 2">Tub 2</button>
                   </li>
                 </ul>
               </div>
@@ -326,7 +358,7 @@
         <article class="deal-card">
           <div class="deal-image">
             <img
-              src="images/coldberry-scoop.jpg"
+              src="images/coldberry-deal-champion.jpg"
               alt="Coldberry Ice Cream Champion Feast Combo"
             />
           </div>
@@ -335,7 +367,7 @@
             <p class="deal-category">CHAMPION SPECIAL</p>
             <h3>Champion Feast</h3>
             <p class="deal-description">
-              1 Champion 2L Party Tub, 6 pieces of sides and 4 chilled Coca-Cola drinks.
+              1 Champion 2L Party Tub, 6 crispy waffle cones/cups and 4 chilled Coca-Cola drinks.
             </p>
 
             <div class="deal-selector-group">
@@ -359,7 +391,11 @@
 
             <div class="deal-combo-badge">Selected: Chocolate Romance Supreme</div>
 
-            <p class="deal-price">₦26,500</p>
+            <div class="deal-pricing-block">
+              <p class="deal-price">₦26,500</p>
+              <span class="deal-anchor-price">₦31,800</span>
+              <span class="deal-savings-badge">Save ₦5,300 · Serves 6–8</span>
+            </div>
 
             <div class="quantity-control" data-cart-item="Champion Feast (Chocolate Romance Supreme)">
               <button type="button" data-cart-action="decrement" aria-label="Remove one Champion Feast">−</button>
@@ -419,7 +455,7 @@
         <article class="deal-card">
           <div class="deal-image">
             <img
-              src="images/coldberry-scoop.jpg"
+              src="images/coldberry-hero-lush.jpg"
               alt="Coldberry Ice Cream Mid Lover Deal"
             />
           </div>
@@ -428,7 +464,7 @@
             <p class="deal-category">PERFECT FOR SHARING</p>
             <h3>Mid Lover Deal</h3>
             <p class="deal-description">
-              Any Medium Classic Creamery Tub, 6 pieces of sides and 1 chilled Coca-Cola drink.
+              Any Medium Classic Creamery Tub, 6 crispy waffle cones/cups and 1 chilled Coca-Cola drink.
             </p>
 
             <div class="deal-selector-group">
@@ -449,7 +485,11 @@
 
             <div class="deal-combo-badge">Selected: Coldberry Vanilla Bean</div>
 
-            <p class="deal-price">₦14,500</p>
+            <div class="deal-pricing-block">
+              <p class="deal-price">₦14,500</p>
+              <span class="deal-anchor-price">₦16,800</span>
+              <span class="deal-savings-badge">Save ₦2,300 · Serves 2–3</span>
+            </div>
 
             <div class="quantity-control" data-cart-item="Mid Lover Deal (Coldberry Vanilla Bean)">
               <button type="button" data-cart-action="decrement" aria-label="Remove one Mid Lover Deal">−</button>
@@ -509,7 +549,7 @@
         <article class="deal-card">
           <div class="deal-image">
             <img
-              src="images/coldberry-hero.jpg"
+              src="images/coldberry-deal-mid.jpg"
               alt="Coldberry Ice Cream Mega Family Combo"
             />
           </div>
@@ -558,7 +598,11 @@
 
             <div class="deal-combo-badge">Selected: Coldberry Vanilla Bean + Chocolate Romance Supreme</div>
 
-            <p class="deal-price">₦32,000</p>
+            <div class="deal-pricing-block">
+              <p class="deal-price">₦32,000</p>
+              <span class="deal-anchor-price">₦36,200</span>
+              <span class="deal-savings-badge">Save ₦4,200 · Serves 6–8</span>
+            </div>
 
             <div class="quantity-control" data-cart-item="Mega Family Combo (Coldberry Vanilla Bean + Chocolate Romance Supreme)">
               <button type="button" data-cart-action="decrement" aria-label="Remove one Mega Family Combo">−</button>
@@ -584,8 +628,8 @@
                         <span class="size-price-tag">Lrg: ₦14,150</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
                     <img src="images/chocolate-rock.jpg" alt="Chocolate Romance Supreme" class="related-pizza-thumb" loading="lazy" />
@@ -596,8 +640,8 @@
                         <span class="size-price-tag">Lrg: ₦15,000</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Chocolate Romance Supreme" aria-label="Select Chocolate Romance Supreme as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Chocolate Romance Supreme" aria-label="Select Chocolate Romance Supreme as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Chocolate Romance Supreme" aria-label="Select Chocolate Romance Supreme as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Chocolate Romance Supreme" aria-label="Select Chocolate Romance Supreme as Tub 2">Tub 2</button>
                   </li>
                 </ul>
               </div>
@@ -609,7 +653,7 @@
         <article class="deal-card">
           <div class="deal-image">
             <img
-              src="images/coldberry-scoop.jpg"
+              src="images/coldberry-combo-feast.jpg"
               alt="Coldberry Ice Cream Double Delight Treat"
             />
           </div>
@@ -658,7 +702,11 @@
 
             <div class="deal-combo-badge">Selected: Strawberry Bliss Swirl + Coldberry Delight</div>
 
-            <p class="deal-price">₦21,000</p>
+            <div class="deal-pricing-block">
+              <p class="deal-price">₦21,000</p>
+              <span class="deal-anchor-price">₦25,200</span>
+              <span class="deal-savings-badge">Save ₦4,200 · Serves 3–4</span>
+            </div>
 
             <div class="quantity-control" data-cart-item="Double Delight Treat (Strawberry Bliss Swirl + Coldberry Delight)">
               <button type="button" data-cart-action="decrement" aria-label="Remove one Double Delight Treat">−</button>
@@ -684,8 +732,8 @@
                         <span class="size-price-tag">Med: ₦11,200</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Strawberry Bliss Swirl" aria-label="Select Strawberry Bliss Swirl as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
                     <img src="images/coldberry-delight.jpg" alt="Coldberry Delight" class="related-pizza-thumb" loading="lazy" />
@@ -696,8 +744,8 @@
                         <span class="size-price-tag">Med: ₦12,200</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Delight" aria-label="Select Coldberry Delight as Tub 2">Tub 2</button>
                   </li>
                   <li class="related-pizza-row">
                     <img src="images/cone.jpg" alt="Coldberry Vanilla Bean" class="related-pizza-thumb" loading="lazy" />
@@ -708,8 +756,8 @@
                         <span class="size-price-tag">Med: ₦11,200</span>
                       </div>
                     </div>
-                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 1">Pizza 1</button>
-                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Pizza 2">Pizza 2</button>
+                    <button type="button" class="related-select-btn" data-target-select="0" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 1">Tub 1</button>
+                    <button type="button" class="related-select-btn" data-target-select="1" data-pizza="Coldberry Vanilla Bean" aria-label="Select Coldberry Vanilla Bean as Tub 2">Tub 2</button>
                   </li>
                 </ul>
               </div>

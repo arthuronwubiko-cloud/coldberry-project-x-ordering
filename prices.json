@@ -1,7 +1,7 @@
 {
   "brand": "Coldberry Ice Cream Nigeria",
   "domain": "coldberry.ng",
-  "currency": "₦",
+  "currency": "\u20a6",
   "fees": {
     "serviceFee": 800,
     "deliveryFeeRate": 0.15,
@@ -21,9 +21,9 @@
         "Champion": 21200
       },
       "formatted": {
-        "Medium": "₦11,200",
-        "Large": "₦14,150",
-        "Champion": "₦21,200"
+        "Medium": "\u20a611,200",
+        "Large": "\u20a614,150",
+        "Champion": "\u20a621,200"
       },
       "pizzas": [
         "Coldberry Vanilla Bean",
@@ -46,9 +46,9 @@
         "Champion": 22000
       },
       "formatted": {
-        "Medium": "₦12,200",
-        "Large": "₦14,800",
-        "Champion": "₦22,000"
+        "Medium": "\u20a612,200",
+        "Large": "\u20a614,800",
+        "Champion": "\u20a622,000"
       },
       "pizzas": [
         "Coldberry Delight",
@@ -69,9 +69,9 @@
         "Champion": 23500
       },
       "formatted": {
-        "Medium": "₦13,500",
-        "Large": "₦15,000",
-        "Champion": "₦23,500"
+        "Medium": "\u20a613,500",
+        "Large": "\u20a615,000",
+        "Champion": "\u20a623,500"
       },
       "pizzas": [
         "Chocolate Romance Supreme",
@@ -88,7 +88,9 @@
     "Ice Cream Cone": 4400,
     "Waffle Cup": 4400,
     "Dipped Waffle Bowl (6 pcs)": 4700,
+    "Dipped Waffle Bowl": 4700,
     "Chicken Wings (6 pcs)": 4700,
+    "Chicken Wings": 4700,
     "Creamy Waffle Roll": 4400,
     "Shawarma Roll": 4400,
     "Shawarma": 4400,
@@ -96,18 +98,21 @@
     "Coca-Cola (50cl)": 900,
     "Coca-Cola": 900,
     "Cold Coca-Cola": 900,
-    "Bottled Water": 500,
-    "Bottled Water (75cl)": 500,
+    "Bottled Water": 850,
+    "Bottled Water (75cl)": 850,
+    "Water": 850,
     "Fanta (50cl)": 900,
     "Fanta": 900,
     "Sprite (50cl)": 900,
     "Sprite": 900,
-    "Monster Green (400ml)": 2200,
-    "Monster Green": 2200,
+    "Fanta / Sprite": 900,
+    "Monster Green (400ml)": 1500,
+    "Monster Green": 1500,
+    "Monster": 1500,
     "Schweppes (Can)": 1000,
     "Schweppes Chapman (Can)": 1000,
-    "Schweppes (PET)": 1100,
-    "Schweppes Chapman (PET)": 1100,
+    "Schweppes (PET)": 1050,
+    "Schweppes Chapman (PET)": 1050,
     "Romeo's Pepperoni Pizza (Medium)": 11200,
     "Romeo's Beef Suya Pizza (Medium)": 12200,
     "Coldberry Waffle Bowl Scoops": 5500
@@ -115,11 +120,28 @@
   "combos": {
     "The Festive Box": 28000,
     "Duo Deal": 22000,
-    "Champion Feast": 40000,
-    "Double Delight Treat": 23000,
+    "Champion Feast": 26500,
+    "Mid Lover Deal": 14500,
+    "Mega Family Combo": 32000,
+    "Double Delight Treat": 21000,
     "Weekly Creamery Drop": 21200,
     "Coldberry 3-Tub Party Box": 30000,
     "Office Friday Feast": 98500,
     "Coldberry Birthday Ice Cream Bar": 72000
+  },
+  "iceCreamToppings": {
+    "Roasted Almonds Topping": 800,
+    "Roasted Cashews Topping": 800,
+    "Roasted Peanuts Topping": 800,
+    "Coconut Shavings (Brown / Toasted)": 800,
+    "Coconut Shavings (White)": 800,
+    "Dark Chocolate Chips Topping": 800,
+    "White Chocolate Chips Topping": 800,
+    "Chocolate Rock Topping": 800,
+    "Candy-Coated Chocolate Gems": 800,
+    "Gummy Bears Topping": 800,
+    "Rainbow Sprinkles Topping": 800,
+    "Chocolate Cookie Crumbles (Cookies & Cream)": 800,
+    "Drizzles & Syrup Topping": 800
   }
 }

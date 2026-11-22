@@ -112,11 +112,11 @@ async function runFeedbackVerification() {
 
   // 4. Test API handler OPTIONS / CORS
   await asyncTest("api/feedback OPTIONS returns 204 with CORS headers", async () => {
-    const req = { method: "OPTIONS", headers: { origin: "https://example.com" } };
+    const req = { method: "OPTIONS", headers: { origin: "https://coldberry-project-x.vercel.app" } };
     const res = createMockRes();
     await feedbackHandler(req, res);
     assert.strictEqual(res.statusCode, 204);
-    assert.strictEqual(res.headers["access-control-allow-origin"], "https://example.com");
+    assert.strictEqual(res.headers["access-control-allow-origin"], "https://coldberry-project-x.vercel.app");
     assert.strictEqual(res.headers["access-control-allow-methods"], "GET, POST, OPTIONS");
   });
 
@@ -177,7 +177,7 @@ async function runFeedbackVerification() {
 
     // Check fixed positioning
     assert(code.includes("position: fixed"), "Includes fixed position");
-    assert(code.includes("bottom: 1.5rem"), "Includes bottom: 1.5rem");
+    assert(code.includes("bottom: 1.5rem") && code.includes("bottom: 4.75rem"), "Includes desktop and mobile bottom offsets");
     assert(code.includes("left: 1.5rem"), "Includes left: 1.5rem");
     assert(code.includes("z-index: 9990"), "Includes z-index: 9990");
 

@@ -24,23 +24,74 @@
       ],
       "destination": "/admin.html"
     },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin-console", "destination": "/admin.html" },
-    { "source": "/feedback", "destination": "/feedback.html" },
-    { "source": "/customer-feedback", "destination": "/feedback.html" },
-    { "source": "/refunds", "destination": "/refunds.html" },
-    { "source": "/refund-tokens", "destination": "/refunds.html" },
-    { "source": "/manager", "destination": "/manager.html" },
-    { "source": "/manager-console", "destination": "/manager.html" },
-    { "source": "/staff", "destination": "/staff.html" },
-    { "source": "/staff-console", "destination": "/staff.html" },
-    { "source": "/driver", "destination": "/driver.html" },
-    { "source": "/driver-console", "destination": "/driver.html" },
-    { "source": "/track", "destination": "/track.html" },
-    { "source": "/order", "destination": "/order.html" },
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/deals", "destination": "/pizzadeals.html" },
-    { "source": "/menu", "destination": "/890b.html" }
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/admin-console",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/feedback",
+      "destination": "/feedback.html"
+    },
+    {
+      "source": "/customer-feedback",
+      "destination": "/feedback.html"
+    },
+    {
+      "source": "/refunds",
+      "destination": "/refunds.html"
+    },
+    {
+      "source": "/refund-tokens",
+      "destination": "/refunds.html"
+    },
+    {
+      "source": "/manager",
+      "destination": "/manager.html"
+    },
+    {
+      "source": "/manager-console",
+      "destination": "/manager.html"
+    },
+    {
+      "source": "/staff",
+      "destination": "/staff.html"
+    },
+    {
+      "source": "/staff-console",
+      "destination": "/staff.html"
+    },
+    {
+      "source": "/driver",
+      "destination": "/driver.html"
+    },
+    {
+      "source": "/driver-console",
+      "destination": "/driver.html"
+    },
+    {
+      "source": "/track",
+      "destination": "/track.html"
+    },
+    {
+      "source": "/order",
+      "destination": "/order.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/login.html"
+    },
+    {
+      "source": "/deals",
+      "destination": "/pizzadeals.html"
+    },
+    {
+      "source": "/menu",
+      "destination": "/890b.html"
+    }
   ],
   "functions": {
     "api/*.js": {
@@ -51,20 +102,44 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), payment=(), geolocation=(self)"
+        }
       ]
     },
     {
       "source": "/(admin|admin-console|manager|manager-console|staff|staff-console|driver|driver-console)(.*)",
       "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     },
     {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ]

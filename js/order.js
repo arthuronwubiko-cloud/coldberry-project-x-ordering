@@ -25,6 +25,20 @@
     "Coca-Cola (50cl)": 900,
     "Coca-Cola": 900,
     "Bottled Water": 850,
+    // Coldberry Ice Cream Toppings & Mix-Ins (₦800 per serving)
+    "Roasted Almonds Topping": 800,
+    "Roasted Cashews Topping": 800,
+    "Roasted Peanuts Topping": 800,
+    "Coconut Shavings (Brown / Toasted)": 800,
+    "Coconut Shavings (White)": 800,
+    "Dark Chocolate Chips Topping": 800,
+    "White Chocolate Chips Topping": 800,
+    "Chocolate Rock Topping": 800,
+    "Candy-Coated Chocolate Gems": 800,
+    "Gummy Bears Topping": 800,
+    "Rainbow Sprinkles Topping": 800,
+    "Chocolate Cookie Crumbles (Cookies & Cream)": 800,
+    "Drizzles & Syrup Topping": 800,
     "Water": 850,
     "Fanta (50cl)": 900,
     "Fanta": 900,
@@ -556,6 +570,18 @@
     if (lower.includes("double delight")) {
       return 21000;
     }
+    if (lower.includes("office friday feast")) {
+      return 98500;
+    }
+    if (lower.includes("coldberry birthday ice cream bar") || lower.includes("birthday ice cream bar")) {
+      return 72000;
+    }
+    if (lower.includes("3-tub party box") || lower.includes("coldberry 3-tub")) {
+      return 30000;
+    }
+    if (lower.includes("weekly creamery drop")) {
+      return 21200;
+    }
 
     // 2. Check Half & Half Pizza (Custom Tub)
     if (isHalfAndHalfItem(clean)) {
@@ -580,6 +606,14 @@
     }
     for (const [key, price] of Object.entries(ITEM_PRICES)) {
       if (key.toLowerCase() === lower) return price;
+    }
+    const strippedBundle = clean.replace(/\s*\([^)]*\)\s*$/, "").trim();
+    if (strippedBundle && strippedBundle !== clean && !/\((medium|large|champion|regular|small|6 pcs|50cl)\)$/i.test(clean)) {
+      if (ITEM_PRICES[strippedBundle] !== undefined) return ITEM_PRICES[strippedBundle];
+      const strippedLower = strippedBundle.toLowerCase();
+      for (const [key, price] of Object.entries(ITEM_PRICES)) {
+        if (key.toLowerCase() === strippedLower) return price;
+      }
     }
 
     // 4. Sides & Drinks
@@ -619,7 +653,7 @@
     return "₦" + Number(amount || 0).toLocaleString("en-NG");
   }
 
-  function calculateOrderTotals(itemsMap, fulfilment) {
+  function calculateOrderTotals(itemsMap, fulfilment, opts) {
     let subtotal = 0;
     let totalCount = 0;
 
@@ -630,17 +664,111 @@
       totalCount += qty;
     }
 
-    const isDelivery = fulfilment !== "Pickup";
-    const serviceFee = totalCount > 0 ? SERVICE_FEE : 0;
-    const deliveryFee = (totalCount > 0 && isDelivery)
+    const isDelivery = fulfilment === "Delivery";
+    const baseServiceFee = totalCount > 0 ? SERVICE_FEE : 0;
+    const baseDeliveryFee = (totalCount > 0 && isDelivery)
       ? Math.round(subtotal * DELIVERY_FEE_RATE)
       : 0;
-    const grandTotal = subtotal + serviceFee + deliveryFee;
+    const originalGrandTotal = subtotal + baseServiceFee + baseDeliveryFee;
+
+    const state = opts || (typeof window !== "undefined" && window.__qsrCheckoutState) || {};
+    const voucher = state.voucher || null;
+
+    let serviceFee = baseServiceFee;
+    let deliveryFee = baseDeliveryFee;
+    let promoDiscount = 0;
+    let promoPercent = 0;
+    let cap95Applied = false;
+    let exemptDrinkVoucher = false;
+    let freeDrinkItem = "";
+    let voucherCode = "";
+
+    if (voucher && subtotal > 0 && totalCount > 0) {
+      voucherCode = String(voucher.code || "").trim().toUpperCase();
+      if (voucher.type === "drink") {
+        // Drink vouchers are EXEMPT from fee scaling & 95% cap policy
+        exemptDrinkVoucher = true;
+        freeDrinkItem = voucher.freeItem || "Cold Coca-Cola (50cl)";
+      } else {
+        const minOrder = Number(voucher.minOrder || 0);
+        if (minOrder <= 0 || subtotal >= minOrder) {
+          const pct = Math.min(50, Math.max(0, Math.round(Number(voucher.percent) || 0)));
+          promoPercent = pct;
+          if (pct > 0) {
+            promoDiscount = Math.round(subtotal * (pct / 100));
+            const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+            let scaledSvc = Math.round(baseServiceFee * (1 + pct / 100));
+            let scaledDel = Math.round(baseDeliveryFee * (1 + pct / 100));
+            const rawTotal = discountedSubtotal + scaledSvc + scaledDel;
+            const maxAllowedTotal = Math.floor(originalGrandTotal * 0.95);
+            if (rawTotal > maxAllowedTotal) {
+              cap95Applied = true;
+              let excess = rawTotal - maxAllowedTotal;
+              const delTrim = Math.min(scaledDel, excess);
+              scaledDel -= delTrim;
+              excess -= delTrim;
+              if (excess > 0) {
+                const svcTrim = Math.min(scaledSvc, excess);
+                scaledSvc -= svcTrim;
+                excess -= svcTrim;
+              }
+              if (excess > 0) {
+                promoDiscount = Math.min(subtotal, promoDiscount + excess);
+              }
+            }
+            serviceFee = scaledSvc;
+            deliveryFee = scaledDel;
+          }
+        }
+      }
+    }
+
+    const LOYALTY_REWARDS_CATALOG = [
+      { id: "drink_10", points: 10, type: "item", label: "Free Cold Drink (50cl)", itemName: "Cold Coca-Cola (50cl)", cashValue: 0 },
+      { id: "shawarma_50", points: 50, type: "item", label: "Free Shawarma", itemName: "Shawarma Roll", cashValue: 0 },
+      { id: "medium_pizza_70", points: 70, type: "item", label: "Free Medium Pizza", itemName: "Medium Pizza", cashValue: 0 },
+      { id: "large_pizza_80", points: 80, type: "item", label: "Free Large Pizza", itemName: "Large Pizza", cashValue: 0 },
+      { id: "champion_pizza_90", points: 90, type: "item", label: "Free Champion Pizza", itemName: "Champion Pizza", cashValue: 0 },
+      { id: "cash_2500", points: 2500, type: "discount", label: "₦2,500 Off Order", itemName: "", cashValue: 2500 },
+    ];
+
+    const totalAfterVoucher = Math.max(0, (subtotal - promoDiscount) + serviceFee + deliveryFee);
+    let loyaltyPointsRedeemed = 0;
+    let loyaltyDiscount = 0;
+    let loyaltyRewardRedeemed = null;
+    const availPts = Math.max(0, Math.floor(Number(state.availablePoints || 0)));
+    const reqRewardId = state.loyaltyRewardId ? String(state.loyaltyRewardId).trim().toLowerCase() : (state.redeemLoyalty ? "cash_2500" : "");
+    const matchedReward = reqRewardId ? LOYALTY_REWARDS_CATALOG.find((r) => r.id === reqRewardId) : null;
+    if (matchedReward && availPts >= matchedReward.points && (subtotal > 0 || matchedReward.type === "item")) {
+      loyaltyPointsRedeemed = matchedReward.points;
+      loyaltyRewardRedeemed = matchedReward;
+      if (matchedReward.type === "discount" && matchedReward.cashValue > 0 && totalAfterVoucher > 0) {
+        loyaltyDiscount = Math.min(matchedReward.cashValue, totalAfterVoucher);
+      }
+    }
+
+    const grandTotal = Math.max(0, totalAfterVoucher - loyaltyDiscount);
+    // Earn 1 point per ₦500 of net paid food subtotal ONLY (delivery & service fees excluded!)
+    const netFoodSub = Math.max(0, subtotal - promoDiscount - loyaltyDiscount);
+    const loyaltyPointsEarned = Math.floor(netFoodSub / 500);
 
     return {
       subtotal,
+      baseServiceFee,
+      baseDeliveryFee,
+      originalGrandTotal,
       serviceFee,
       deliveryFee,
+      voucherCode,
+      promoPercent,
+      promoDiscount,
+      cap95Applied,
+      exemptDrinkVoucher,
+      freeDrinkItem,
+      loyaltyPointsRedeemed,
+      loyaltyDiscount,
+      loyaltyRewardRedeemed,
+      loyaltyPointsEarned,
       grandTotal,
       totalCount,
       isDelivery,
@@ -849,14 +977,42 @@
       pricing = calculateOrderTotals(itemsMap, fulfilment);
     }
 
+    const freeLbl = fulfilment === "Call To Collect" ? "₦0 (Call To Collect)" : "₦0 (Free Pickup)";
+    if (payload.hotspotLandmark && isDelivery) {
+      lines.push(`• Hotspot Landmark: ${payload.hotspotLandmark}`);
+    }
+    if (payload.scheduledTime && payload.scheduledTime !== "ASAP") {
+      lines.push(`• Scheduled Time: ${payload.scheduledTime}`);
+    }
     lines.push(
       "",
       "*Payment Summary:*",
-      `• Subtotal: ${formatNaira(pricing.subtotal)}`,
-      `• Service Fee: ${formatNaira(pricing.serviceFee !== undefined ? pricing.serviceFee : (pricing.totalCount > 0 ? SERVICE_FEE : 0))}`,
-      `• Delivery Fee: ${isDelivery ? formatNaira(pricing.deliveryFee) : "₦0 (Free Pickup)"}`,
-      `• Grand Total: ${formatNaira(pricing.grandTotal)}`
+      `• Subtotal: ${formatNaira(pricing.subtotal)}`
     );
+    if (pricing.voucherCode) {
+      if (pricing.exemptDrinkVoucher) {
+        lines.push(`• Drink Voucher (${pricing.voucherCode}): ${pricing.freeDrinkItem} FREE`);
+      } else if (pricing.promoDiscount > 0) {
+        lines.push(`• Promo Voucher (${pricing.voucherCode} — ${pricing.promoPercent}% off): -${formatNaira(pricing.promoDiscount)}`);
+      }
+    }
+    lines.push(
+      `• Service Fee: ${formatNaira(pricing.serviceFee !== undefined ? pricing.serviceFee : (pricing.totalCount > 0 ? SERVICE_FEE : 0))}`,
+      `• Delivery Fee: ${isDelivery ? formatNaira(pricing.deliveryFee) : freeLbl}`
+    );
+    if (pricing.loyaltyRewardRedeemed) {
+      if (pricing.loyaltyDiscount > 0) {
+        lines.push(`• Loyalty Reward (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): -${formatNaira(pricing.loyaltyDiscount)}`);
+      } else {
+        lines.push(`• Loyalty Reward (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): ${pricing.loyaltyRewardRedeemed.label} FREE`);
+      }
+    } else if (pricing.loyaltyDiscount > 0) {
+      lines.push(`• Loyalty Redemption (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): -${formatNaira(pricing.loyaltyDiscount)}`);
+    }
+    lines.push(`• Grand Total: ${formatNaira(pricing.grandTotal)}`);
+    if (pricing.loyaltyPointsEarned > 0) {
+      lines.push(`• Loyalty Points Earned: +${pricing.loyaltyPointsEarned} pts (food subtotal only)`);
+    }
 
     if (payload.notes) {
       lines.push("", "*Special Notes:*", payload.notes);
@@ -1029,12 +1185,48 @@
           serviceValEl.textContent = totals.totalCount > 0 ? formatNaira(totals.serviceFee) : "₦0";
         }
         if (deliveryLabelEl) {
-          deliveryLabelEl.textContent = totals.isDelivery ? "Delivery Fee" : "Pickup Fee";
+          deliveryLabelEl.textContent = totals.isDelivery ? "Delivery Fee" : (fulfilment === "Call To Collect" ? "Call To Collect" : "Pickup Fee");
         }
         if (deliveryValEl) {
           deliveryValEl.textContent = totals.isDelivery
             ? (totals.totalCount > 0 ? formatNaira(totals.deliveryFee) : "₦0")
-            : "₦0 (Free Pickup)";
+            : (fulfilment === "Call To Collect" ? "₦0 (Call To Collect)" : "₦0 (Free Pickup)");
+        }
+        const promoRowEl = document.getElementById("cart-promo-row");
+        const promoLabelEl = document.getElementById("cart-promo-label");
+        const promoValEl = document.getElementById("cart-promo-val");
+        if (promoRowEl) {
+          if (totals.voucherCode && (totals.promoDiscount > 0 || totals.exemptDrinkVoucher)) {
+            promoRowEl.hidden = false;
+            if (promoLabelEl) {
+              promoLabelEl.textContent = totals.exemptDrinkVoucher
+                ? `Drink Voucher (${totals.voucherCode})`
+                : `Promo (${totals.voucherCode} · ${totals.promoPercent}% off${totals.cap95Applied ? " · 95% Cap" : ""})`;
+            }
+            if (promoValEl) {
+              promoValEl.textContent = totals.exemptDrinkVoucher
+                ? `${totals.freeDrinkItem} FREE`
+                : `-${formatNaira(totals.promoDiscount)}`;
+            }
+          } else {
+            promoRowEl.hidden = true;
+          }
+        }
+        const loyaltyRowEl = document.getElementById("cart-loyalty-row");
+        const loyaltyValEl = document.getElementById("cart-loyalty-val");
+        if (loyaltyRowEl) {
+          const hasLoy = Boolean(totals.loyaltyRewardRedeemed || totals.loyaltyDiscount > 0);
+          loyaltyRowEl.hidden = !hasLoy;
+          if (loyaltyValEl && hasLoy) {
+            loyaltyValEl.textContent = totals.loyaltyDiscount > 0
+              ? `-${formatNaira(totals.loyaltyDiscount)}`
+              : `${totals.loyaltyRewardRedeemed.label} (${totals.loyaltyPointsRedeemed} pts)`;
+          }
+        }
+        const earnPreviewEl = document.getElementById("cart-loyalty-earn-preview");
+        if (earnPreviewEl) {
+          earnPreviewEl.hidden = totals.loyaltyPointsEarned <= 0;
+          earnPreviewEl.textContent = `Earn +${totals.loyaltyPointsEarned} pts on this food subtotal`;
         }
         if (grandTotalEl) {
           grandTotalEl.textContent = formatNaira(totals.grandTotal);
@@ -1163,7 +1355,9 @@
       if (requestedItem?.trim()) {
         const currentCart = readStoredCart();
         const itemName = normalizeItemName(requestedItem.trim());
-        currentCart[itemName] = Math.min((currentCart[itemName] || 0) + 1, MAX_ITEM_QUANTITY);
+        if (itemName && !/^(__proto__|constructor|prototype)$/i.test(itemName)) {
+          currentCart[itemName] = Math.min((currentCart[itemName] || 0) + 1, MAX_ITEM_QUANTITY);
+        }
         saveStoredCart(currentCart);
         renderOrderCart(currentCart);
 
@@ -1240,7 +1434,8 @@
         }
       });
 
-      document.addEventListener("cart:change", () => {
+      document.addEventListener("qsr:pricing-refresh", () => { if (typeof renderOrderCart === "function") renderOrderCart(); });
+        document.addEventListener("cart:change", () => {
         renderOrderCart(readStoredCart());
         const items = getCartItemsList();
         if (items.length > 0) {
@@ -1334,8 +1529,23 @@
           additionalItems,
           notes: String(formData.get("notes") || "").trim(),
           consent: formData.get("consent") === "on",
+          scheduledTime: String(formData.get("scheduledTime") || document.getElementById("order-scheduled-time")?.value || "ASAP").trim(),
+          hotspotLandmark: String(formData.get("hotspotLandmark") || document.getElementById("order-hotspot-input")?.value || "").trim(),
+          promoCode: (window.__qsrCheckoutState && window.__qsrCheckoutState.voucher && window.__qsrCheckoutState.voucher.code) || "",
+          redeemLoyalty: Boolean(window.__qsrCheckoutState && window.__qsrCheckoutState.redeemLoyalty),
+          loyaltyRewardId: (window.__qsrCheckoutState && window.__qsrCheckoutState.loyaltyRewardId) || "", 
           pricing: totals,
         };
+        try {
+          if (cartItems.length > 0) {
+            localStorage.setItem("cb_rm_last_order", JSON.stringify({
+              items: cartItems,
+              location: payload.location,
+              fulfilment: payload.fulfilment,
+              savedAt: new Date().toISOString(),
+            }));
+          }
+        } catch (_) {}
 
         const localPin = generateOrderPin();
         payload.orderPin = localPin;
@@ -1368,6 +1578,9 @@
             }
             if (data && data.orderPin) {
               finalPin = data.orderPin;
+            }
+            if (data && typeof data.loyaltyBalance === "number") {
+              try { localStorage.setItem("cb_rm_loyalty_points", String(data.loyaltyBalance)); } catch (_) {}
             }
           } else if (response.status === 400 || response.status === 413 || response.status === 415) {
             const errData = await response.json().catch(() => ({}));

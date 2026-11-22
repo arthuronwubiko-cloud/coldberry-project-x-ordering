@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -714,6 +714,589 @@
         }
       }
     </style>
+  
+    <style id="ops-console-deslop">
+      :root,
+      :root[data-theme="light"] {
+        --bg: #FFF8F5 !important;
+        --surface: #FFFFFF !important;
+        --surface-2: #FDF1F5 !important;
+        --text: #2A1218 !important;
+        --muted: #6E5560 !important;
+        --border: #ECD6DE !important;
+        --coral: #8C1D40 !important;
+        --coral-hover: #6F1632 !important;
+        --brand-text: #FFFFFF !important;
+        --accent: #8C1D40 !important;
+        --header-bg: #5C1A2B !important;
+        --header-text: #FFFFFF !important;
+        --danger: #B3261E !important;
+        --success: #1F7A46 !important;
+      }
+      :root[data-theme="dark"] {
+        --bg: #160D10 !important;
+        --surface: #22151A !important;
+        --surface-2: #2C1C22 !important;
+        --text: #F8EFEA !important;
+        --muted: #C7B4AE !important;
+        --border: #3E2931 !important;
+        --coral: #A82650 !important;
+        --coral-hover: #8C1D40 !important;
+        --brand-text: #FFFFFF !important;
+        --accent: #A82650 !important;
+        --header-bg: #5C1A2B !important;
+        --header-text: #FFF8F5 !important;
+      }
+
+      html, body {
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Unified Single-Row Brand Header */
+      header, .admin-header, .staff-header, .mgr-header, .driver-header {
+        background: var(--header-bg) !important;
+        color: var(--header-text) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 0.75rem 1.5rem !important;
+        min-height: 64px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        gap: 0.75rem !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        box-shadow: 0 2px 12px rgba(24, 8, 12, 0.14) !important;
+      }
+      header > div:first-child,
+      .admin-brand, .staff-brand, .mgr-brand, .driver-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.7rem !important;
+        min-width: 0 !important;
+        color: var(--header-text) !important;
+        font-weight: 700 !important;
+        font-size: 0.98rem !important;
+        letter-spacing: -0.01em !important;
+        text-decoration: none !important;
+      }
+      header img, .admin-brand img, .staff-brand img, .mgr-brand img, .driver-brand img {
+        height: 32px !important;
+        width: auto !important;
+        max-width: 112px !important;
+        object-fit: contain !important;
+        flex-shrink: 0 !important;
+        background: rgba(255, 255, 255, 0.96);
+        padding: 3px 8px;
+        border-radius: 6px;
+      }
+      header span, .admin-brand span, .staff-brand span, .mgr-brand span, .driver-brand span {
+        color: var(--header-text) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      /* STRICT PRE-AUTH CLEANLINESS: Hide ALL unlocked tabs/kebab/logout/refresh/rider-badge while locked! */
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .admin-dots-wrap,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .dots-wrap,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .console-nav-tabs,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #admin-dots-toggle,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #admin-dots-menu,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #top-nav,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .driver-badge,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-role-badge,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #refresh-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #logout-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #lock-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-refresh-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-logout-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .header-actions > *:not(#theme-toggle):not(.theme-toggle-btn):not(.ops-back-link) {
+        display: none !important;
+      }
+
+      /* Clean right-side utility controls in header */
+      .header-actions, .driver-actions, .ops-header-right {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+      }
+      #theme-toggle, .theme-toggle-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.24) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: var(--header-text) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        font-size: 0.95rem !important;
+        flex-shrink: 0 !important;
+        transition: background 0.15s ease !important;
+      }
+      #theme-toggle:hover, .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+
+      /* Grounded Vertical Centering for Auth Gate */
+      main {
+        flex: 1 0 auto !important;
+        width: 100% !important;
+        padding: 2.25rem 1.25rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) main {
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      /* Elevated, Restraint-Driven Auth Card */
+      #auth-panel, #auth-section, #gate, .admin-auth-card, .auth-card, .staff-auth-card, .mgr-auth-card, .driver-auth-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 2.25rem 2rem !important;
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 18px 42px rgba(42, 16, 24, 0.08) !important;
+      }
+      :root[data-theme="dark"] #auth-panel,
+      :root[data-theme="dark"] #auth-section,
+      :root[data-theme="dark"] #gate {
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.42) !important;
+      }
+
+      /* Eliminate duplicate logo sticker & generic shield icon inside auth card */
+      #auth-panel img, #auth-section img, #gate img,
+      #auth-section .driver-auth-icon, #auth-section .fa-shield-halved {
+        display: none !important;
+      }
+      #auth-panel > div:first-child::before,
+      #auth-section > div:first-child::before,
+      #gate > div:first-child::before {
+        content: "INTERNAL OPERATIONS · ROLE-LOCKED";
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--coral);
+        margin-bottom: 0.55rem;
+      }
+
+      #auth-panel h1, #auth-section h1, #gate h1 {
+        font-family: "Fraunces", Georgia, serif !important;
+        font-size: 1.55rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+        color: var(--text) !important;
+        margin: 0 0 0.45rem !important;
+      }
+      #auth-panel h1 i, #auth-section h1 i, #gate h1 i {
+        display: none !important;
+      }
+      #auth-panel p.muted, #auth-section p, #gate p.muted,
+      #auth-panel > div:first-child p {
+        font-size: 0.87rem !important;
+        line-height: 1.5 !important;
+        color: var(--muted) !important;
+        margin: 0 !important;
+      }
+
+      /* Crisp Accessible Inputs (zero monospace clipping, calm resting border) */
+      #auth-panel label, #auth-section label, #gate label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: var(--text) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 0.4rem !important;
+      }
+      .char-counter {
+        font-family: "JetBrains Mono", ui-monospace, monospace !important;
+        font-size: 0.75rem !important;
+        font-variant-numeric: tabular-nums !important;
+        color: var(--muted) !important;
+      }
+      #auth-panel input[type="text"], #auth-panel input[type="password"],
+      #auth-section input[type="text"], #auth-section input[type="password"],
+      #gate input[type="text"], #gate input[type="password"] {
+        width: 100% !important;
+        min-height: 46px !important;
+        padding: 0.7rem 0.9rem !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.93rem !important;
+        letter-spacing: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      #auth-panel input:focus, #auth-section input:focus, #gate input:focus {
+        border-color: var(--coral) !important;
+        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.16) !important;
+      }
+      #auth-panel input::placeholder, #auth-section input::placeholder, #gate input::placeholder {
+        color: var(--muted) !important;
+        opacity: 0.72 !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.88rem !important;
+      }
+
+      /* Hide dev-only Separate API Host Settings on clean production login gate */
+      #auth-panel details {
+        display: none !important;
+      }
+
+      /* WCAG AAA Primary Submit CTA */
+      #auth-panel button[type="submit"],
+      #auth-section button[type="submit"],
+      #gate button[type="submit"] {
+        width: 100% !important;
+        min-height: 48px !important;
+        padding: 0.8rem 1.25rem !important;
+        border: none !important;
+        border-radius: 10px !important;
+        background: var(--coral) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.94rem !important;
+        letter-spacing: 0.01em !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 14px rgba(140, 29, 64, 0.16) !important;
+        transition: background 0.15s ease, transform 0.12s ease !important;
+      }
+      #auth-panel button[type="submit"]:hover,
+      #auth-section button[type="submit"]:hover,
+      #gate button[type="submit"]:hover {
+        background: var(--coral-hover) !important;
+        transform: translateY(-1px) !important;
+      }
+
+      /* Quiet Flush Operations Footer */
+      .ops-footer {
+        margin-top: auto;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .ops-footer a {
+        color: var(--coral);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .ops-footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 640px) {
+        header, .admin-header, .staff-header, .mgr-header, .driver-header {
+          padding: 0.65rem 1rem !important;
+          min-height: 58px !important;
+        }
+        header img, .admin-brand img, .staff-brand img, .mgr-brand img, .driver-brand img {
+          height: 28px !important;
+          max-width: 88px !important;
+          padding: 2px 6px !important;
+        }
+        header > div:first-child,
+        .admin-brand, .staff-brand, .mgr-brand, .driver-brand {
+          font-size: 0.88rem !important;
+          gap: 0.5rem !important;
+        }
+        main {
+          padding: 1.5rem 1rem !important;
+        }
+        #auth-panel, #auth-section, #gate {
+          padding: 1.65rem 1.25rem !important;
+          border-radius: 14px !important;
+        }
+        #auth-panel h1, #auth-section h1, #gate h1 {
+          font-size: 1.38rem !important;
+        }
+        .ops-footer {
+          padding: 0.9rem 1rem;
+          font-size: 0.76rem;
+          justify-content: center;
+          text-align: center;
+        }
+      }
+    </style>
+  
+    <style id="ops-console-deslop-r3">
+      [hidden] { display: none !important; }
+
+      /* Unify translucent glass header theme toggle across ALL 6 consoles */
+      #theme-toggle, .theme-toggle-btn,
+      #console-theme-btn, #admin-theme-btn, #staff-theme-btn, #mgr-theme-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        padding: 0 !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.24) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: var(--header-text) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        font-size: 0.95rem !important;
+        box-shadow: none !important;
+        flex-shrink: 0 !important;
+      }
+      #theme-toggle:hover, .theme-toggle-btn:hover,
+      #console-theme-btn:hover, #admin-theme-btn:hover, #staff-theme-btn:hover, #mgr-theme-btn:hover {
+        background: rgba(255, 255, 255, 0.22) !important;
+      }
+
+      /* Driver header actions alignment + hide pre-auth RIDER badge completely */
+      .driver-header-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+      }
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .rider-badge,
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #rider-status-badge,
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .driver-header-actions > *:not(#theme-toggle):not(.theme-toggle-btn) {
+        display: none !important;
+      }
+
+      /* Vertical centering for ALL 6 locked auth gates (incl. #staff-auth-panel & #mgr-auth-panel) */
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) main {
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      /* Single elevated card across ALL consoles — kill Driver nested double-card */
+      #auth-section {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      #auth-section > div:first-child::before {
+        content: none !important;
+        display: none !important;
+      }
+      #auth-panel, #staff-auth-panel, #mgr-auth-panel, #gate, .driver-auth-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 2.25rem 2rem !important;
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 18px 42px rgba(42, 16, 24, 0.08) !important;
+      }
+
+      /* Hide duplicate logo inside Staff/Manager/Driver/Admin/Refunds/Feedback auth cards */
+      #auth-panel img, #staff-auth-panel img, #mgr-auth-panel img, #gate img, .driver-auth-card img,
+      .driver-auth-card .driver-auth-icon, .driver-auth-card .fa-shield-halved {
+        display: none !important;
+      }
+
+      /* Crisp centered uppercase eyebrow on ALL 6 auth cards */
+      #auth-panel > div:first-child::before,
+      #staff-auth-panel > div:first-child::before,
+      #mgr-auth-panel > div:first-child::before,
+      #gate > div:first-child::before,
+      .driver-auth-card > div:first-child::before {
+        content: "INTERNAL OPERATIONS · ROLE-LOCKED";
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--coral);
+        margin-bottom: 0.55rem;
+      }
+
+      /* Unified Fraunces serif H1 + balanced subtitles (zero single-word widows!) */
+      #auth-panel h1, #staff-auth-panel h1, #mgr-auth-panel h1, #gate h1, .driver-auth-card h1 {
+        font-family: "Fraunces", Georgia, serif !important;
+        font-size: clamp(1.32rem, 4.6vw, 1.55rem) !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+        color: var(--text) !important;
+        margin: 0 0 0.45rem !important;
+        text-wrap: balance !important;
+      }
+      #auth-panel h1 i, #staff-auth-panel h1 i, #mgr-auth-panel h1 i, #gate h1 i, .driver-auth-card h1 i {
+        display: none !important;
+      }
+      #auth-panel > div:first-child p,
+      #staff-auth-panel > div:first-child p,
+      #mgr-auth-panel > div:first-child p,
+      #gate > div:first-child p,
+      .driver-auth-card > div:first-child p {
+        font-size: 0.87rem !important;
+        line-height: 1.5 !important;
+        color: var(--muted) !important;
+        margin: 0 !important;
+        text-wrap: balance !important;
+      }
+
+      /* Consistent pure-white crisp inputs across ALL consoles (incl. <input id="login-user"> without type) */
+      #auth-panel label, #staff-auth-panel label, #mgr-auth-panel label, #gate label, .driver-auth-card label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: var(--text) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 0.4rem !important;
+      }
+      #auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #staff-auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #mgr-auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #gate input:not([type="checkbox"]):not([type="radio"]),
+      .driver-auth-card input:not([type="checkbox"]):not([type="radio"]) {
+        width: 100% !important;
+        min-height: 46px !important;
+        padding: 0.7rem 0.9rem !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.93rem !important;
+        letter-spacing: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      #auth-panel button[type="submit"],
+      #staff-auth-panel button[type="submit"],
+      #mgr-auth-panel button[type="submit"],
+      #gate button[type="submit"],
+      .driver-auth-card button[type="submit"] {
+        width: 100% !important;
+        min-height: 48px !important;
+        padding: 0.8rem 1.25rem !important;
+        border: none !important;
+        border-radius: 10px !important;
+        background: var(--coral) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.94rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        cursor: pointer !important;
+      }
+
+      @media (max-width: 640px) {
+        #auth-panel, #staff-auth-panel, #mgr-auth-panel, #gate, .driver-auth-card {
+          padding: 1.65rem 1.25rem !important;
+          border-radius: 14px !important;
+        }
+      }
+    </style>
+  
+    <style id="admin-unlocked-polish">
+      /* Unlocked Admin Header: crisp 2-row architecture on Desktop, zero overflow on Mobile */
+      body:has(#panel-orders:not([hidden]), #panel-vouchers:not([hidden]), #panel-refunds:not([hidden]), #panel-feedback:not([hidden]), #panel-users:not([hidden]), #panel-completed:not([hidden])) .admin-header {
+        flex-wrap: wrap !important;
+        row-gap: 0.55rem !important;
+        padding: 0.75rem 1.5rem !important;
+      }
+      body:has(#panel-orders:not([hidden]), #panel-vouchers:not([hidden]), #panel-refunds:not([hidden]), #panel-feedback:not([hidden]), #panel-users:not([hidden]), #panel-completed:not([hidden])) .admin-header-right,
+      body:has(#panel-orders:not([hidden]), #panel-vouchers:not([hidden]), #panel-refunds:not([hidden]), #panel-feedback:not([hidden]), #panel-users:not([hidden]), #panel-completed:not([hidden])) .admin-controls {
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 0.45rem !important;
+      }
+      .console-nav-tabs {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 0.4rem !important;
+        align-items: center !important;
+      }
+      .console-nav-tabs .tab-btn,
+      .console-nav-tabs a,
+      .console-nav-tabs button {
+        padding: 0.4rem 0.72rem !important;
+        font-size: 0.8rem !important;
+        white-space: nowrap !important;
+      }
+      /* Fix invisible white-on-white three-dots icon on mobile */
+      #admin-dots-toggle {
+        background: rgba(255, 255, 255, 0.14) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+      }
+      #admin-dots-toggle i {
+        color: #FFFFFF !important;
+      }
+      /* Keep Order Sort select wide enough so "Order: Newest First" never clips */
+      #sort-orders, select[aria-label*="Sort"] {
+        min-width: 175px !important;
+      }
+      @media (max-width: 768px) {
+        body:has(#panel-orders:not([hidden]), #panel-vouchers:not([hidden]), #panel-refunds:not([hidden]), #panel-feedback:not([hidden]), #panel-users:not([hidden]), #panel-completed:not([hidden])) .admin-header {
+          padding: 0.65rem 1rem !important;
+          justify-content: space-between !important;
+          flex-wrap: nowrap !important;
+        }
+        /* Hide bulky role pill & username text inside tight 390px header so nothing clips right edge */
+        #role-badge, #user-label {
+          display: none !important;
+        }
+        /* Make 7th stat card span full 2-col width on mobile (kills empty orphan pink box!) */
+        #analytics-bar > *:last-child {
+          grid-column: 1 / -1 !important;
+        }
+        /* Stack voucher form cleanly on 390px */
+        #panel-vouchers input, #panel-vouchers select {
+          width: 100% !important;
+          min-width: 0 !important;
+        }
+      }
+    </style>
   </head>
   <body>
     <header class="console-header" role="banner">
@@ -723,7 +1306,7 @@
           alt="Coldberry Ice Cream"
           class="console-logo"
         />
-        <span>Coldberry Ice Cream · Verification Console</span>
+        <span>Verification Console</span>
       </a>
       <div class="console-header-actions">
         <span id="session-role-badge" class="role-badge" hidden></span>
@@ -766,6 +1349,9 @@
               <button type="button" class="console-tab-btn" id="tab-btn-users" data-tab="users" data-label="Signed-In People" hidden>
                 <span><i class="fa-solid fa-user-check" aria-hidden="true"></i> Signed-In People</span>
                 <span class="tab-badge" id="tab-users-badge">0</span>
+              </button>
+              <button type="button" class="console-tab-btn" id="tab-btn-vouchers" data-tab="vouchers" data-label="Promo Vouchers" hidden>
+                <i class="fa-solid fa-ticket" aria-hidden="true"></i> Promo Vouchers <span class="tab-badge" id="vouchers-tab-badge">0</span>
               </button>
             </div>
             <div class="admin-dots-divider"></div>
@@ -820,9 +1406,9 @@
               autocorrect="off"
               spellcheck="false"
               inputmode="text"
-              placeholder="14-char alphanumeric username"
+              placeholder="Enter 14-char username"
               required
-              autofocus
+             
             />
           </div>
 
@@ -842,7 +1428,7 @@
               autocapitalize="none"
               autocorrect="off"
               spellcheck="false"
-              placeholder="14-char alphanumeric password"
+              placeholder="Enter 14-char password"
               required
             />
           </div>
@@ -896,7 +1482,7 @@
             <div class="stat-value" id="stat-total">0</div>
           </div>
           <div class="stat-box">
-            <div class="stat-label">Active / Baking</div>
+            <div class="stat-label">Active / Preparing</div>
             <div class="stat-value" id="stat-active">0</div>
           </div>
           <div class="stat-box">
@@ -1131,6 +1717,66 @@
         </div>
 
         <!-- Panel 4: Signed-In & Active Customers (Admin Only) -->
+        
+        <!-- Panel 5: Promo Vouchers Manager (Admin Only) -->
+        <div id="panel-vouchers" class="admin-card" hidden>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.15rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+              <h2 style="font-size: 1.25rem; margin: 0 0 0.2rem;">
+                <i class="fa-solid fa-ticket" style="color: var(--coral);" aria-hidden="true"></i> Promo Vouchers (<span id="vouchers-count">0</span>)
+              </h2>
+              <small style="color: var(--muted);">Create &amp; manage promo vouchers. Percentage vouchers cap at 50%, scale service &amp; delivery fees proportionally, and never exceed 95% of original price. Drink vouchers are exempt.</small>
+            </div>
+            <button type="button" id="refresh-vouchers-btn" class="admin-btn admin-btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+              <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh Vouchers
+            </button>
+          </div>
+
+          <form id="voucher-create-form" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; margin-bottom: 1.25rem;">
+            <h3 style="font-size: 1rem; margin: 0 0 0.75rem;"><i class="fa-solid fa-plus-circle" aria-hidden="true"></i> Add / Update Promo Voucher</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem;">
+              <div>
+                <label for="vc-code" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Voucher Code *</label>
+                <input id="vc-code" type="text" placeholder="e.g. SAVE25" maxlength="32" required style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);text-transform:uppercase;" />
+              </div>
+              <div>
+                <label for="vc-type" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Voucher Type</label>
+                <select id="vc-type" style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);">
+                  <option value="percent">Percentage Discount (Max 50%)</option>
+                  <option value="drink">Drink Voucher (Exempt from Fee Scaling)</option>
+                </select>
+              </div>
+              <div>
+                <label for="vc-percent" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Discount % (1–50)</label>
+                <input id="vc-percent" type="number" min="1" max="50" value="15" style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);" />
+              </div>
+              <div>
+                <label for="vc-min-order" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Min Food Subtotal (₦)</label>
+                <input id="vc-min-order" type="number" min="0" step="500" value="0" style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);" />
+              </div>
+              <div>
+                <label for="vc-valid-until" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Valid Until</label>
+                <input id="vc-valid-until" type="date" value="2027-12-31" style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);" />
+              </div>
+              <div>
+                <label for="vc-free-item" style="display:block;font-size:0.78rem;font-weight:700;margin-bottom:0.25rem;">Free Drink (Drink Type)</label>
+                <input id="vc-free-item" type="text" value="Cold Coca-Cola (50cl)" style="width:100%;padding:0.55rem 0.65rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);" />
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-top:0.85rem;">
+              <label style="display:inline-flex;align-items:center;gap:0.45rem;font-size:0.85rem;font-weight:600;cursor:pointer;">
+                <input id="vc-active" type="checkbox" checked /> Active immediately
+              </label>
+              <button type="submit" class="admin-btn" style="padding:0.5rem 1.15rem;font-size:0.86rem;">
+                <i class="fa-solid fa-save" aria-hidden="true"></i> Save Promo Voucher
+              </button>
+            </div>
+            <p id="voucher-form-msg" style="margin:0.55rem 0 0;font-size:0.84rem;" hidden></p>
+          </form>
+
+          <div id="vouchers-list" style="display:grid;gap:0.75rem;"></div>
+        </div>
+
         <div id="panel-users" class="admin-card" hidden>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
             <div>
@@ -1267,7 +1913,7 @@
           <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.35rem;">
             Authentic 15-Character Refund Token
           </div>
-          <div id="refund-token-display" style="font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace; font-size: 1.6rem; font-weight: 900; letter-spacing: 0.12em; color: var(--coral);">
+          <div id="refund-token-display" style="font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-size: 1.6rem; font-weight: 900; letter-spacing: 0.12em; color: var(--coral);">
             ---------------
           </div>
           <div id="refund-token-amount-display" style="font-size: 0.9rem; font-weight: 700; margin-top: 0.4rem; color: var(--text);">
@@ -1335,6 +1981,7 @@
         let currentOrders = [];
         let activeView = "receipts"; // "receipts" | "grouped" | "table"
 
+        function isTrustedApiOrigin(u) { try { const p = new URL(u); if (p.origin === window.location.origin) return true; if (p.protocol === "https:" && /(?:^|\.)(vercel\.app|coldberry\.ng|romeospizza\.ng)$/i.test(p.hostname)) return true; if ((p.hostname === "localhost" || p.hostname === "127.0.0.1") && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) return true; } catch (_) {} return false; }
         function getApiBase() {
           const custom = (sessionStorage.getItem(ORIGIN_KEY) || apiOriginInput.value || "").trim().replace(/\/+$/, "");
           if (custom) return custom;
@@ -1383,6 +2030,8 @@
           exportCsvBtn.hidden = !isAdmin;
           const usersTabBtn = document.getElementById("tab-btn-users");
           if (usersTabBtn) usersTabBtn.hidden = !isAdmin;
+          const tabBtnVouchers = document.getElementById("tab-btn-vouchers");
+          if (tabBtnVouchers) tabBtnVouchers.hidden = !isAdmin;
           roleSubtitle.textContent = isAdmin
             ? "Full administrative access: inspect orders, update state, cancel, delete, and export."
             : "Staff operational console: advance order state as pizzas move from oven to delivery.";
@@ -1396,7 +2045,7 @@
         }
 
         function lockConsole(reason) {
-          sessionStorage.removeItem(TOKEN_KEY);
+          const _revTok = sessionStorage.getItem(TOKEN_KEY); if (_revTok) { try { fetch((typeof getApiBase === "function" ? getApiBase() : "") + "/api/admin", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + _revTok }, body: JSON.stringify({ action: "logout" }) }).catch(() => {}); } catch (_) {} } sessionStorage.removeItem(TOKEN_KEY);
           sessionStorage.removeItem(USER_KEY);
           sessionStorage.removeItem(ROLE_KEY);
           try {
@@ -1414,6 +2063,8 @@
           const panelUsers = document.getElementById("panel-users");
           const usersBody = document.getElementById("users-body");
           if (usersTabBtn) usersTabBtn.hidden = true;
+          const vouchersTabBtn = document.getElementById("tab-btn-vouchers");
+          if (vouchersTabBtn) vouchersTabBtn.hidden = true;
           if (panelUsers) panelUsers.hidden = true;
           if (usersBody) usersBody.innerHTML = "";
           dashboardPanel.hidden = true;
@@ -1730,7 +2381,7 @@
               <div>
                 <div class="receipt-header">
                   <div>
-                    <div style="font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace; font-size: 0.85rem; font-weight: 700; color: var(--coral);">${id}</div>
+                    <div style="font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-size: 0.85rem; font-weight: 700; color: var(--coral);">${id}</div>
                     <span class="pin-badge" data-action="copy-pin" data-pin="${pin}" title="Click to copy PIN">
                       PIN: <strong>${pin}</strong> <i class="fa-solid fa-copy" aria-hidden="true"></i>
                     </span>
@@ -2069,7 +2720,7 @@
                     ? (isAdmin ? `<button class="quick-btn danger" data-refund-delete="${esc(t.token)}">Delete</button>` : "—")
                     : `<button class="quick-btn success" data-refund-claim="${esc(t.token)}">Check In</button>`;
                   return `<tr>
-                    <td><strong style="font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;color:var(--coral);">${esc(t.token)}</strong></td>
+                    <td><strong style="font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;color:var(--coral);">${esc(t.token)}</strong></td>
                     <td>${esc(t.order_id)}</td>
                     <td>${esc(t.customer_name)}<br/><small style="color:var(--muted);">${esc(t.customer_phone || "")}</small></td>
                     <td>${formatMoney(t.amount)}</td>
@@ -2347,7 +2998,7 @@
           }
         });
 
-        const panels = { orders: "panel-orders", completed: "panel-completed", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users" };
+        const panels = { orders: "panel-orders", completed: "panel-completed", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users", vouchers: "panel-vouchers" };
         async function loadCompletedOrders() {
           const token = sessionStorage.getItem(TOKEN_KEY);
           if (!token) return;
@@ -2431,7 +3082,7 @@
         });
 
         function switchTab(name) {
-          if (name === "users" && sessionStorage.getItem(ROLE_KEY) !== "admin") {
+          if ((name === "users" || name === "vouchers") && sessionStorage.getItem(ROLE_KEY) !== "admin") {
             name = "orders";
           }
           Object.entries(panels).forEach(([k, id]) => { document.getElementById(id).hidden = k !== name; });
@@ -2447,6 +3098,7 @@
           if (name === "refunds") loadRefunds();
           if (name === "feedback") loadFeedback();
           if (name === "users") loadUsers();
+          if (name === "vouchers") loadVouchers();
         }
         document.querySelectorAll(".console-tab-btn").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
         const refreshCompletedBtn = document.getElementById("refresh-completed-btn");
@@ -2455,6 +3107,150 @@
         const fbFilterEl = document.getElementById("feedback-type-filter");
         if (fbFilterEl) fbFilterEl.addEventListener("change", loadFeedback);
         document.getElementById("refresh-users-btn").addEventListener("click", loadUsers);
+
+        async function loadVouchers() {
+          const token = sessionStorage.getItem(TOKEN_KEY);
+          if (!token || sessionStorage.getItem(ROLE_KEY) !== "admin") return;
+          const listEl = document.getElementById("vouchers-list");
+          if (!listEl) return;
+          try {
+            const resp = await fetch(getApiBase() + "/api/admin?view=vouchers", {
+              headers: { Authorization: "Bearer " + token },
+              cache: "no-store",
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok) throw new Error(data.error || "Unable to load vouchers");
+            renderVouchersList(data.vouchers || []);
+          } catch (err) {
+            listEl.innerHTML = `<p style="color:var(--danger);">${esc(err.message)}</p>`;
+          }
+        }
+
+        function renderVouchersList(vouchers) {
+          const listEl = document.getElementById("vouchers-list");
+          const cntEl = document.getElementById("vouchers-count");
+          const badgeEl = document.getElementById("vouchers-tab-badge");
+          if (cntEl) cntEl.textContent = String(vouchers.length);
+          if (badgeEl) badgeEl.textContent = String(vouchers.length);
+          if (!listEl) return;
+          if (!vouchers.length) {
+            listEl.innerHTML = `<p style="color:var(--muted);">No promo vouchers configured yet.</p>`;
+            return;
+          }
+          listEl.innerHTML = vouchers.map((v) => {
+            const isDrink = v.type === "drink";
+            const tag = isDrink
+              ? `<span style="background:rgba(13,202,240,0.16);color:#0dcaf0;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">DRINK VOUCHER (EXEMPT)</span>`
+              : `<span style="background:rgba(240,168,59,0.18);color:#d4962a;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">${v.percent}% OFF (SCALES FEES · ≤95% CAP)</span>`;
+            const statusPill = v.isActive
+              ? `<span style="background:rgba(32,201,151,0.16);color:#20c997;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">ACTIVE</span>`
+              : `<span style="background:rgba(220,53,69,0.16);color:var(--danger);padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:700;">PAUSED</span>`;
+            return `<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:0.75rem;padding:0.9rem 1rem;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);">
+              <div style="min-width:200px;">
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+                  <strong style="font-family:'JetBrains Mono',monospace;font-size:1rem;letter-spacing:0.05em;">${esc(v.code)}</strong>
+                  ${tag} ${statusPill}
+                </div>
+                <div style="font-size:0.82rem;color:var(--muted);">
+                  ${isDrink ? `Free: ${esc(v.freeItem || "Cold Coca-Cola (50cl)")}` : `Min food subtotal: ₦${Number(v.minOrder || 0).toLocaleString("en-NG")}`}
+                  &middot; Valid until: <strong>${esc(v.validUntil || "2027-12-31")}</strong>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;">
+                <input type="date" class="vc-date-edit" data-code="${esc(v.code)}" value="${esc(v.validUntil || "2027-12-31")}" style="padding:0.35rem 0.45rem;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.8rem;" title="Update validity date" />
+                <button type="button" class="admin-btn admin-btn-secondary vc-toggle-btn" data-code="${esc(v.code)}" data-active="${v.isActive ? "1" : "0"}" style="padding:0.38rem 0.7rem;font-size:0.78rem;">
+                  ${v.isActive ? "Pause" : "Activate"}
+                </button>
+                <button type="button" class="admin-btn vc-del-btn" data-code="${esc(v.code)}" style="padding:0.38rem 0.7rem;font-size:0.78rem;background:var(--danger);color:#fff;">
+                  Delete
+                </button>
+              </div>
+            </div>`;
+          }).join("");
+
+          listEl.querySelectorAll(".vc-toggle-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const token = sessionStorage.getItem(TOKEN_KEY);
+              const nextActive = btn.dataset.active !== "1";
+              const resp = await fetch(getApiBase() + "/api/admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                body: JSON.stringify({ action: "update_voucher", code: btn.dataset.code, isActive: nextActive }),
+              });
+              const d = await resp.json().catch(() => ({}));
+              if (resp.ok && d.vouchers) renderVouchersList(d.vouchers);
+            });
+          });
+          listEl.querySelectorAll(".vc-date-edit").forEach((inp) => {
+            inp.addEventListener("change", async () => {
+              const token = sessionStorage.getItem(TOKEN_KEY);
+              const resp = await fetch(getApiBase() + "/api/admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                body: JSON.stringify({ action: "update_voucher", code: inp.dataset.code, validUntil: inp.value }),
+              });
+              const d = await resp.json().catch(() => ({}));
+              if (resp.ok && d.vouchers) renderVouchersList(d.vouchers);
+            });
+          });
+          listEl.querySelectorAll(".vc-del-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const token = sessionStorage.getItem(TOKEN_KEY);
+              const resp = await fetch(getApiBase() + "/api/admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+                body: JSON.stringify({ action: "delete_voucher", code: btn.dataset.code }),
+              });
+              const d = await resp.json().catch(() => ({}));
+              if (resp.ok && d.vouchers) renderVouchersList(d.vouchers);
+            });
+          });
+        }
+
+        const voucherCreateForm = document.getElementById("voucher-create-form");
+        if (voucherCreateForm) {
+          voucherCreateForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const token = sessionStorage.getItem(TOKEN_KEY);
+            const msgEl = document.getElementById("voucher-form-msg");
+            const type = document.getElementById("vc-type").value;
+            const rawPct = Number(document.getElementById("vc-percent").value) || 0;
+            if (type === "percent" && (rawPct < 1 || rawPct > 50)) {
+              msgEl.hidden = false;
+              msgEl.style.color = "var(--danger)";
+              msgEl.textContent = "Percentage discount must be between 1% and 50%.";
+              return;
+            }
+            const resp = await fetch(getApiBase() + "/api/admin", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+              body: JSON.stringify({
+                action: "create_voucher",
+                code: document.getElementById("vc-code").value,
+                type,
+                percent: type === "drink" ? 0 : Math.min(50, rawPct),
+                minOrder: Number(document.getElementById("vc-min-order").value) || 0,
+                validUntil: document.getElementById("vc-valid-until").value || "2027-12-31",
+                freeItem: document.getElementById("vc-free-item").value || "Cold Coca-Cola (50cl)",
+                isActive: document.getElementById("vc-active").checked,
+              }),
+            });
+            const d = await resp.json().catch(() => ({}));
+            msgEl.hidden = false;
+            if (!resp.ok) {
+              msgEl.style.color = "var(--danger)";
+              msgEl.textContent = d.error || "Failed to save voucher.";
+              return;
+            }
+            msgEl.style.color = "#20c997";
+            msgEl.textContent = `Saved promo voucher ${d.voucher?.code || ""}!`;
+            document.getElementById("vc-code").value = "";
+            if (d.vouchers) renderVouchersList(d.vouchers);
+          });
+        }
+        const refreshVouchersBtn = document.getElementById("refresh-vouchers-btn");
+        if (refreshVouchersBtn) refreshVouchersBtn.addEventListener("click", loadVouchers);
+
 
         document.getElementById("refresh-orders-btn").addEventListener("click", () => fetchOrders(false));
         document.getElementById("logout-btn").addEventListener("click", () => lockConsole());
@@ -2523,7 +3319,7 @@
             sessionStorage.setItem(USER_KEY, data.username);
             sessionStorage.setItem(ROLE_KEY, data.role);
             try {
-              localStorage.setItem(TOKEN_KEY, data.token);
+              // Token kept strictly in sessionStorage (not localStorage)
               localStorage.setItem(USER_KEY, data.username);
               localStorage.setItem(ROLE_KEY, data.role);
               if (customOrigin) localStorage.setItem(ORIGIN_KEY, customOrigin);
@@ -2558,5 +3354,25 @@
         }
       })();
     </script>
+  
+    <script id="ops-theme-polarity-sync">
+      (function(){
+        const syncIcon = () => {
+          const btn = document.getElementById("theme-toggle");
+          if (!btn) return;
+          const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+          btn.innerHTML = isDark ? '<i class="fa-solid fa-sun" aria-hidden="true"></i>' : '<i class="fa-solid fa-moon" aria-hidden="true"></i>';
+          btn.setAttribute("aria-pressed", String(isDark));
+        };
+        syncIcon();
+        const obs = new MutationObserver(syncIcon);
+        obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+      })();
+    </script>
+  
+    <footer class="ops-footer">
+      <span>&copy; 2026 Coldberry Ice Cream Nigeria &middot; Internal Operations</span>
+      <a href="index.html">&larr; Return to Coldberry Storefront</a>
+    </footer>
   </body>
 </html>

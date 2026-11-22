@@ -107,6 +107,10 @@
         `Shopping cart (${itemCount} ${itemCount === 1 ? "item" : "items"})`
       );
     }
+    document.querySelectorAll(".menu-cart").forEach((el) => {
+      el.classList.toggle("has-items", itemCount > 0);
+      el.classList.toggle("is-empty", itemCount === 0);
+    });
     const countLabel = document.getElementById("cart-count-label");
     if (countLabel) {
       countLabel.textContent = `${itemCount === 1 ? "item" : "items"} in your cart`;
@@ -238,8 +242,85 @@
   const LOCATION_STORAGE_KEY = "cb_rm_location";
   let cachedPriceLookup = null;
 
+  const FALLBACK_PRICE_MAP = {
+    "ice cream": 4700,
+    "ice cream cone": 4400,
+    "waffle cup": 4400,
+    "dipped waffle bowl (6 pcs)": 4700,
+    "dipped waffle bowl": 4700,
+    "chicken wings (6 pcs)": 4700,
+    "chicken wings": 4700,
+    "creamy waffle roll": 4400,
+    "shawarma roll": 4400,
+    "shawarma": 4400,
+    "cold coca-cola (50cl)": 900,
+    "coca-cola (50cl)": 900,
+    "coca-cola": 900,
+    "cold coca-cola": 900,
+    "bottled water": 850,
+    "bottled water (75cl)": 850,
+    "water": 850,
+    "fanta (50cl)": 900,
+    "fanta": 900,
+    "sprite (50cl)": 900,
+    "sprite": 900,
+    "monster green": 1500,
+    "monster green (400ml)": 1500,
+    "monster": 1500,
+    "schweppes (can)": 1000,
+    "schweppes (pet)": 1050,
+    "romeo's pepperoni pizza (medium)": 11200,
+    "romeo's beef suya pizza (medium)": 12200,
+    "coldberry waffle bowl scoops": 5500,
+    "weekly creamery drop": 21200,
+    "coldberry 3-tub party box": 30000,
+    "office friday feast": 98500,
+    "coldberry birthday ice cream bar": 72000,
+    "the festive box": 28000,
+    "duo deal": 22000,
+    "champion feast": 26500,
+    "mid lover deal": 14500,
+    "mega family combo": 32000,
+    "double delight treat": 21000
+  };
+
+  function getFlavorTierPrice(flavor, size) {
+    const f = String(flavor || "").toLowerCase();
+    const s = String(size || "large").toLowerCase();
+    const sizeKey = s.includes("med") ? "Medium" : s.includes("champ") ? "Champion" : "Large";
+    const tiers = {
+      A: { Medium: 11200, Large: 14150, Champion: 21200 },
+      B: { Medium: 12200, Large: 14800, Champion: 22000 },
+      C: { Medium: 13500, Large: 15000, Champion: 23500 }
+    };
+    if (
+      f.includes("chocolate romance") ||
+      f.includes("cheesecake fantasy") ||
+      f.includes("fresh cream") ||
+      f.includes("meatylover") ||
+      f.includes("sweet & hot") ||
+      f.includes("sweet and hot") ||
+      f.includes("margherita")
+    ) {
+      return tiers.C[sizeKey];
+    }
+    if (
+      f.includes("coldberry delight") ||
+      f.includes("oreo") ||
+      f.includes("rainbow berry") ||
+      f.includes("caramel swirl") ||
+      f.includes("suya") ||
+      f.includes("shawarma") ||
+      f.includes("sweet chilli") ||
+      f.includes("nineoverloaded")
+    ) {
+      return tiers.B[sizeKey];
+    }
+    return tiers.A[sizeKey];
+  }
+
   function buildPriceLookup(data) {
-    const map = {};
+    const map = Object.assign({}, FALLBACK_PRICE_MAP);
     if (!data || typeof data !== "object") return map;
     const tiers = data.pizzaTiers || {};
     for (const tier of Object.values(tiers)) {
@@ -260,16 +341,41 @@
     return map;
   }
 
+  function estimateUnitPrice(rawName, lookup) {
+    const key = String(rawName || "").replace(/&amp;/gi, "&").trim().toLowerCase();
+    if (!key) return 0;
+    if (lookup[key]) return lookup[key];
+
+    // Half & Half Pizza (...) (+5% surcharge on highest flavor)
+    if (/^half\s*(?:&|and|\/|-)\s*half/i.test(key)) {
+      let inner = key.replace(/^half\s*(?:&|and|\/|-)\s*half(?:\s*pizza)?\s*[:\-\—]?\s*/i, "").trim();
+      if (inner.startsWith("(") && inner.endsWith(")")) inner = inner.slice(1, -1).trim();
+      const sizeMatch = inner.match(/[,|\-]?\s*\(?\s*(medium|large|champion)\s*\)?\s*$/i);
+      const size = sizeMatch ? sizeMatch[1] : "Large";
+      const flavorsPart = inner.replace(/[,|\-]?\s*\(?\s*(?:medium|large|champion)\s*\)?\s*$/i, "");
+      const flavors = flavorsPart.split(/\s*(?:\+|\/|\||vs\.?|with)\s*/i).filter(Boolean);
+      const maxBase = flavors.reduce((m, fl) => Math.max(m, getFlavorTierPrice(fl, size)), 0) || getFlavorTierPrice("vanilla", size);
+      return Math.round(maxBase * 1.05);
+    }
+
+    // Named combo deals with parenthesized flavor choices e.g. Mid Lover Deal (...), Mega Family Combo (...)
+    const baseKey = key.replace(/\s*\([^)]*\)\s*$/, "").trim();
+    if (lookup[baseKey]) return lookup[baseKey];
+
+    // Size-qualified tub e.g. "Coldberry Vanilla Bean (Medium)"
+    const sizeParen = key.match(/^(.*?)\s*\((medium|large|champion)\)$/i);
+    if (sizeParen) {
+      return getFlavorTierPrice(sizeParen[1], sizeParen[2]);
+    }
+
+    return getFlavorTierPrice(baseKey, "Large") || 0;
+  }
+
   function estimateCartSubtotal() {
-    if (!cachedPriceLookup) return 0;
+    const lookup = cachedPriceLookup || FALLBACK_PRICE_MAP;
     let total = 0;
     for (const [name, qty] of Object.entries(cart)) {
-      const key = String(name).trim().toLowerCase();
-      let unit = cachedPriceLookup[key] || 0;
-      if (!unit) {
-        const baseKey = key.replace(/\s*\([^)]*\)\s*$/, "").trim();
-        unit = cachedPriceLookup[baseKey] || 0;
-      }
+      const unit = estimateUnitPrice(name, lookup);
       total += unit * qty;
     }
     return total;
@@ -335,7 +441,7 @@
         });
         if (select && loc) select.value = loc;
         if (eta) {
-          eta.textContent = method === "Pickup" ? "Est. 15 min pickup" : "Est. 30–35 min delivery";
+          eta.textContent = method === "Call To Collect" ? "Est. 15 min · Call To Collect" : (method === "Pickup" ? "Est. 15 min pickup" : "Est. 30–35 min delivery");
         }
       }
 

@@ -450,6 +450,10 @@
         totalPriceEl.textContent = formatNaira(totalPrice);
       }
 
+      const splitCircle = document.getElementById("half-split-circle");
+      if (splitCircle) {
+        splitCircle.dataset.flavours = String(activeNames.length);
+      }
       if (previewLeft) {
         previewLeft.style.backgroundImage = `url("${getPizzaImage(side1Name)}")`;
       }

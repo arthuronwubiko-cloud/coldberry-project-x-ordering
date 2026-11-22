@@ -213,6 +213,15 @@ async function allocateOrderPin(options = {}) {
 }
 
 async function defaultHandler(req, res) {
+  try {
+    const { resolveAuthFromRequest } = require("./admin");
+    const auth = resolveAuthFromRequest(req);
+    if (!auth || auth.role !== "admin") {
+      return res && typeof res.status === "function" ? res.status(401).json({ error: "Admin authentication required." }) : null;
+    }
+  } catch (_) {
+    return res && typeof res.status === "function" ? res.status(401).json({ error: "Admin authentication required." }) : null;
+  }
   if (res && typeof res.status === "function") {
     res.setHeader("Content-Type", "application/json");
     return res.status(200).json({

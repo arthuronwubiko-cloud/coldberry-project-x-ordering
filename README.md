@@ -495,3 +495,15 @@ Returns whether the database is configured and the WhatsApp recipient number in 
 - **Three-Dots (`⋮`) Navigation Menu:** Moved primary navigation into an accessible three-dots (`fa-ellipsis-vertical`) menu across all 8 client storefront pages (`#nav-dots-toggle`, `DotsMenuController`) and the Admin Verification Console (`#admin-dots-toggle`, `#admin-dots-menu`, `feedback.html`, `refunds.html`).
 - **Automated Verification:** `npm test` runs **111 / 111** passing end-to-end checks.
 - **Completed Console & Strict 4-Tier Role Isolation:** Dedicated role-locked consoles for **Admin** (`/admin`, `/feedback`, `/refunds`), **Manager** (`/manager`, `/refunds` — can cancel orders & delete orders for refunds), **Staff** (`/staff`), and **Rider** (`/driver`). Orders marked `completed` or `out_for_delivery` shift to the Completed Console with permanent DB persistence and role windows (**3h** Rider, **48h** Staff, **7d** Manager, **unlimited** Admin), recording `ready_confirmed_by` and `completed_by`. Full-database CSV export (`GET /api/admin?export=csv`) is strictly Admin-only (`HTTP 403` for all other roles).
+
+---
+
+## Future Implementations (Planned Roadmap)
+
+The following high-conversion QSR modules are intentionally scoped for upcoming iterations and are NOT yet active in production:
+
+1. **Digital e-Gift Cards / Treat-a-Friend Module (`pizzadeals.html`, `order.html`, `api/orders.js`):**
+   - Digital e-Gift Cards in `₦10,000`, `₦25,000`, and `₦50,000` denominations with bonus perks on `₦25,000+` gift cards (e.g., complimentary Waffle Cup on Coldberry or complimentary Wings on Romeo's), recipient name, custom gift note, and unique redeemable e-Gift codes.
+2. **Product Toppings & Mix-Ins Customizers (Pending Final Ingredient & Pricing Lists):**
+   - **Coldberry Ice Cream:** 1-tap Mix-Ins & Waffle Vessel customizer chips inside the Split Tub builder and menu cards (waiting for final approved Coldberry toppings list).
+   - **Romeo's Pizza:** 1-tap Crust & Extra Toppings customizer chips inside the Half & Half builder and pizza cards (waiting for final approved Romeo's toppings list).

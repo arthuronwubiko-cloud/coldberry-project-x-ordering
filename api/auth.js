@@ -121,7 +121,7 @@ function parseCookies(req) {
     if (idx > 0) {
       const k = part.slice(0, idx).trim();
       const v = part.slice(idx + 1).trim();
-      if (k) out[k] = decodeURIComponent(v);
+      if (k) try { out[k] = decodeURIComponent(v); } catch (_) { out[k] = v; }
     }
   }
   return out;
@@ -255,12 +255,27 @@ module.exports = async function handler(req, res) {
     }
 
     recordVisitorHit(`user:${user.username}`);
-    const [orders, refunds, messages] = await Promise.all([
+    const [rawOrders, rawRefunds, rawMessages] = await Promise.all([
       getOrdersByCustomer(user.username, user.phone),
       findRefundsByPhone(user.phone),
       getMessagesForCustomer(user.username, user.phone),
       updateCustomerProfile(user.username, { lastLoginAt: new Date().toISOString() }),
     ]);
+    const userCreatedMs = user.createdAt ? new Date(user.createdAt).getTime() : 0;
+    const orders = (rawOrders || []).filter((o) => {
+      if (o.customer_username && String(o.customer_username).toLowerCase() === String(user.username).toLowerCase()) return true;
+      const t = new Date(o.created_at || o.timestamp || 0).getTime();
+      return !userCreatedMs || !t || t >= userCreatedMs - 5000;
+    });
+    const refunds = (rawRefunds || []).filter((r) => {
+      const t = new Date(r.issued_at || r.created_at || 0).getTime();
+      return !userCreatedMs || !t || t >= userCreatedMs - 5000;
+    });
+    const messages = (rawMessages || []).filter((m) => {
+      if (m.recipient_username === "ALL" || String(m.recipient_username || "").toLowerCase() === String(user.username).toLowerCase()) return true;
+      const t = new Date(m.created_at || 0).getTime();
+      return !userCreatedMs || !t || t >= userCreatedMs - 5000;
+    });
 
     return res.status(200).json({
       authenticated: true,

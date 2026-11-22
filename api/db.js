@@ -154,7 +154,7 @@ function deleteLocalOrder(orderId) {
   return true;
 }
 
-const DEFAULT_SUPABASE_URL = "https://tfpedhsgktihxkeuoztv.supabase.co";
+const DEFAULT_SUPABASE_URL = "";
 
 function getSupabaseConfig() {
   const url =
@@ -887,7 +887,7 @@ async function insertFeedback(feedback) {
     rating: Math.max(1, Math.min(5, Number(feedback.rating) || 5)),
     customer_name: String(feedback.customer_name || feedback.name || "Anonymous").slice(0, 100),
     order_pin: String(feedback.order_pin || feedback.pin || "").slice(0, 10),
-    tags: Array.isArray(feedback.tags) ? feedback.tags.join(", ") : String(feedback.tags || ""),
+    tags: (Array.isArray(feedback.tags) ? feedback.tags.slice(0, 10).map((t) => String(t).trim().slice(0, 40)).filter(Boolean).join(", ") : String(feedback.tags || "")).slice(0, 300),
     comments: String(feedback.comments || feedback.comment || feedback.message || "").slice(0, 1000),
     source: String(feedback.source || "web_bubble").slice(0, 50),
     feedback_type: feedbackType,
@@ -1932,6 +1932,15 @@ function getActiveVisitorCount() {
 }
 
 async function defaultHandler(req, res) {
+  try {
+    const { resolveAuthFromRequest } = require("./admin");
+    const auth = resolveAuthFromRequest(req);
+    if (!auth || auth.role !== "admin") {
+      return res && typeof res.status === "function" ? res.status(401).json({ error: "Admin authentication required." }) : null;
+    }
+  } catch (_) {
+    return res && typeof res.status === "function" ? res.status(401).json({ error: "Admin authentication required." }) : null;
+  }
   if (res && typeof res.status === "function") {
     const supabase = getSupabaseConfig();
     const neon = isNeonConfigured();

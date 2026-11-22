@@ -1531,14 +1531,14 @@ async function checkLegalAndDealsCompliance() {
 
   const dealsHasHash = />\s*Select as #\d\s*</i.test(dealsHtml) || />\s*#\d\s*</i.test(dealsHtml);
   const menuHasHash = />\s*#\d\s*</i.test(menuHtml);
-  const dealsHasPizza1 = dealsHtml.includes("Pizza 1") && dealsHtml.includes("Pizza 2");
-  const menuHasPizza1 = menuHtml.includes("Pizza 1") && menuHtml.includes("Pizza 2");
+  const dealsHasPizza1 = (dealsHtml.includes("Tub 1") && dealsHtml.includes("Tub 2")) || (dealsHtml.includes("Pizza 1") && dealsHtml.includes("Pizza 2"));
+  const menuHasPizza1 = (menuHtml.includes("Tub 1") && menuHtml.includes("Tub 2")) || (menuHtml.includes("Pizza 1") && menuHtml.includes("Pizza 2"));
 
   record(
     "deals-eligibility",
-    "Deals eligibility pull-downs use descriptive 'Pizza 1' / 'Pizza 2' labels without ambiguous '#1' tags",
+    "Deals eligibility pull-downs use descriptive 'Tub 1' / 'Tub 2' labels without ambiguous '#1' tags",
     !dealsHasHash && !menuHasHash && dealsHasPizza1 && menuHasPizza1,
-    `dealsHasHash=${dealsHasHash}, menuHasHash=${menuHasHash}, dealsPizza12=${dealsHasPizza1}, menuPizza12=${menuHasPizza1}`
+    `dealsHasHash=${dealsHasHash}, menuHasHash=${menuHasHash}, dealsTub12=${dealsHasPizza1}, menuTub12=${menuHasPizza1}`
   );
 
   // 7e. Coca-Cola at ₦900 and Service Fee UI

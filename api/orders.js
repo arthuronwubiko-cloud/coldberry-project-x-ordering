@@ -1,3 +1,4 @@
+const { validateVoucherForOrder, applyVoucherAndLoyaltyPolicy, getLoyaltyBalance, adjustLoyaltyBalance, redeemLoyaltyPointsAtomic, LOYALTY_REDEEM_POINTS, LOYALTY_REDEEM_VALUE, LOYALTY_REWARDS } = require("./vouchers");
 const {
   getItemPrice,
   calculateOrderTotals,
@@ -73,7 +74,7 @@ function generateOrderId() {
   return `order-${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
 }
 
-function validateOrder(body, orderPin) {
+function validateOrder(body, orderPin, policyContext = null) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { error: "Invalid order details." };
   }
@@ -98,7 +99,7 @@ function validateOrder(body, orderPin) {
   if (!ALLOWED_LOCATIONS.has(location)) {
     return { error: "Choose a valid Coldberry Ice Cream location." };
   }
-  if (fulfilment !== "Delivery" && fulfilment !== "Pickup") {
+  if (fulfilment !== "Delivery" && fulfilment !== "Pickup" && fulfilment !== "Call To Collect") {
     return { error: "Choose delivery or pickup." };
   }
 
@@ -112,13 +113,19 @@ function validateOrder(body, orderPin) {
   }
 
   const items = [];
-  const itemsMap = {};
+  const itemsMap = Object.create(null);
+  let cumulativeQty = 0;
   if (Array.isArray(body.items)) {
     for (const item of body.items) {
       if (!item || typeof item !== "object" || Array.isArray(item)) continue;
-      const itemName = normalizeItemName(cleanText(item.name, 80));
+      const itemName = normalizeItemName(cleanText(item.name, 120));
+      if (!itemName || /^(__proto__|constructor|prototype)$/i.test(itemName)) continue;
       const quantity = Number(item.quantity);
-      if (itemName && Number.isInteger(quantity) && quantity > 0 && quantity <= 50) {
+      if (Number.isInteger(quantity) && quantity > 0 && quantity <= 50) {
+        if (cumulativeQty + quantity > 50) {
+          return { error: "Maximum 50 items per online order. Contact catering for larger events." };
+        }
+        cumulativeQty += quantity;
         const unitPrice = getItemPrice(itemName);
         const lineTotal = unitPrice > 0 ? ` (${formatNaira(unitPrice * quantity)})` : "";
         items.push(`${quantity} × ${itemName}${lineTotal}`);
@@ -135,7 +142,22 @@ function validateOrder(body, orderPin) {
     return { error: "Add an item to your order." };
   }
 
-  const pricing = calculateOrderTotals(itemsMap, fulfilment);
+  const basePricing = calculateOrderTotals(itemsMap, fulfilment);
+  const policy = applyVoucherAndLoyaltyPolicy({
+    subtotal: basePricing.subtotal,
+    baseServiceFee: basePricing.serviceFee !== undefined ? basePricing.serviceFee : (basePricing.totalCount > 0 ? 800 : 0),
+    baseDeliveryFee: fulfilment === "Delivery" ? basePricing.deliveryFee : 0,
+    voucher: policyContext?.voucher || null,
+    redeemLoyalty: Boolean(policyContext?.redeemLoyalty),
+    loyaltyRewardId: policyContext?.loyaltyRewardId || null,
+    availablePoints: Number(policyContext?.availablePoints) || 0,
+  });
+  const pricing = {
+    ...basePricing,
+    ...policy,
+  };
+  const scheduledTime = cleanText(body.scheduledTime || "ASAP", 60) || "ASAP";
+  const hotspotLandmark = cleanText(body.hotspotLandmark || "", 120);
   const allItems = [...items, ...(additionalItems ? [additionalItems] : [])].join(", ");
   const pin = orderPin || (typeof body.orderPin === "string" && /^\d{6}$/.test(body.orderPin) ? body.orderPin : null);
 
@@ -160,6 +182,12 @@ function validateOrder(body, orderPin) {
 
   if (fulfilment === "Delivery") {
     lines.push(`• Delivery Address: ${address}`);
+    if (hotspotLandmark) {
+      lines.push(`• Hotspot Landmark: ${hotspotLandmark}`);
+    }
+  }
+  if (scheduledTime && scheduledTime !== "ASAP") {
+    lines.push(`• Scheduled Time: ${scheduledTime}`);
   }
 
   lines.push("", "*Order Items:*");
@@ -171,14 +199,36 @@ function validateOrder(body, orderPin) {
   }
 
   const isDelivery = fulfilment === "Delivery";
+  const freeLabel = fulfilment === "Call To Collect" ? "₦0 (Call To Collect)" : "₦0 (Free Pickup)";
   lines.push(
     "",
     "*Payment Summary:*",
-    `• Subtotal: ${formatNaira(pricing.subtotal)}`,
-    `• Service Fee: ${formatNaira(pricing.serviceFee !== undefined ? pricing.serviceFee : (pricing.totalCount > 0 ? 800 : 0))}`,
-    `• Delivery Fee: ${isDelivery ? formatNaira(pricing.deliveryFee) : "₦0 (Free Pickup)"}`,
-    `• Grand Total: ${formatNaira(pricing.grandTotal)}`
+    `• Subtotal: ${formatNaira(pricing.subtotal)}`
   );
+  if (pricing.voucherCode) {
+    if (pricing.exemptDrinkVoucher) {
+      lines.push(`• Drink Voucher (${pricing.voucherCode}): ${pricing.freeDrinkItem} FREE`);
+    } else if (pricing.promoDiscount > 0) {
+      lines.push(`• Promo Voucher (${pricing.voucherCode} — ${pricing.promoPercent}% off): -${formatNaira(pricing.promoDiscount)}`);
+    }
+  }
+  lines.push(
+    `• Service Fee: ${formatNaira(pricing.serviceFee)}`,
+    `• Delivery Fee: ${isDelivery ? formatNaira(pricing.deliveryFee) : freeLabel}`
+  );
+  if (pricing.loyaltyRewardRedeemed) {
+    if (pricing.loyaltyDiscount > 0) {
+      lines.push(`• Loyalty Reward (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): -${formatNaira(pricing.loyaltyDiscount)}`);
+    } else {
+      lines.push(`• Loyalty Reward (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): ${pricing.loyaltyRewardRedeemed.label} FREE`);
+    }
+  } else if (pricing.loyaltyDiscount > 0) {
+    lines.push(`• Loyalty Redemption (${pricing.loyaltyPointsRedeemed.toLocaleString("en-NG")} pts): -${formatNaira(pricing.loyaltyDiscount)}`);
+  }
+  lines.push(`• Grand Total: ${formatNaira(pricing.grandTotal)}`);
+  if (pricing.loyaltyPointsEarned > 0) {
+    lines.push(`• Loyalty Points Pending: +${pricing.loyaltyPointsEarned} pts (credited once paid & completed; food subtotal only)`);
+  }
 
   if (notes) {
     lines.push("", "*Special Notes:*", notes);
@@ -208,6 +258,17 @@ function validateOrder(body, orderPin) {
       serviceFee: pricing.serviceFee !== undefined ? pricing.serviceFee : (pricing.totalCount > 0 ? 800 : 0),
       deliveryFee: isDelivery ? pricing.deliveryFee : 0,
       grandTotal: pricing.grandTotal,
+      scheduledTime,
+      hotspotLandmark,
+      promoCode: pricing.voucherCode || null,
+      promoDiscount: pricing.promoDiscount || 0,
+      freeDrinkItem: pricing.freeDrinkItem || null,
+      loyaltyPointsEarned: pricing.loyaltyPointsEarned || 0,
+      loyaltyPointsPending: pricing.loyaltyPointsEarned || 0,
+      loyaltyCredited: false,
+      loyaltyPointsRedeemed: pricing.loyaltyPointsRedeemed || 0,
+      loyaltyReward: pricing.loyaltyRewardRedeemed ? pricing.loyaltyRewardRedeemed.label : null,
+      loyaltyDiscount: pricing.loyaltyDiscount || 0,
       paymentStatus: "pending",
     },
   };
@@ -263,6 +324,40 @@ module.exports = async function handler(req, res) {
       });
     }
 
+    if (req.method === "GET" && req.query?.action === "validate_voucher") {
+      const code = String(req.query?.code || "").trim();
+      const sub = Number(req.query?.subtotal) || 0;
+      const vRes = await validateVoucherForOrder(code, sub);
+      if (!vRes.valid) {
+        return res.status(200).json({ valid: false, error: vRes.error });
+      }
+      return res.status(200).json({ valid: true, voucher: vRes.voucher });
+    }
+
+    if (req.method === "GET" && req.query?.action === "loyalty_balance") {
+      let authUsername = null;
+      try {
+        const { resolveCustomerSession } = require("./auth");
+        const { isSessionRevoked } = require("./redis");
+        const sess = resolveCustomerSession(req);
+        if (sess && sess.username && !(sess.jti && await isSessionRevoked(sess.jti))) {
+          authUsername = sess.username;
+        }
+      } catch (_) {}
+      const points = authUsername ? await getLoyaltyBalance(authUsername) : 0;
+      const unlockedRewards = LOYALTY_REWARDS.filter((r) => points >= r.points);
+      return res.status(200).json({
+        ok: true,
+        authenticated: Boolean(authUsername),
+        points,
+        rewards: LOYALTY_REWARDS,
+        unlockedRewards,
+        redeemThreshold: LOYALTY_REDEEM_POINTS,
+        redeemValue: LOYALTY_REDEEM_VALUE,
+        canRedeem: points >= 10,
+      });
+    }
+
     if (req.method !== "POST") {
       res.setHeader("Allow", "POST");
       return res.status(405).json({ error: "Method not allowed." });
@@ -289,19 +384,50 @@ module.exports = async function handler(req, res) {
 
     const pinAlloc = typeof allocateOrderPin === "function" ? await allocateOrderPin() : { pin: generateOrderPin() };
     const orderPin = pinAlloc.pin || generateOrderPin();
-    const validatedOrder = validateOrder(body, orderPin);
+    let customerUsernamePre = null;
+    try {
+      const { resolveCustomerSession } = require("./auth");
+      const { isSessionRevoked } = require("./redis");
+      const sess = resolveCustomerSession(req);
+      if (sess && sess.username && !(sess.jti && await isSessionRevoked(sess.jti))) {
+        customerUsernamePre = sess.username;
+      }
+    } catch (_) {}
+
+    const wantsLoyaltyRedeem = Boolean(body?.redeemLoyalty) || Boolean(body?.loyaltyRewardId && String(body.loyaltyRewardId).trim());
+    if (wantsLoyaltyRedeem && !customerUsernamePre) {
+      return res.status(401).json({ error: "Please sign in to your account to redeem loyalty points." });
+    }
+
+    const loyaltyKey = customerUsernamePre || "";
+    const availablePoints = loyaltyKey ? await getLoyaltyBalance(loyaltyKey) : 0;
+    let resolvedVoucher = null;
+    if (body && typeof body.promoCode === "string" && body.promoCode.trim()) {
+      const preCheck = await validateVoucherForOrder(body.promoCode.trim(), 999999999);
+      if (!preCheck.valid) {
+        return res.status(400).json({ error: preCheck.error });
+      }
+      resolvedVoucher = preCheck.voucher;
+    }
+
+    const validatedOrder = validateOrder(body, orderPin, {
+      voucher: resolvedVoucher,
+      redeemLoyalty: Boolean(body?.redeemLoyalty),
+      loyaltyRewardId: body?.loyaltyRewardId ? String(body.loyaltyRewardId).trim() : null,
+      availablePoints,
+    });
+    if (!validatedOrder.error && resolvedVoucher && resolvedVoucher.minOrder > 0 && validatedOrder.pricing.subtotal < resolvedVoucher.minOrder) {
+      return res.status(400).json({
+        error: `${resolvedVoucher.code} requires a minimum food subtotal of ₦${resolvedVoucher.minOrder.toLocaleString("en-NG")}.`,
+      });
+    }
     if (validatedOrder.error) {
       return res.status(400).json({ error: validatedOrder.error });
     }
 
     const orderId = generateOrderId();
     const timestamp = new Date().toISOString();
-    let customerUsername = null;
-    try {
-      const { resolveCustomerSession } = require("./auth");
-      const sess = resolveCustomerSession(req);
-      if (sess && sess.username) customerUsername = sess.username;
-    } catch (_) {}
+    const customerUsername = customerUsernamePre;
 
     const orderRecord = {
       orderId,
@@ -329,8 +455,23 @@ module.exports = async function handler(req, res) {
     const recipient = getRestaurantWhatsAppNumber();
     const whatsappUrl = `https://wa.me/${recipient}?text=${encodeURIComponent(validatedOrder.message)}`;
 
+    let updatedLoyaltyBalance = availablePoints;
+    if (loyaltyKey && (validatedOrder.pricing.loyaltyPointsRedeemed || 0) > 0) {
+      const atomicRes = await redeemLoyaltyPointsAtomic(loyaltyKey, validatedOrder.pricing.loyaltyPointsRedeemed);
+      if (!atomicRes.ok) {
+        return res.status(400).json({ error: "Insufficient loyalty points balance for this reward." });
+      }
+      updatedLoyaltyBalance = atomicRes.balance;
+    }
+
     return res.status(200).json({
       message: "Your WhatsApp message is ready to send.",
+      loyaltyPointsPending: validatedOrder.pricing.loyaltyPointsEarned || 0,
+      loyaltyPointsEarned: validatedOrder.pricing.loyaltyPointsEarned || 0,
+      loyaltyRewardRedeemed: validatedOrder.pricing.loyaltyRewardRedeemed || null,
+      loyaltyBalance: updatedLoyaltyBalance,
+      promoCode: validatedOrder.pricing.voucherCode || null,
+      promoDiscount: validatedOrder.pricing.promoDiscount || 0,
       orderId,
       orderPin,
       pricing: validatedOrder.pricing,

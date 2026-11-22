@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
@@ -47,12 +47,529 @@
     [hidden]{display:none!important}
     @media(max-width:700px){table,thead,tbody,tr,td{display:block;width:100%}thead{display:none}tr{border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;padding:.5rem}td{border:0;padding:.3rem .5rem}}
   </style>
-</head>
+
+    <style id="ops-console-deslop">
+      :root,
+      :root[data-theme="light"] {
+        --bg: #FFF8F5 !important;
+        --surface: #FFFFFF !important;
+        --surface-2: #FDF1F5 !important;
+        --text: #2A1218 !important;
+        --muted: #6E5560 !important;
+        --border: #ECD6DE !important;
+        --coral: #8C1D40 !important;
+        --coral-hover: #6F1632 !important;
+        --brand-text: #FFFFFF !important;
+        --accent: #8C1D40 !important;
+        --header-bg: #5C1A2B !important;
+        --header-text: #FFFFFF !important;
+        --danger: #B3261E !important;
+        --success: #1F7A46 !important;
+      }
+      :root[data-theme="dark"] {
+        --bg: #160D10 !important;
+        --surface: #22151A !important;
+        --surface-2: #2C1C22 !important;
+        --text: #F8EFEA !important;
+        --muted: #C7B4AE !important;
+        --border: #3E2931 !important;
+        --coral: #A82650 !important;
+        --coral-hover: #8C1D40 !important;
+        --brand-text: #FFFFFF !important;
+        --accent: #A82650 !important;
+        --header-bg: #5C1A2B !important;
+        --header-text: #FFF8F5 !important;
+      }
+
+      html, body {
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: var(--bg) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      /* Unified Single-Row Brand Header */
+      header, .admin-header, .staff-header, .mgr-header, .driver-header {
+        background: var(--header-bg) !important;
+        color: var(--header-text) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+        padding: 0.75rem 1.5rem !important;
+        min-height: 64px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        gap: 0.75rem !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+        box-shadow: 0 2px 12px rgba(24, 8, 12, 0.14) !important;
+      }
+      header > div:first-child,
+      .admin-brand, .staff-brand, .mgr-brand, .driver-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.7rem !important;
+        min-width: 0 !important;
+        color: var(--header-text) !important;
+        font-weight: 700 !important;
+        font-size: 0.98rem !important;
+        letter-spacing: -0.01em !important;
+        text-decoration: none !important;
+      }
+      header img, .admin-brand img, .staff-brand img, .mgr-brand img, .driver-brand img {
+        height: 32px !important;
+        width: auto !important;
+        max-width: 112px !important;
+        object-fit: contain !important;
+        flex-shrink: 0 !important;
+        background: rgba(255, 255, 255, 0.96);
+        padding: 3px 8px;
+        border-radius: 6px;
+      }
+      header span, .admin-brand span, .staff-brand span, .mgr-brand span, .driver-brand span {
+        color: var(--header-text) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      /* STRICT PRE-AUTH CLEANLINESS: Hide ALL unlocked tabs/kebab/logout/refresh/rider-badge while locked! */
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .admin-dots-wrap,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .dots-wrap,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .console-nav-tabs,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #admin-dots-toggle,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #admin-dots-menu,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #top-nav,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .driver-badge,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-role-badge,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #refresh-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #logout-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #lock-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-refresh-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #driver-logout-btn,
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .header-actions > *:not(#theme-toggle):not(.theme-toggle-btn):not(.ops-back-link) {
+        display: none !important;
+      }
+
+      /* Clean right-side utility controls in header */
+      .header-actions, .driver-actions, .ops-header-right {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+      }
+      #theme-toggle, .theme-toggle-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.24) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: var(--header-text) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        font-size: 0.95rem !important;
+        flex-shrink: 0 !important;
+        transition: background 0.15s ease !important;
+      }
+      #theme-toggle:hover, .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+      }
+
+      /* Grounded Vertical Centering for Auth Gate */
+      main {
+        flex: 1 0 auto !important;
+        width: 100% !important;
+        padding: 2.25rem 1.25rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+      body:has(#auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) main {
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      /* Elevated, Restraint-Driven Auth Card */
+      #auth-panel, #auth-section, #gate, .admin-auth-card, .auth-card, .staff-auth-card, .mgr-auth-card, .driver-auth-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 2.25rem 2rem !important;
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 18px 42px rgba(42, 16, 24, 0.08) !important;
+      }
+      :root[data-theme="dark"] #auth-panel,
+      :root[data-theme="dark"] #auth-section,
+      :root[data-theme="dark"] #gate {
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.42) !important;
+      }
+
+      /* Eliminate duplicate logo sticker & generic shield icon inside auth card */
+      #auth-panel img, #auth-section img, #gate img,
+      #auth-section .driver-auth-icon, #auth-section .fa-shield-halved {
+        display: none !important;
+      }
+      #auth-panel > div:first-child::before,
+      #auth-section > div:first-child::before,
+      #gate > div:first-child::before {
+        content: "INTERNAL OPERATIONS · ROLE-LOCKED";
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--coral);
+        margin-bottom: 0.55rem;
+      }
+
+      #auth-panel h1, #auth-section h1, #gate h1 {
+        font-family: "Fraunces", Georgia, serif !important;
+        font-size: 1.55rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+        color: var(--text) !important;
+        margin: 0 0 0.45rem !important;
+      }
+      #auth-panel h1 i, #auth-section h1 i, #gate h1 i {
+        display: none !important;
+      }
+      #auth-panel p.muted, #auth-section p, #gate p.muted,
+      #auth-panel > div:first-child p {
+        font-size: 0.87rem !important;
+        line-height: 1.5 !important;
+        color: var(--muted) !important;
+        margin: 0 !important;
+      }
+
+      /* Crisp Accessible Inputs (zero monospace clipping, calm resting border) */
+      #auth-panel label, #auth-section label, #gate label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: var(--text) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 0.4rem !important;
+      }
+      .char-counter {
+        font-family: "JetBrains Mono", ui-monospace, monospace !important;
+        font-size: 0.75rem !important;
+        font-variant-numeric: tabular-nums !important;
+        color: var(--muted) !important;
+      }
+      #auth-panel input[type="text"], #auth-panel input[type="password"],
+      #auth-section input[type="text"], #auth-section input[type="password"],
+      #gate input[type="text"], #gate input[type="password"] {
+        width: 100% !important;
+        min-height: 46px !important;
+        padding: 0.7rem 0.9rem !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.93rem !important;
+        letter-spacing: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+      }
+      #auth-panel input:focus, #auth-section input:focus, #gate input:focus {
+        border-color: var(--coral) !important;
+        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.16) !important;
+      }
+      #auth-panel input::placeholder, #auth-section input::placeholder, #gate input::placeholder {
+        color: var(--muted) !important;
+        opacity: 0.72 !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.88rem !important;
+      }
+
+      /* Hide dev-only Separate API Host Settings on clean production login gate */
+      #auth-panel details {
+        display: none !important;
+      }
+
+      /* WCAG AAA Primary Submit CTA */
+      #auth-panel button[type="submit"],
+      #auth-section button[type="submit"],
+      #gate button[type="submit"] {
+        width: 100% !important;
+        min-height: 48px !important;
+        padding: 0.8rem 1.25rem !important;
+        border: none !important;
+        border-radius: 10px !important;
+        background: var(--coral) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.94rem !important;
+        letter-spacing: 0.01em !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 14px rgba(140, 29, 64, 0.16) !important;
+        transition: background 0.15s ease, transform 0.12s ease !important;
+      }
+      #auth-panel button[type="submit"]:hover,
+      #auth-section button[type="submit"]:hover,
+      #gate button[type="submit"]:hover {
+        background: var(--coral-hover) !important;
+        transform: translateY(-1px) !important;
+      }
+
+      /* Quiet Flush Operations Footer */
+      .ops-footer {
+        margin-top: auto;
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .ops-footer a {
+        color: var(--coral);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .ops-footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 640px) {
+        header, .admin-header, .staff-header, .mgr-header, .driver-header {
+          padding: 0.65rem 1rem !important;
+          min-height: 58px !important;
+        }
+        header img, .admin-brand img, .staff-brand img, .mgr-brand img, .driver-brand img {
+          height: 28px !important;
+          max-width: 88px !important;
+          padding: 2px 6px !important;
+        }
+        header > div:first-child,
+        .admin-brand, .staff-brand, .mgr-brand, .driver-brand {
+          font-size: 0.88rem !important;
+          gap: 0.5rem !important;
+        }
+        main {
+          padding: 1.5rem 1rem !important;
+        }
+        #auth-panel, #auth-section, #gate {
+          padding: 1.65rem 1.25rem !important;
+          border-radius: 14px !important;
+        }
+        #auth-panel h1, #auth-section h1, #gate h1 {
+          font-size: 1.38rem !important;
+        }
+        .ops-footer {
+          padding: 0.9rem 1rem;
+          font-size: 0.76rem;
+          justify-content: center;
+          text-align: center;
+        }
+      }
+    </style>
+  
+    <style id="ops-console-deslop-r3">
+      [hidden] { display: none !important; }
+
+      /* Unify translucent glass header theme toggle across ALL 6 consoles */
+      #theme-toggle, .theme-toggle-btn,
+      #console-theme-btn, #admin-theme-btn, #staff-theme-btn, #mgr-theme-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        padding: 0 !important;
+        border-radius: 8px !important;
+        border: 1px solid rgba(255, 255, 255, 0.24) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: var(--header-text) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        font-size: 0.95rem !important;
+        box-shadow: none !important;
+        flex-shrink: 0 !important;
+      }
+      #theme-toggle:hover, .theme-toggle-btn:hover,
+      #console-theme-btn:hover, #admin-theme-btn:hover, #staff-theme-btn:hover, #mgr-theme-btn:hover {
+        background: rgba(255, 255, 255, 0.22) !important;
+      }
+
+      /* Driver header actions alignment + hide pre-auth RIDER badge completely */
+      .driver-header-actions {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+        flex-shrink: 0 !important;
+        margin-left: auto !important;
+      }
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .rider-badge,
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) #rider-status-badge,
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) .driver-header-actions > *:not(#theme-toggle):not(.theme-toggle-btn) {
+        display: none !important;
+      }
+
+      /* Vertical centering for ALL 6 locked auth gates (incl. #staff-auth-panel & #mgr-auth-panel) */
+      body:has(#auth-panel:not([hidden]), #staff-auth-panel:not([hidden]), #mgr-auth-panel:not([hidden]), #auth-section:not([hidden]), #gate:not([hidden])) main {
+        justify-content: center !important;
+        align-items: center !important;
+      }
+
+      /* Single elevated card across ALL consoles — kill Driver nested double-card */
+      #auth-section {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      #auth-section > div:first-child::before {
+        content: none !important;
+        display: none !important;
+      }
+      #auth-panel, #staff-auth-panel, #mgr-auth-panel, #gate, .driver-auth-card {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
+        padding: 2.25rem 2rem !important;
+        background: var(--surface) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 18px 42px rgba(42, 16, 24, 0.08) !important;
+      }
+
+      /* Hide duplicate logo inside Staff/Manager/Driver/Admin/Refunds/Feedback auth cards */
+      #auth-panel img, #staff-auth-panel img, #mgr-auth-panel img, #gate img, .driver-auth-card img,
+      .driver-auth-card .driver-auth-icon, .driver-auth-card .fa-shield-halved {
+        display: none !important;
+      }
+
+      /* Crisp centered uppercase eyebrow on ALL 6 auth cards */
+      #auth-panel > div:first-child::before,
+      #staff-auth-panel > div:first-child::before,
+      #mgr-auth-panel > div:first-child::before,
+      #gate > div:first-child::before,
+      .driver-auth-card > div:first-child::before {
+        content: "INTERNAL OPERATIONS · ROLE-LOCKED";
+        display: block;
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--coral);
+        margin-bottom: 0.55rem;
+      }
+
+      /* Unified Fraunces serif H1 + balanced subtitles (zero single-word widows!) */
+      #auth-panel h1, #staff-auth-panel h1, #mgr-auth-panel h1, #gate h1, .driver-auth-card h1 {
+        font-family: "Fraunces", Georgia, serif !important;
+        font-size: clamp(1.32rem, 4.6vw, 1.55rem) !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.02em !important;
+        color: var(--text) !important;
+        margin: 0 0 0.45rem !important;
+        text-wrap: balance !important;
+      }
+      #auth-panel h1 i, #staff-auth-panel h1 i, #mgr-auth-panel h1 i, #gate h1 i, .driver-auth-card h1 i {
+        display: none !important;
+      }
+      #auth-panel > div:first-child p,
+      #staff-auth-panel > div:first-child p,
+      #mgr-auth-panel > div:first-child p,
+      #gate > div:first-child p,
+      .driver-auth-card > div:first-child p {
+        font-size: 0.87rem !important;
+        line-height: 1.5 !important;
+        color: var(--muted) !important;
+        margin: 0 !important;
+        text-wrap: balance !important;
+      }
+
+      /* Consistent pure-white crisp inputs across ALL consoles (incl. <input id="login-user"> without type) */
+      #auth-panel label, #staff-auth-panel label, #mgr-auth-panel label, #gate label, .driver-auth-card label {
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        color: var(--text) !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 0.4rem !important;
+      }
+      #auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #staff-auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #mgr-auth-panel input:not([type="checkbox"]):not([type="radio"]),
+      #gate input:not([type="checkbox"]):not([type="radio"]),
+      .driver-auth-card input:not([type="checkbox"]):not([type="radio"]) {
+        width: 100% !important;
+        min-height: 46px !important;
+        padding: 0.7rem 0.9rem !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border) !important;
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+        font-size: 0.93rem !important;
+        letter-spacing: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+      #auth-panel button[type="submit"],
+      #staff-auth-panel button[type="submit"],
+      #mgr-auth-panel button[type="submit"],
+      #gate button[type="submit"],
+      .driver-auth-card button[type="submit"] {
+        width: 100% !important;
+        min-height: 48px !important;
+        padding: 0.8rem 1.25rem !important;
+        border: none !important;
+        border-radius: 10px !important;
+        background: var(--coral) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        font-size: 0.94rem !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        cursor: pointer !important;
+      }
+
+      @media (max-width: 640px) {
+        #auth-panel, #staff-auth-panel, #mgr-auth-panel, #gate, .driver-auth-card {
+          padding: 1.65rem 1.25rem !important;
+          border-radius: 14px !important;
+        }
+      }
+    </style>
+  </head>
 <body>
   <header>
     <div style="font-weight:800;font-size:1.1rem;display:flex;align-items:center;gap:.65rem;color:var(--coral)">
       <img src="images/coldberry-logo.png" alt="Coldberry Ice Cream" style="height:40px;width:40px;border-radius:50%;object-fit:cover"/>
-      <span>Coldberry Ice Cream · Refund Tokens Console</span>
+      <span>Refund Tokens Console</span>
     </div>
     <nav id="top-nav" hidden>
       <a href="/admin"><i class="fa-solid fa-list-check"></i> Orders Console</a>
@@ -60,6 +577,7 @@
       <a href="/refunds" id="n-rf" class="on"><i class="fa-solid fa-ticket"></i> Refund Tokens</a>
       <button type="button" class="btn sec" id="lock-btn" style="padding:.45rem .85rem;font-size:.84rem"><i class="fa-solid fa-right-from-bracket"></i> Lock / Logout</button>
     </nav>
+      <div class="ops-header-right"><button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle dark or light theme"><i class="fa-solid fa-moon" aria-hidden="true"></i></button></div>
   </header>
   <main>
     <!-- Strict Password Gate: always required before accessing Refund Tokens -->
@@ -72,11 +590,11 @@
       <form id="login-form" novalidate>
         <div class="auth-field">
           <label for="login-user"><span>Username</span><span id="user-cnt" class="char-counter">0 / 14</span></label>
-          <input id="login-user" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric username" required autofocus/>
+          <input type="text" id="login-user" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Enter 14-char username" required/>
         </div>
         <div class="auth-field">
           <label for="login-pass"><span>Password</span><span id="pass-cnt" class="char-counter">0 / 14</span></label>
-          <input id="login-pass" type="password" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="14-char alphanumeric password" required/>
+          <input id="login-pass" type="password" minlength="14" maxlength="14" pattern="[A-Za-z0-9]{14}" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Enter 14-char password" required/>
         </div>
         <p id="login-err" class="err" role="alert" style="margin:0 0 .85rem;font-size:.85rem" hidden></p>
         <button type="submit" class="btn" style="width:100%"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Refund Token Console</button>
@@ -285,5 +803,27 @@
     document.getElementById("refresh").addEventListener("click",load);
   })();
   </script>
-</body>
+
+    <script id="ops-theme-init">
+      (function(){
+        const btn = document.getElementById("theme-toggle");
+        const apply = (t) => {
+          document.documentElement.setAttribute("data-theme", t);
+          if (btn) btn.innerHTML = t === "dark" ? '<i class="fa-solid fa-sun" aria-hidden="true"></i>' : '<i class="fa-solid fa-moon" aria-hidden="true"></i>';
+        };
+        const saved = localStorage.getItem("ops_console_theme") || "light";
+        apply(saved);
+        if (btn) btn.addEventListener("click", () => {
+          const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+          localStorage.setItem("ops_console_theme", next);
+          apply(next);
+        });
+      })();
+    </script>
+  
+    <footer class="ops-footer">
+      <span>&copy; 2026 Coldberry Ice Cream Nigeria &middot; Internal Operations</span>
+      <a href="../index.html">&larr; Return to Coldberry Storefront</a>
+    </footer>
+  </body>
 </html>

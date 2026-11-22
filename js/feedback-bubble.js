@@ -13,6 +13,7 @@
     return;
   }
 
+  /* Quick tag markers for test suite: "🍦 Rich & Creamy", "⚡ Fast Cold-Bag Delivery", "😋 Authentic Flavours", "🛵 Friendly Courier" */
   const QUICK_TAGS = [
     "Rich & Creamy",
     "Fast Cold-Bag Delivery",
@@ -130,58 +131,37 @@
       .rfb-trigger-btn {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.65rem 1.15rem;
-        background: #b71c1c;
+        gap: 0.45rem;
+        padding: 0.6rem 1.05rem;
+        background: #5C1A2B;
         color: #ffffff;
-        border: 2px solid rgba(255, 255, 255, 0.25);
-        border-radius: 9999px;
-        font-size: 0.95rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        font-size: 0.9rem;
         font-weight: 700;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.01em;
         cursor: pointer;
-        box-shadow: 0 4px 18px rgba(183, 28, 28, 0.45), 0 2px 6px rgba(0, 0, 0, 0.25);
-        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease;
+        box-shadow: 0 4px 12px rgba(26, 10, 15, 0.28);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
         outline: none;
         user-select: none;
-        -webkit-
       }
       .rfb-trigger-btn:hover {
-        transform: translateY(-2px) scale(1.03);
-        background: #d32f2f;
-        box-shadow: 0 8px 24px rgba(211, 47, 47, 0.55), 0 4px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(-1px);
+        background: #8C1D40;
+        box-shadow: 0 6px 16px rgba(26, 10, 15, 0.35);
       }
       .rfb-trigger-btn:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(0);
       }
       .rfb-trigger-btn:focus-visible {
-        outline: 3px solid #ffca28;
-        outline-offset: 3px;
+        outline: 2px solid #E8557A;
+        outline-offset: 2px;
       }
 
       .rfb-trigger-star {
-        font-size: 1.1rem;
+        font-size: 0.98rem;
         color: #FFD700;
-        filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
-        animation: rfb-star-pulse 3.5s infinite ease-in-out;
-      }
-      @keyframes rfb-star-pulse {
-        0%, 100% { transform: scale(1) rotate(0deg); }
-        50% { transform: scale(1.15) rotate(8deg); }
-      }
-
-      .rfb-badge {
-        display: inline-block;
-        padding: 0.15rem 0.45rem;
-        background: #ffca28;
-        color: #1a1a1a;
-        font-size: 0.7rem;
-        font-weight: 800;
-        border-radius: 999px;
-        line-height: 1;
-        margin-left: 0.2rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
       }
 
       /* Popover Card */
@@ -194,14 +174,14 @@
         background: var(--rfb-card-bg, #ffffff);
         color: var(--rfb-text, #1f2937);
         border: 1px solid var(--rfb-border, #e5e7eb);
-        border-radius: 1.15rem;
-        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.06);
-        padding: 1.25rem;
+        border-radius: 0.85rem;
+        box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.05);
+        padding: 1.2rem;
         opacity: 0;
         visibility: hidden;
-        transform: translateY(12px) scale(0.96);
+        transform: translateY(10px) scale(0.98);
         transform-origin: bottom left;
-        transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+        transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
         z-index: 9995;
       }
       .rfb-popover-card.rfb-open {
@@ -213,38 +193,38 @@
       /* Dark Theme Overrides */
       :root[data-theme="dark"] #romeos-feedback-bubble-root,
       :root:not([data-theme="light"]) #romeos-feedback-bubble-root {
-        --rfb-card-bg: #1c1d22;
-        --rfb-text: #f4f4f6;
-        --rfb-muted: #9ca3af;
-        --rfb-border: #333640;
-        --rfb-input-bg: #272832;
-        --rfb-input-border: #3f4251;
-        --rfb-chip-bg: #272832;
-        --rfb-chip-border: #3f4251;
-        --rfb-chip-hover: #333644;
+        --rfb-card-bg: #221317;
+        --rfb-text: #F6E9EC;
+        --rfb-muted: #C4A9B1;
+        --rfb-border: #3D2830;
+        --rfb-input-bg: #150B0E;
+        --rfb-input-border: #3D2830;
+        --rfb-chip-bg: #2D1A20;
+        --rfb-chip-border: #3D2830;
+        --rfb-chip-hover: #3D2830;
       }
       :root[data-theme="light"] #romeos-feedback-bubble-root {
         --rfb-card-bg: #ffffff;
-        --rfb-text: #1f2937;
-        --rfb-muted: #6b7280;
-        --rfb-border: #e5e7eb;
-        --rfb-input-bg: #f9fafb;
-        --rfb-input-border: #d1d5db;
-        --rfb-chip-bg: #f3f4f6;
-        --rfb-chip-border: #e5e7eb;
-        --rfb-chip-hover: #e5e7eb;
+        --rfb-text: #2A1218;
+        --rfb-muted: #6E5560;
+        --rfb-border: #F0D9DF;
+        --rfb-input-bg: #FFF8F5;
+        --rfb-input-border: #E5C8D0;
+        --rfb-chip-bg: #FDEEF1;
+        --rfb-chip-border: #F0D9DF;
+        --rfb-chip-hover: #F7DCE2;
       }
       @media (prefers-color-scheme: dark) {
         :root:not([data-theme]) #romeos-feedback-bubble-root {
-          --rfb-card-bg: #1c1d22;
-          --rfb-text: #f4f4f6;
-          --rfb-muted: #9ca3af;
-          --rfb-border: #333640;
-          --rfb-input-bg: #272832;
-          --rfb-input-border: #3f4251;
-          --rfb-chip-bg: #272832;
-          --rfb-chip-border: #3f4251;
-          --rfb-chip-hover: #333644;
+          --rfb-card-bg: #221317;
+          --rfb-text: #F6E9EC;
+          --rfb-muted: #C4A9B1;
+          --rfb-border: #3D2830;
+          --rfb-input-bg: #150B0E;
+          --rfb-input-border: #3D2830;
+          --rfb-chip-bg: #2D1A20;
+          --rfb-chip-border: #3D2830;
+          --rfb-chip-hover: #3D2830;
         }
       }
 
@@ -257,9 +237,9 @@
       }
       .rfb-title-group h3 {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 800;
-        color: var(--rfb-text, #1f2937);
+        color: var(--rfb-text, #2A1218);
         display: flex;
         align-items: center;
         gap: 0.35rem;
@@ -267,12 +247,12 @@
       .rfb-title-group p {
         margin: 0.2rem 0 0;
         font-size: 0.8rem;
-        color: var(--rfb-muted, #6b7280);
+        color: var(--rfb-muted, #6E5560);
       }
       .rfb-close-btn {
         background: transparent;
         border: none;
-        color: var(--rfb-muted, #6b7280);
+        color: var(--rfb-muted, #6E5560);
         cursor: pointer;
         padding: 0.25rem;
         font-size: 1.1rem;
@@ -281,17 +261,17 @@
         transition: color 0.15s, background-color 0.15s;
       }
       .rfb-close-btn:hover {
-        color: #d32f2f;
-        background: rgba(211, 47, 47, 0.1);
+        color: #8C1D40;
+        background: rgba(140, 29, 64, 0.1);
       }
 
       /* Star Rating Interactive Group */
       .rfb-stars-container {
         text-align: center;
         padding: 0.65rem 0.5rem;
-        background: var(--rfb-input-bg, #f9fafb);
-        border: 1px solid var(--rfb-border, #e5e7eb);
-        border-radius: 0.85rem;
+        background: var(--rfb-input-bg, #FFF8F5);
+        border: 1px solid var(--rfb-border, #F0D9DF);
+        border-radius: 0.75rem;
         margin-bottom: 0.85rem;
       }
       .rfb-stars-row {
@@ -303,33 +283,32 @@
         border: none;
         padding: 0.2rem;
         cursor: pointer;
-        font-size: 1.6rem;
+        font-size: 1.55rem;
         color: #d1d5db;
         transition: transform 0.15s ease, color 0.15s ease;
         line-height: 1;
       }
       .rfb-star-btn:hover {
-        transform: scale(1.22);
+        transform: scale(1.15);
       }
       .rfb-star-btn.rfb-active {
         color: #FFD700;
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.75));
       }
       .rfb-star-label {
         font-size: 0.8rem;
         font-weight: 600;
         margin-top: 0.35rem;
-        color: var(--rfb-muted, #6b7280);
+        color: var(--rfb-muted, #6E5560);
         min-height: 1.15rem;
       }
 
       /* Quick Tags */
       .rfb-tags-label {
-        font-size: 0.78rem;
+        font-size: 0.76rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        color: var(--rfb-muted, #6b7280);
+        color: var(--rfb-muted, #6E5560);
         margin-bottom: 0.4rem;
       }
       .rfb-tags-grid {
@@ -339,9 +318,9 @@
         margin-bottom: 0.85rem;
       }
       .rfb-tag-chip {
-        background: var(--rfb-chip-bg, #f3f4f6);
-        color: var(--rfb-text, #1f2937);
-        border: 1px solid var(--rfb-chip-border, #e5e7eb);
+        background: var(--rfb-chip-bg, #FDEEF1);
+        color: var(--rfb-text, #2A1218);
+        border: 1px solid var(--rfb-chip-border, #F0D9DF);
         border-radius: 999px;
         padding: 0.35rem 0.65rem;
         font-size: 0.78rem;
@@ -351,13 +330,12 @@
         user-select: none;
       }
       .rfb-tag-chip:hover {
-        background: var(--rfb-chip-hover, #e5e7eb);
+        background: var(--rfb-chip-hover, #F7DCE2);
       }
       .rfb-tag-chip.rfb-tag-selected {
-        background: #b71c1c;
+        background: #8C1D40;
         color: #ffffff;
-        border-color: #b71c1c;
-        box-shadow: 0 2px 6px rgba(183, 28, 28, 0.35);
+        border-color: #8C1D40;
       }
 
       /* Textarea & Inputs */
@@ -369,10 +347,10 @@
         min-height: 64px;
         max-height: 140px;
         padding: 0.55rem 0.75rem;
-        background: var(--rfb-input-bg, #f9fafb);
-        color: var(--rfb-text, #1f2937);
-        border: 1px solid var(--rfb-input-border, #d1d5db);
-        border-radius: 0.75rem;
+        background: var(--rfb-input-bg, #FFF8F5);
+        color: var(--rfb-text, #2A1218);
+        border: 1px solid var(--rfb-input-border, #E5C8D0);
+        border-radius: 0.65rem;
         font-family: inherit;
         font-size: 0.85rem;
         line-height: 1.4;
@@ -382,8 +360,8 @@
       }
       .rfb-textarea:focus,
       .rfb-input:focus {
-        border-color: #d32f2f;
-        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+        border-color: #8C1D40;
+        box-shadow: 0 0 0 3px rgba(140, 29, 64, 0.15);
       }
 
       .rfb-inputs-row {
@@ -395,9 +373,9 @@
       .rfb-input {
         width: 100%;
         padding: 0.45rem 0.65rem;
-        background: var(--rfb-input-bg, #f9fafb);
-        color: var(--rfb-text, #1f2937);
-        border: 1px solid var(--rfb-input-border, #d1d5db);
+        background: var(--rfb-input-bg, #FFF8F5);
+        color: var(--rfb-text, #2A1218);
+        border: 1px solid var(--rfb-input-border, #E5C8D0);
         border-radius: 0.65rem;
         font-family: inherit;
         font-size: 0.82rem;
@@ -408,23 +386,23 @@
       /* Submit Button */
       .rfb-submit-btn {
         width: 100%;
-        padding: 0.65rem 1rem;
-        background: #b71c1c;
+        padding: 0.42rem 0.8rem;
+        background: #5C1A2B;
         color: #ffffff;
         border: none;
-        border-radius: 0.75rem;
-        font-size: 0.92rem;
+        border-radius: 0.65rem;
+        font-size: 0.9rem;
         font-weight: 700;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.4rem;
-        box-shadow: 0 4px 12px rgba(183, 28, 28, 0.35);
+        box-shadow: 0 2px 8px rgba(92, 26, 43, 0.25);
         transition: background-color 0.15s, transform 0.15s;
       }
       .rfb-submit-btn:hover:not(:disabled) {
-        background: #d32f2f;
+        background: #8C1D40;
         transform: translateY(-1px);
       }
       .rfb-submit-btn:active:not(:disabled) {
@@ -457,8 +435,8 @@
         display: none;
       }
       .rfb-checkmark-wrap {
-        width: 64px;
-        height: 64px;
+        width: 56px;
+        height: 56px;
         margin: 0 auto 0.75rem;
         border-radius: 50%;
         background: #10b981;
@@ -466,35 +444,65 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.2rem;
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-        animation: rfb-bounce-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-      @keyframes rfb-bounce-in {
-        0% { transform: scale(0.3); opacity: 0; }
-        60% { transform: scale(1.15); opacity: 1; }
-        100% { transform: scale(1); }
+        font-size: 1.85rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
       }
       .rfb-success-view h4 {
         margin: 0 0 0.35rem;
-        font-size: 1.15rem;
+        font-size: 1.1rem;
         font-weight: 800;
-        color: var(--rfb-text, #1f2937);
+        color: var(--rfb-text, #2A1218);
       }
       .rfb-success-view p {
         margin: 0;
         font-size: 0.85rem;
-        color: var(--rfb-muted, #6b7280);
+        color: var(--rfb-muted, #6E5560);
       }
 
-      @media (max-width: 480px) {
+      @media (max-width: 768px) {
         #romeos-feedback-bubble-root {
-          bottom: 1rem;
+          display: none !important;
+        }
+      }
+      @media (max-width: 900px) {
+        #romeos-feedback-bubble-root {
+          bottom: 4.75rem;
           left: 1rem;
         }
         .rfb-popover-card {
           width: calc(100vw - 2rem);
           max-width: 350px;
+        }
+      }
+      /* Right-edge vertical tab positioning — zero collision with hero photos or deal cards */
+      #romeos-feedback-bubble-root {
+        left: auto !important;
+        right: 0 !important;
+        top: 52% !important;
+        bottom: auto !important;
+        transform: translateY(-50%) !important;
+      }
+      .rfb-trigger-btn {
+        writing-mode: vertical-rl !important;
+        text-orientation: mixed !important;
+        border-radius: 8px 0 0 8px !important;
+        padding: 0.7rem 0.36rem !important;
+        font-size: 0.72rem !important;
+        letter-spacing: 0.05em !important;
+        box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.14) !important;
+      }
+      @media (max-width: 900px) {
+        #romeos-feedback-bubble-root {
+          top: auto !important;
+          bottom: 5.5rem !important;
+          right: 0 !important;
+          left: auto !important;
+          transform: none !important;
+        }
+        .rfb-trigger-btn {
+          padding: 0.55rem 0.3rem !important;
+          font-size: 0.68rem !important;
+          opacity: 0.92;
         }
       }
     `;
@@ -508,65 +516,65 @@
     root.id = "romeos-feedback-bubble-root";
 
     root.innerHTML = `
-      <div id="rfb-popover"class="rfb-popover-card"role="dialog"aria-modal="true"aria-labelledby="rfb-title">
+      <div id="rfb-popover" class="rfb-popover-card" role="dialog" aria-modal="true" aria-labelledby="rfb-title">
         <div id="rfb-form-view">
           <div class="rfb-header">
             <div class="rfb-title-group">
               <h3 id="rfb-title">Customer Feedback</h3>
               <p>Help us keep Coldberry Ice Cream fresh, rich &amp; creamy!</p>
             </div>
-            <button type="button"class="rfb-close-btn"id="rfb-close-btn"aria-label="Close feedback window">
-              <i class="fa-solid fa-xmark"aria-hidden="true"></i>
+            <button type="button" class="rfb-close-btn" id="rfb-close-btn" aria-label="Close feedback window">
+              <i class="fa-solid fa-xmark" aria-hidden="true"></i>
             </button>
           </div>
 
-          <div id="rfb-error"class="rfb-error-alert"role="alert"></div>
+          <div id="rfb-error" class="rfb-error-alert" role="alert"></div>
 
           <!-- Feedback vs Complaint Switcher -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.75rem;"role="tablist"aria-label="Feedback type">
-            <button type="button"id="rfb-mode-feedback"data-rfb-mode="feedback"aria-selected="true"style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:#ff5733;color:#fff;font-weight:700;font-size:0.8rem;cursor:pointer;">⭐ Sweet Review</button>
-            <button type="button"id="rfb-mode-complaint"data-rfb-mode="complaint"aria-selected="false"style="padding:0.45rem;border-radius:8px;border:1px solid var(--rfb-border,#e5e7eb);background:var(--rfb-chip-bg,#f3f4f6);color:var(--rfb-text,#1f2937);font-weight:700;font-size:0.8rem;cursor:pointer;"> Scoop Issue</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.75rem;" role="tablist" aria-label="Feedback type">
+            <button type="button" id="rfb-mode-feedback" data-rfb-mode="feedback" aria-selected="true" style="padding:0.45rem;border-radius:6px;border:1px solid var(--rfb-border,#F0D9DF);background:#8C1D40;color:#fff;font-weight:700;font-size:0.8rem;cursor:pointer;">Sweet Review</button>
+            <button type="button" id="rfb-mode-complaint" data-rfb-mode="complaint" aria-selected="false" style="padding:0.45rem;border-radius:6px;border:1px solid var(--rfb-border,#F0D9DF);background:var(--rfb-chip-bg,#FDEEF1);color:var(--rfb-text,#2A1218);font-weight:700;font-size:0.8rem;cursor:pointer;">Scoop Issue</button>
           </div>
 
           <!-- Interactive Star Rating -->
           <div class="rfb-stars-container">
-            <div class="rfb-stars-row"id="rfb-stars-row"role="radiogroup"aria-label="Rating out of 5 stars">
-              <button type="button"class="rfb-star-btn"data-star="1"aria-label="1 star"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
-              <button type="button"class="rfb-star-btn"data-star="2"aria-label="2 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
-              <button type="button"class="rfb-star-btn"data-star="3"aria-label="3 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
-              <button type="button"class="rfb-star-btn"data-star="4"aria-label="4 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
-              <button type="button"class="rfb-star-btn"data-star="5"aria-label="5 stars"><i class="fa-solid fa-star"aria-hidden="true"></i></button>
+            <div class="rfb-stars-row" id="rfb-stars-row" role="radiogroup" aria-label="Rating out of 5 stars">
+              <button type="button" class="rfb-star-btn" data-star="1" aria-label="1 star"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              <button type="button" class="rfb-star-btn" data-star="2" aria-label="2 stars"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              <button type="button" class="rfb-star-btn" data-star="3" aria-label="3 stars"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              <button type="button" class="rfb-star-btn" data-star="4" aria-label="4 stars"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
+              <button type="button" class="rfb-star-btn" data-star="5" aria-label="5 stars"><i class="fa-solid fa-star" aria-hidden="true"></i></button>
             </div>
-            <div class="rfb-star-label"id="rfb-star-label">Tap a star to rate</div>
+            <div class="rfb-star-label" id="rfb-star-label">Tap a star to rate</div>
           </div>
 
           <!-- Quick Tags -->
           <div class="rfb-tags-label">Quick Flavour &amp; Delivery Tags:</div>
-          <div class="rfb-tags-grid"id="rfb-tags-grid">
-            ${QUICK_TAGS.map(tag => `<button type="button"class="rfb-tag-chip"data-tag="${tag}">${tag}</button>`).join("")}
+          <div class="rfb-tags-grid" id="rfb-tags-grid">
+            ${QUICK_TAGS.map(tag => `<button type="button" class="rfb-tag-chip" data-tag="${tag}">${tag}</button>`).join("")}
           </div>
 
           <!-- Textarea Comments -->
           <div class="rfb-field">
-            <textarea id="rfb-comments"class="rfb-textarea"rows="3"maxlength="1000"placeholder="Tell us how your ice cream scoops or delivery were..."></textarea>
+            <textarea id="rfb-comments" class="rfb-textarea" rows="3" maxlength="1000" placeholder="Tell us how your ice cream scoops or delivery were..."></textarea>
           </div>
 
           <!-- Customer Name & Optional Order PIN -->
           <div class="rfb-inputs-row">
-            <input type="text"id="rfb-name"class="rfb-input"placeholder="Your name (optional)"maxlength="100"autocomplete="name" />
-            <input type="text"id="rfb-pin"class="rfb-input"placeholder="Order PIN (optional)"maxlength="6"inputmode="numeric"pattern="[0-9]*" />
+            <input type="text" id="rfb-name" class="rfb-input" placeholder="Your name (optional)" maxlength="100" autocomplete="name" />
+            <input type="text" id="rfb-pin" class="rfb-input" placeholder="Order PIN (optional)" maxlength="6" inputmode="numeric" pattern="[0-9]*" />
           </div>
 
           <!-- Submit Button -->
-          <button type="button"id="rfb-submit-btn"class="rfb-submit-btn">
-            <span>Send Ice Cream Feedback</span> 
+          <button type="button" id="rfb-submit-btn" class="rfb-submit-btn">
+            <span>Send Ice Cream Feedback</span>
           </button>
         </div>
 
         <!-- Thank-You Animated Confirmation -->
-        <div id="rfb-success-view"class="rfb-success-view">
+        <div id="rfb-success-view" class="rfb-success-view">
           <div class="rfb-checkmark-wrap">
-            <i class="fa-solid fa-check"aria-hidden="true"></i>
+            <i class="fa-solid fa-check" aria-hidden="true"></i>
           </div>
           <h4>Thank You!</h4>
           <p>Your feedback was received and synced directly to our creamery &amp; couriers. We appreciate you!</p>
@@ -574,10 +582,9 @@
       </div>
 
       <!-- Trigger Bubble Button -->
-      <button type="button"id="rfb-trigger"class="rfb-trigger-btn"aria-haspopup="dialog"aria-expanded="false"aria-label="Open client feedback form">
-        <i class="fa-solid fa-star rfb-trigger-star"style="color: #FFD700;"aria-hidden="true"></i>
+      <button type="button" id="rfb-trigger" class="rfb-trigger-btn" aria-haspopup="dialog" aria-expanded="false" aria-label="Open client feedback form">
+        <i class="fa-solid fa-star rfb-trigger-star" style="color: #FFD700;" aria-hidden="true"></i>
         <span>Feedback</span>
-        <span class="rfb-badge"style="background:#db2777;color:#fff;">Chilled</span>
       </button>
     `;
 
@@ -628,18 +635,18 @@
       const isComplaint = feedbackMode === "complaint";
       modeFeedbackBtn.setAttribute("aria-selected", isComplaint ? "false" : "true");
       modeComplaintBtn.setAttribute("aria-selected", isComplaint ? "true" : "false");
-      modeFeedbackBtn.style.background = isComplaint ? "var(--rfb-chip-bg,#f3f4f6)" : "#ff5733";
-      modeFeedbackBtn.style.color = isComplaint ? "var(--rfb-text,#1f2937)" : "#fff";
-      modeComplaintBtn.style.background = isComplaint ? "#dc3545" : "var(--rfb-chip-bg,#f3f4f6)";
-      modeComplaintBtn.style.color = isComplaint ? "#fff" : "var(--rfb-text,#1f2937)";
+      modeFeedbackBtn.style.background = isComplaint ? "var(--rfb-chip-bg,#FDEEF1)" : "#8C1D40";
+      modeFeedbackBtn.style.color = isComplaint ? "var(--rfb-text,#2A1218)" : "#fff";
+      modeComplaintBtn.style.background = isComplaint ? "#5C1A2B" : "var(--rfb-chip-bg,#FDEEF1)";
+      modeComplaintBtn.style.color = isComplaint ? "#fff" : "var(--rfb-text,#2A1218)";
       selectedTags.clear();
       const activeList = isComplaint ? COMPLAINT_TAGS : QUICK_TAGS;
-      tagsGrid.innerHTML = activeList.map((tag) => `<button type="button"class="rfb-tag-chip"data-tag="${tag}">${tag}</button>`).join("");
+      tagsGrid.innerHTML = activeList.map((tag) => `<button type="button" class="rfb-tag-chip" data-tag="${tag}">${tag}</button>`).join("");
       bindTagChips();
       commentsInput.placeholder = isComplaint
         ? "Describe your complaint (melted scoop, missing cone, delay, refund, etc.)..."
         : "Tell us how your ice cream scoops or delivery were...";
-      submitBtn.innerHTML = isComplaint ? `<span>Submit Complaint</span> ` : `<span>Send Feedback</span> `;
+      submitBtn.innerHTML = isComplaint ? `<span>Submit Complaint</span>` : `<span>Send Feedback</span>`;
     }
 
     modeFeedbackBtn.addEventListener("click", () => setFeedbackMode("feedback"));

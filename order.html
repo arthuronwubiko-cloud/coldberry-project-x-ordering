@@ -48,6 +48,7 @@
     <script src="js/site.js" defer></script>
     <script src="js/phone-region-accordion.js" defer></script>
     <script src="js/auth-ui.js" defer></script>
+    <script src="js/qsr-features.js" defer></script>
     <script src="js/feedback-bubble.js" defer></script>
       <script type="application/ld+json" data-local-seo="true">
 {
@@ -190,11 +191,13 @@
       <section class="order-content" aria-labelledby="order-heading">
         <div class="order-intro">
           <h2 id="order-heading">Your order details</h2>
-          <p>Choose your nearest Coldberry Ice Cream parlor location, then select delivery or pickup.</p>
+          <p>Choose your nearest Coldberry Ice Cream parlor location, then select delivery, pickup, or Call &amp; Collect.</p>
         </div>
 
         <form class="order-form" id="order-form" novalidate>
-          <div class="order-fields">
+          <div class="checkout-grid">
+          <div class="checkout-left">
+<div class="order-fields">
             <div class="order-field">
               <label for="customer-name">Full name <span aria-hidden="true">*</span></label>
               <input
@@ -203,7 +206,7 @@
                 autocomplete="name"
                 minlength="2"
                 maxlength="80"
-                placeholder="e.g. Amina Bello"
+                placeholder="e.g. Tunde Adeyemi"
                 required
               />
             </div>
@@ -226,7 +229,8 @@
 
           <fieldset class="order-method">
             <legend>How would you like to receive your order? <span aria-hidden="true">*</span></legend>
-            <label>
+            <div class="order-method-pills">
+<label>
               <input type="radio" name="fulfilment" value="Delivery" checked required />
               Delivery
             </label>
@@ -234,6 +238,11 @@
               <input type="radio" name="fulfilment" value="Pickup" />
               Pickup
             </label>
+            <label>
+              <input type="radio" name="fulfilment" value="Call To Collect" />
+              Call &amp; Collect
+            </label>
+            </div>
           </fieldset>
 
           <div class="order-field">
@@ -269,12 +278,42 @@
           </div>
 
           <div class="order-field">
+            <label for="order-items">Other items or order details <span class="optional">(optional)</span></label>
+            <textarea
+              id="order-items"
+              name="items"
+              rows="4"
+              maxlength="1000"
+              placeholder="Add tub sizes, toppings, waffle bowls, drinks, or other requests..."
+            ></textarea>
+          </div>
+
+          <div class="order-field">
+            <label for="order-notes">Additional notes <span class="optional">(optional)</span></label>
+            <textarea id="order-notes" name="notes" rows="2" maxlength="500" placeholder="e.g. Ring the bell, pack chilled, extra spoons &amp; napkins"></textarea>
+          </div>
+
+          <div class="order-field">
+            <label for="order-consent">
+              <input id="order-consent" name="consent" type="checkbox" required />
+              I agree to the <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a> and agree to my order details being handled in accordance with the <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>. <span aria-hidden="true">*</span>
+            </label>
+          </div>
+
+          <p id="order-status" role="alert" aria-live="polite" hidden></p>
+          <button class="order-button" id="submit-order" type="submit"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> Continue to WhatsApp</button>
+          <p class="order-disclaimer">
+            WhatsApp opens with your order details filled in. Review the message and tap Send to submit your request. No payment is taken.
+          </p>
+                  </div>
+          <div class="checkout-right">
+<div class="order-field">
             <section class="order-cart" aria-labelledby="cart-heading">
               <div class="order-cart-header">
                 <h3 id="cart-heading">Your cart</h3>
                 <button type="button" id="clear-cart-btn" class="clear-cart-btn" aria-label="Clear all items from cart" hidden>Clear cart</button>
               </div>
-              <p id="cart-empty">Your cart is empty. Add items from the menu or choose popular sides below.</p>
+              <p id="cart-empty">Your cart is empty. Add items from our menu or pick quick add-ons below. <a href="890b.html" class="cart-empty-link">Browse Menu &rarr;</a></p>
               <ul id="order-cart-items" aria-live="polite"></ul>
 
               <div id="cart-pricing-summary" class="cart-pricing-summary" hidden>
@@ -305,7 +344,7 @@
 
           <div class="order-field">
             <section class="sister-cross-sell-box" aria-labelledby="sister-cross-sell-heading">
-              <p class="sister-cross-sell-kicker">Hot + Cold Sister Kitchen Add-On · Same Rider, 1 Delivery Fee</p>
+              <p class="sister-cross-sell-kicker"><span>Hot + Cold Sister Kitchen</span><span class="kicker-sep" aria-hidden="true">&middot;</span><span>Same Rider, 1&nbsp;Delivery&nbsp;Fee</span></p>
               <h3 id="sister-cross-sell-heading" class="sister-cross-sell-title">Pair with Oven-Hot Romeo's Pizza</h3>
               <p class="sister-cross-sell-sub">Packed in separate thermal and -18°C cold pouches so your pizza arrives hot and your Coldberry stays frozen.</p>
               <div class="sister-cross-sell-grid">
@@ -338,20 +377,19 @@
           <div class="order-field">
             <section class="checkout-addons-section" aria-labelledby="addons-heading">
               <div class="checkout-addons-header">
-                <h3 id="addons-heading" class="checkout-addons-title">
-                  <span aria-hidden="true"></span> Add Popular Sides &amp; Extras
+                <h3 id="addons-heading" class="checkout-addons-title">Add Popular Sides &amp; Extras
                 </h3>
-                <p class="checkout-addons-subtitle">Enhance your meal — add delicious sides and drinks straight to your checkout list.</p>
+                <p class="checkout-addons-subtitle">Round out your order — add freshly churned scoops, waffle cups, and chilled drinks.</p>
               </div>
               <div class="checkout-addons-grid">
-                <!-- Ice Cream -->
+                <!-- Ice Cream (legacy asset check: images/chicken-wings.jpg) -->
                 <article class="checkout-addon-card" data-addon-item="Ice Cream">
                   <img
                     src="images/cone.jpg"
                     alt="Ice Cream"
                     class="checkout-addon-thumb"
                     loading="lazy"
-                    onerror="this.src='images/chicken-wings.jpg'"
+                    onerror="this.src='images/coldberry-scoop.jpg'"
                   />
                   <div class="checkout-addon-info">
                     <strong class="checkout-addon-name">Ice Cream</strong>
@@ -364,14 +402,14 @@
                   </div>
                 </article>
 
-                <!-- Waffle Cup -->
+                <!-- Waffle Cup (legacy asset check: images/shawarma.jpg) -->
                 <article class="checkout-addon-card" data-addon-item="Waffle Cup">
                   <img
                     src="images/dip-waffle.jpg"
                     alt="Waffle Cup"
                     class="checkout-addon-thumb"
                     loading="lazy"
-                    onerror="this.src='images/shawarma.jpg'"
+                    onerror="this.src='images/waffle-cup.jpg'"
                   />
                   <div class="checkout-addon-info">
                     <strong class="checkout-addon-name">Waffle Cup</strong>
@@ -407,48 +445,8 @@
             </section>
           </div>
 
-          <!-- Sister-Brand Cart & Checkout Upsell: Romeo's Pizza Nigeria -->
-          <div class="order-field">
-            <section class="sister-upsell-card" aria-label="Romeo's Pizza Partner Upsell">
-              <div class="sister-upsell-content">
-                <div class="sister-upsell-badge"><i class="fa-solid fa-pizza-slice" aria-hidden="true"></i> Pair with Hot Artisan Pizza</div>
-                <h3 class="sister-upsell-title">Craving hot, cheesy pizza to go with dessert?</h3>
-                <p class="sister-upsell-desc">Complete your feast with freshly baked stone pizzas, crispy wings, and savoury shawarma from our partner kitchen, <strong>Romeo's Pizza Nigeria</strong>.</p>
-                <a href="https://romeos-project-x.vercel.app/order.html" class="sister-upsell-btn" target="_blank" rel="noopener noreferrer">
-                  <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> Order From Romeo's Pizza
-                </a>
-              </div>
-            </section>
-          </div>
-
-          <div class="order-field">
-            <label for="order-items">Other items or order details <span class="optional">(optional)</span></label>
-            <textarea
-              id="order-items"
-              name="items"
-              rows="4"
-              maxlength="1000"
-              placeholder="Add tub sizes, toppings, waffle bowls, drinks, or other requests..."
-            ></textarea>
-          </div>
-
-          <div class="order-field">
-            <label for="order-notes">Additional notes <span class="optional">(optional)</span></label>
-            <textarea id="order-notes" name="notes" rows="2" maxlength="500" placeholder="e.g. Ring the bell, pack chilled, extra spoons &amp; napkins"></textarea>
-          </div>
-
-          <div class="order-field">
-            <label for="order-consent">
-              <input id="order-consent" name="consent" type="checkbox" required />
-              I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a> and agree to my order details being handled in accordance with the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>. <span aria-hidden="true">*</span>
-            </label>
-          </div>
-
-          <p id="order-status" role="alert" aria-live="polite" hidden></p>
-          <button class="order-button" id="submit-order" type="submit">Continue to WhatsApp</button>
-          <p class="order-disclaimer">
-            WhatsApp opens with your order details filled in. Review the message and tap Send to submit your request. No payment is taken.
-          </p>
+                    </div>
+        </div>
         </form>
 
         <section class="order-confirmation" id="order-confirmation" aria-live="polite" hidden>

@@ -131,7 +131,7 @@
             (m) => `
           <div class="auth-drawer-card" style="margin-bottom:0.55rem;border:1px solid rgba(184, 58, 27, 0.35);">
             <div style="display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:0.86rem;">
-              <span><i class="fa-solid fa-envelope"></i> ${esc(m.title || "Message from Romeo's Pizza")}</span>
+              <span><i class="fa-solid fa-envelope"></i> ${esc(m.title || "Message from Coldberry Ice Cream")}</span>
               <span style="font-size:0.72rem;opacity:0.7;">${m.recipient_username === "ALL" ? "Broadcast" : "Direct"}</span>
             </div>
             <div style="font-size:0.84rem;margin-top:0.3rem;line-height:1.45;">${esc(m.body)}</div>
@@ -139,7 +139,7 @@
           </div>`
           )
           .join("")
-      : `<div style="font-size:0.84rem;opacity:0.75;">No messages from Romeo's Pizza yet.</div>`;
+      : `<div style="font-size:0.84rem;opacity:0.75;">No messages from Coldberry Ice Cream yet.</div>`;
 
     const refundsHtml = refunds.length
       ? refunds
@@ -154,7 +154,7 @@
             <div style="font-size:0.78rem;opacity:0.85;margin-bottom:0.45rem;">Order: ${esc(r.orderId || "")} · ${esc(r.reason || "")}</div>
             <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
               <button type="button" data-copy-refund="${esc(r.token)}" style="padding:0.3rem 0.65rem;border-radius:6px;border:1px solid #20c997;background:transparent;color:inherit;font-size:0.78rem;font-weight:700;cursor:pointer;">Copy Token</button>
-              <a href="https://wa.me/2349055303848?text=${encodeURIComponent("Hello Romeo's Pizza, I would like to claim my refund token " + r.token + " (₦" + Number(r.amount || 0).toLocaleString("en-NG") + ").")}" target="_blank" rel="noopener noreferrer" style="padding:0.3rem 0.65rem;border-radius:6px;background:#25d366;color:#fff;text-decoration:none;font-size:0.78rem;font-weight:700;">Claim on WhatsApp</a>
+              <a href="https://wa.me/2349055303848?text=${encodeURIComponent("Hello Coldberry Ice Cream, I would like to claim my refund token " + r.token + " (₦" + Number(r.amount || 0).toLocaleString("en-NG") + ").")}" target="_blank" rel="noopener noreferrer" style="padding:0.3rem 0.65rem;border-radius:6px;background:#25d366;color:#fff;text-decoration:none;font-size:0.78rem;font-weight:700;">Claim on WhatsApp</a>
             </div>
           </div>`
           )
@@ -191,6 +191,17 @@
           <button type="button" id="close-auth-drawer" aria-label="Close account panel" style="background:transparent;border:none;color:inherit;font-size:1.4rem;cursor:pointer;">&times;</button>
         </div>
 
+        <div class="auth-drawer-card" id="drawer-loyalty-card" style="border-left:3px solid #8C1D40;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
+            <span style="font-weight:800;font-size:0.88rem;color:#8C1D40;"><i class="fa-solid fa-crown" aria-hidden="true"></i> BerryPoints Rewards</span>
+            <strong id="drawer-loyalty-pts" style="font-size:0.9rem;">Loading…</strong>
+          </div>
+          <div style="height:6px;background:rgba(128,128,128,0.18);border-radius:999px;overflow:hidden;margin:0.45rem 0 0.35rem;">
+            <div id="drawer-loyalty-fill" style="height:100%;width:0%;background:#8C1D40;transition:width 0.3s ease;"></div>
+          </div>
+          <div id="drawer-loyalty-meta" style="font-size:0.74rem;opacity:0.78;line-height:1.35;">1 pt / ₦500 food subtotal (excl. fees) · 10 Drink · 50 Shawarma · 70 Med · 80 Lrg · 90 Champ · 2,500 = ₦2,500 off.</div>
+        </div>
+
         <div>
           <div style="font-weight:700;font-size:0.85rem;margin-bottom:0.45rem;">Choose Your Profile Icon</div>
           <div class="auth-avatar-grid">
@@ -205,7 +216,7 @@
         </div>
 
         <div>
-          <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.45rem;">Messages from Romeo's Pizza (${messages.length})</div>
+          <div style="font-weight:800;font-size:0.92rem;margin-bottom:0.45rem;">Messages from Coldberry Ice Cream (${messages.length})</div>
           ${messagesHtml}
         </div>
 
@@ -226,6 +237,40 @@
     `;
 
     document.body.appendChild(backdrop);
+
+    if (user) {
+      fetch("/api/orders?action=loyalty_balance", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          const ptsEl = backdrop.querySelector("#drawer-loyalty-pts");
+          const fillEl = backdrop.querySelector("#drawer-loyalty-fill");
+          const metaEl = backdrop.querySelector("#drawer-loyalty-meta");
+          if (!ptsEl || !data || !data.ok) return;
+          const pts = Number(data.points || 0);
+          const tiers = [
+            { p: 10, n: "Free Drink" },
+            { p: 50, n: "Free Shawarma" },
+            { p: 70, n: "Medium Pizza" },
+            { p: 80, n: "Large Pizza" },
+            { p: 90, n: "Champion Pizza" },
+            { p: 2500, n: "₦2,500 Off" },
+          ];
+          const next = tiers.find((t) => pts < t.p) || tiers[tiers.length - 1];
+          const pct = Math.min(100, Math.round((pts / next.p) * 100));
+          ptsEl.textContent = pts.toLocaleString("en-NG") + " pts";
+          if (fillEl) fillEl.style.width = pct + "%";
+          if (metaEl) {
+            const unlocked = tiers.filter((t) => pts >= t.p).map((t) => t.n);
+            metaEl.textContent = unlocked.length
+              ? "Unlocked: " + unlocked.join(", ") + " · Redeem at checkout! (1 pt / ₦500 food subtotal, excl. fees)"
+              : (next.p - pts) + " pts to " + next.n + " · 10 Drink · 50 Shawarma · 70 Med · 80 Lrg · 90 Champ · 2,500 = ₦2.5k off.";
+          }
+        })
+        .catch(() => {
+          const ptsEl = backdrop.querySelector("#drawer-loyalty-pts");
+          if (ptsEl) ptsEl.textContent = "0 pts";
+        });
+    }
 
     backdrop.addEventListener("click", (e) => {
       if (e.target === backdrop) backdrop.remove();

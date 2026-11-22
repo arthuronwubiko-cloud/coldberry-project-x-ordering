@@ -208,7 +208,7 @@ const server = http.createServer(async (req, res) => {
         : "public, max-age=60, stale-while-revalidate=300"
     );
 
-    res.writeHead(200, { "Content-Type": contentType });
+    res.writeHead(200, { "Content-Type": contentType, "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Referrer-Policy": "strict-origin-when-cross-origin" });
     fs.createReadStream(filePath).pipe(res);
   });
 });

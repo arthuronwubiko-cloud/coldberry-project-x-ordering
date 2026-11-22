@@ -342,7 +342,7 @@ async function storeSession(sessionId, payload, ttlMs = 7 * 24 * 60 * 60 * 1000)
   const userKey = payload?.username || payload?.u;
   if (userKey) {
     const indexKey = `user_sessions:${String(userKey).toLowerCase()}`;
-    const existingRaw = memGet(indexKey);
+    const existingRaw = await redisGet(indexKey);
     let list = [];
     if (existingRaw) {
       try { list = JSON.parse(existingRaw); } catch (_) { list = []; }
