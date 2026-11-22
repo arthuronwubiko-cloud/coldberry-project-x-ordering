@@ -5998,7 +5998,7 @@ body {
 
 /* 4. Full-Bleed Text-Free Deal Card Photos & Equalized Horizontal Footers */
 .deals-hero {
-  background: linear-gradient(135deg, rgba(114, 18, 56, 0.72), rgba(158, 27, 77, 0.62)), url('images/coldberry-combo-feast.jpg') center/cover no-repeat !important;
+  background: linear-gradient(135deg, rgba(114, 18, 56, 0.72), rgba(158, 27, 77, 0.62)), url('images/coldberry-fresh-cream-banner.jpg') center/cover no-repeat !important;
   padding: clamp(2rem, 4vw, 3.2rem) clamp(1rem, 4vw, 2.5rem) !important;
   min-height: 0 !important;
 }
@@ -6536,7 +6536,7 @@ label[for="order-consent"] input[type="checkbox"] {
 
 /* Coldberry Deals Hero WCAG Contrast + Vanilla Bean Photo Top Framing */
 .deals-hero {
-  background: linear-gradient(135deg, rgba(64, 14, 34, 0.84), rgba(110, 22, 56, 0.74)), url('images/coldberry-combo-feast.jpg') center/cover no-repeat !important;
+  background: linear-gradient(135deg, rgba(64, 14, 34, 0.84), rgba(110, 22, 56, 0.74)), url('images/coldberry-fresh-cream-banner.jpg') center/cover no-repeat !important;
 }
 .deals-hero h1 span {
   color: #FFD1E0 !important;
@@ -8775,4 +8775,21 @@ body:has(.order-page) #rfb-trigger {
 }
 .qsr-allergen-accordion p {
   margin: 0.4rem 0 0.15rem !important;
+}
+
+/* Real Brand Deal Banners: preserve full banner artwork without cropping edges */
+.deal-card .deal-image {
+  background: #FFF8F5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+:root[data-theme="dark"] .deal-card .deal-image {
+  background: #1F1518 !important;
+}
+.deal-card .deal-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
