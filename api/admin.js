@@ -28,6 +28,11 @@ const {
   getAllCustomerMessages,
   savePromotionalEmail,
   getPromotionalEmails,
+  createConsoleAccount,
+  findConsoleAccountByUsername,
+  getConsoleAccounts,
+  setConsoleAccountActive,
+  deleteConsoleAccount,
 } = require("./db");
 const {
   checkRedisRateLimit,
@@ -337,6 +342,52 @@ function getConfiguredRoleCredentials() {
   return roles;
 }
 
+const DYNAMIC_USERNAME_REGEX = /^[A-Za-z0-9._-]{4,32}$/;
+const DYNAMIC_CREATABLE_ROLES = new Set(["manager", "pseudo_admin", "staff", "driver"]);
+
+function isAdminLike(role) {
+  return role === "admin" || role === "pseudo_admin";
+}
+
+function hashAccountPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const derived = crypto.scryptSync(String(password), salt, 64).toString("hex");
+  return `scrypt:${salt}:${derived}`;
+}
+
+function verifyAccountPassword(password, storedHash) {
+  if (typeof storedHash !== "string" || !storedHash.startsWith("scrypt:")) return false;
+  const parts = storedHash.split(":");
+  if (parts.length !== 3) return false;
+  const [, salt, expectedHex] = parts;
+  try {
+    const derivedHex = crypto.scryptSync(String(password), salt, 64).toString("hex");
+    return timingSafeHexEqual(derivedHex, expectedHex);
+  } catch (_) {
+    return false;
+  }
+}
+
+async function authenticateCredentialsAsync(username, password) {
+  const cleanUser = String(username || "").trim();
+  const cleanPass = String(password || "").trim();
+  if (!CREDENTIAL_REGEX.test(cleanUser) || !CREDENTIAL_REGEX.test(cleanPass)) {
+    return { invalidFormat: true };
+  }
+
+  // 1. Check root static / env credentials first
+  const staticRes = authenticateCredentials(cleanUser, cleanPass);
+  if (staticRes && !staticRes.invalidFormat) return staticRes;
+
+  // 2. Check dynamically created console_accounts (Manager, Pseudo-Admin, Staff, Driver)
+  const acct = await findConsoleAccountByUsername(cleanUser);
+  if (acct && acct.is_active !== false && verifyAccountPassword(cleanPass, acct.password_hash)) {
+    return { username: acct.username, role: acct.role, dynamic: true };
+  }
+
+  return null;
+}
+
 function authenticateCredentials(username, password) {
   if (!CREDENTIAL_REGEX.test(String(username || "")) || !CREDENTIAL_REGEX.test(String(password || ""))) {
     return { invalidFormat: true };
@@ -499,6 +550,9 @@ function sanitizeOrderForDriver(order) {
 
 function getPermissionsForRole(role) {
   if (role === "admin") {
+    return ["read_all", "change_state", "cancel", "delete", "export", "refunds", "feedback", "users", "manage_accounts"];
+  }
+  if (role === "pseudo_admin") {
     return ["read_all", "change_state", "cancel", "delete", "export", "refunds", "feedback", "users"];
   }
   if (role === "manager") {
@@ -561,10 +615,47 @@ module.exports = async function handler(req, res) {
     const body = parseBody(req);
     const action = String(body.action || "").toLowerCase();
 
+    // 0. Create Team Account (Root Admin ONLY — Pseudo-Admin strictly blocked)
+    if (action === "create_account") {
+      const postAuth = resolveAuthFromRequest(req);
+      if (!postAuth) {
+        return res.status(401).json({ error: "Unauthorized. Admin authentication required." });
+      }
+      if (postAuth.role !== "admin") {
+        return res.status(403).json({
+          error: "Access denied: Only the primary root Admin account can create Manager, Pseudo-Admin, Staff, or Driver accounts.",
+        });
+      }
+      const newUser = String(body.username || "").trim();
+      const newPass = String(body.password || "").trim();
+      const newRole = String(body.role || "").trim().toLowerCase();
+      const fullName = String(body.fullName || body.full_name || "").trim().slice(0, 80);
+
+      if (!CREDENTIAL_REGEX.test(newUser) || !CREDENTIAL_REGEX.test(newPass)) {
+        return res.status(400).json({ error: "Username and password must each be exactly 14 alphanumeric characters (letters and numbers)." });
+      }
+      if (!DYNAMIC_CREATABLE_ROLES.has(newRole)) {
+        return res.status(400).json({ error: "Invalid role. Choose manager, pseudo_admin, staff, or driver." });
+      }
+
+      const passwordHash = hashAccountPassword(newPass);
+      const created = await createConsoleAccount({
+        username: newUser,
+        passwordHash,
+        role: newRole,
+        fullName,
+        createdBy: postAuth.username,
+      });
+      if (!created.ok) {
+        return res.status(created.duplicate ? 409 : 500).json({ error: created.error || "Could not create account." });
+      }
+      return res.status(201).json({ created: true, account: created.account });
+    }
+
     // 1. Verify Refund Token (Admin / Staff only)
     if (action === "verify_refund_token" || action === "verify_refund") {
       const postAuth = resolveAuthFromRequest(req);
-      if (!postAuth || (postAuth.role !== "admin" && postAuth.role !== "manager")) {
+      if (!postAuth || (!isAdminLike(postAuth.role) && postAuth.role !== "manager")) {
         return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required." });
       }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
@@ -593,7 +684,7 @@ module.exports = async function handler(req, res) {
     // 2. Check-In / Claim Refund Token (Admin / Staff only)
     if (action === "check_in_refund" || action === "claim_refund" || action === "checkin_refund") {
       const auth = resolveAuthFromRequest(req);
-      if (!auth || (auth.role !== "admin" && auth.role !== "manager")) {
+      if (!auth || (!isAdminLike(auth.role) && auth.role !== "manager")) {
         return res.status(401).json({ error: "Unauthorized. Admin or staff authentication required to claim refund tokens." });
       }
       const token = String(body.token || body.refundToken || "").trim().toUpperCase();
@@ -620,7 +711,7 @@ module.exports = async function handler(req, res) {
     // 4. Admin Broadcast or Direct Message to Customers
     if (action === "send_message") {
       const postAuth = resolveAuthFromRequest(req);
-      if (!postAuth || postAuth.role !== "admin") {
+      if (!postAuth || !isAdminLike(postAuth.role)) {
         return res.status(403).json({ error: "Access denied: Only admin accounts can send customer messages." });
       }
       const msgRes = await saveCustomerMessage({
@@ -639,7 +730,7 @@ module.exports = async function handler(req, res) {
     // 5. Admin Promotional Email Campaign (Admin Only)
     if (action === "send_promo_email") {
       const postAuth = resolveAuthFromRequest(req);
-      if (!postAuth || postAuth.role !== "admin") {
+      if (!postAuth || !isAdminLike(postAuth.role)) {
         return res.status(403).json({ error: "Access denied: Only admin accounts can send promotional emails." });
       }
       const subject = String(body.subject || "").trim();
@@ -749,7 +840,7 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const result = authenticateCredentials(username, password);
+    const result = await authenticateCredentialsAsync(username, password);
     if (result && result.invalidFormat) {
       return res.status(400).json({
         error: "Username and password must each be exactly 14 alphanumeric characters (letters and numbers).",
@@ -769,9 +860,13 @@ module.exports = async function handler(req, res) {
 
     const requiredRoleRaw = String(body.requiredRole || body.consoleRole || "").trim().toLowerCase();
     const allowedRoles = requiredRoleRaw
-      ? requiredRoleRaw.split(",").map((r) => r.trim()).filter((r) => ["admin", "manager", "staff", "driver"].includes(r))
+      ? requiredRoleRaw.split(",").map((r) => r.trim()).filter((r) => ["admin", "pseudo_admin", "manager", "staff", "driver"].includes(r))
       : [];
-    if (allowedRoles.length > 0 && !allowedRoles.includes(result.role)) {
+    const roleAllowedForUi =
+      allowedRoles.length === 0 ||
+      allowedRoles.includes(result.role) ||
+      (allowedRoles.includes("admin") && result.role === "pseudo_admin");
+    if (!roleAllowedForUi) {
       return res.status(403).json({
         error: `Access denied: This console is strictly locked to ${allowedRoles.join(" / ")} accounts. Please sign in through your dedicated ${result.role} UI.`,
         role: result.role,
@@ -805,8 +900,19 @@ module.exports = async function handler(req, res) {
   if (req.method === "PATCH") {
     const body = parseBody(req);
 
+    if (body.action === "toggle_account") {
+      if (auth.role !== "admin") {
+        return res.status(403).json({ error: "Access denied: Only root Admin can modify team accounts." });
+      }
+      const targetUser = String(body.username || "").trim();
+      if (!targetUser) return res.status(400).json({ error: "username is required." });
+      const toggled = await setConsoleAccountActive(targetUser, body.isActive !== false);
+      if (!toggled.ok) return res.status(404).json({ error: toggled.error || "Account not found." });
+      return res.status(200).json({ updated: true, account: toggled.account });
+    }
+
     if (body.action === "claim_refund" || body.action === "verify_refund") {
-      if (auth.role !== "admin" && auth.role !== "manager") {
+      if (!isAdminLike(auth.role) && auth.role !== "manager") {
         return res.status(403).json({ error: "Access denied: Only admin or manager accounts can claim refund tokens." });
       }
       const token = String(body.token || "").trim().toUpperCase();
@@ -836,7 +942,7 @@ module.exports = async function handler(req, res) {
             error: "Access denied: Driver accounts are only allowed to update delivery status to 'out_for_delivery' or 'completed'.",
           });
         }
-      } else if (auth.role !== "admin" && auth.role !== "manager" && !STAFF_ALLOWED_STATUSES.includes(status)) {
+      } else if (!isAdminLike(auth.role) && auth.role !== "manager" && !STAFF_ALLOWED_STATUSES.includes(status)) {
         return res.status(403).json({
           error: "Access denied: Regular user accounts are only allowed to change operational order state (confirmed, preparing, out_for_delivery, ready, completed).",
         });
@@ -919,7 +1025,7 @@ module.exports = async function handler(req, res) {
 
   // DELETE: Strictly restricted to Admin -> Delete used refund tokens OR delete order & issue 15-char refund token
   if (req.method === "DELETE") {
-    if (auth.role !== "admin" && auth.role !== "manager") {
+    if (!isAdminLike(auth.role) && auth.role !== "manager") {
       return res.status(403).json({ error: "Access denied: Only admin or manager accounts can delete orders for refunds." });
     }
     const body = parseBody(req);
@@ -1034,9 +1140,20 @@ module.exports = async function handler(req, res) {
   // Record live active visitor hit
   recordVisitorHit(req.headers?.["x-forwarded-for"] || req.socket?.remoteAddress || auth?.username);
 
-  // GET: Admin-Only Full-Database CSV Export (strictly forbidden for Manager, Staff, Driver)
-  if (req.query?.export === "csv" || req.query?.format === "csv") {
+  // GET: Team Accounts (Root Admin ONLY — Pseudo-Admin strictly blocked)
+  if (req.query?.view === "accounts") {
     if (auth.role !== "admin") {
+      return res.status(403).json({
+        error: "Access denied: Only root Admin can view or manage team accounts.",
+      });
+    }
+    const accounts = await getConsoleAccounts();
+    return res.status(200).json({ accounts, total: accounts.length });
+  }
+
+  // GET: Admin & Pseudo-Admin Full-Database CSV Export (strictly forbidden for Manager, Staff, Driver)
+  if (req.query?.export === "csv" || req.query?.format === "csv") {
+    if (!isAdminLike(auth.role)) {
       return res.status(403).json({
         error: "Access denied: Full-database CSV export is strictly restricted to Admin accounts.",
       });
@@ -1060,7 +1177,7 @@ module.exports = async function handler(req, res) {
     const rawOrders = Array.isArray(result.orders) ? result.orders : [];
     let completedOrders;
     let retentionWindow = "unlimited";
-    if (auth.role === "admin") {
+    if (isAdminLike(auth.role)) {
       completedOrders = rawOrders.filter(isOrderCompletedForConsole);
     } else if (auth.role === "manager") {
       retentionWindow = "7d";
@@ -1094,7 +1211,7 @@ module.exports = async function handler(req, res) {
 
   // GET: Verify Refund Token
   if (req.query?.verifyRefundToken) {
-    if (auth.role !== "admin" && auth.role !== "manager") {
+    if (!isAdminLike(auth.role) && auth.role !== "manager") {
       return res.status(403).json({ error: "Access denied: Only admin or manager accounts can verify refund tokens." });
     }
     const token = String(req.query.verifyRefundToken).trim().toUpperCase();
@@ -1123,7 +1240,7 @@ module.exports = async function handler(req, res) {
 
   // GET: Refund Tokens Tab data
   if (req.query?.tab === "refunds" || req.query?.view === "refunds" || req.query?.refundTokens === "true") {
-    if (auth.role !== "admin" && auth.role !== "manager") {
+    if (!isAdminLike(auth.role) && auth.role !== "manager") {
       return res.status(403).json({ error: "Access denied: Only admin or manager accounts can view refund tokens." });
     }
     const limit = Math.min(Number(req.query?.limit) || 50, 200);
@@ -1140,7 +1257,7 @@ module.exports = async function handler(req, res) {
 
   // GET: Customer Feedback Tab data
   if (req.query?.tab === "feedback" || req.query?.view === "feedback") {
-    if (auth.role !== "admin") {
+    if (!isAdminLike(auth.role)) {
       return res.status(403).json({ error: "Access denied: Only admin accounts can view customer feedback." });
     }
     const limit = Math.min(Number(req.query?.limit) || 50, 200);
@@ -1182,11 +1299,11 @@ module.exports = async function handler(req, res) {
 
   const [result, usersSummary] = await Promise.all([
     getOrders({ limit, offset }),
-    auth.role === "admin" ? getCustomerUsers({ limit: 100 }).catch(() => null) : Promise.resolve(null),
+    isAdminLike(auth.role) ? getCustomerUsers({ limit: 100 }).catch(() => null) : Promise.resolve(null),
   ]);
   const rawOrders = Array.isArray(result.orders) ? result.orders : [];
   let orders;
-  if (auth.role === "admin") {
+  if (isAdminLike(auth.role)) {
     orders = rawOrders;
   } else if (auth.role === "manager") {
     orders = rawOrders.filter(
@@ -1217,7 +1334,7 @@ module.exports = async function handler(req, res) {
     username: auth.username,
     permissions: getPermissionsForRole(auth.role),
     provider: result.provider || "local",
-    activeVisitors: auth.role === "admin" ? getActiveVisitorCount() : undefined,
+    activeVisitors: isAdminLike(auth.role) ? getActiveVisitorCount() : undefined,
     totalSignedIn: usersSummary ? usersSummary.totalSignedIn : undefined,
     activeSignedIn: usersSummary ? usersSummary.activeSignedIn : undefined,
   });

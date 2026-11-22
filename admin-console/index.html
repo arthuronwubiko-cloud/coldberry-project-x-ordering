@@ -765,6 +765,10 @@
                 <span><i class="fa-solid fa-user-check" aria-hidden="true"></i> Signed-In People</span>
                 <span class="tab-badge" id="tab-users-badge">0</span>
               </button>
+              <button type="button" class="console-tab-btn" id="tab-btn-accounts" data-tab="accounts" data-label="Team Accounts" hidden>
+                <span><i class="fa-solid fa-user-shield" aria-hidden="true"></i> Team Accounts</span>
+                <span class="tab-badge" id="tab-accounts-badge">0</span>
+              </button>
             </div>
             <div class="admin-dots-divider"></div>
             <div class="admin-dots-section-label">Pages &amp; Actions</div>
@@ -1216,6 +1220,74 @@
             <div id="sent-messages-list" style="display: grid; gap: 0.5rem; font-size: 0.85rem;"></div>
           </div>
         </div>
+
+        <!-- TAB PANEL: TEAM ACCOUNTS (ROOT ADMIN ONLY) -->
+        <div id="panel-accounts" hidden>
+          <div class="orders-table-wrap" style="padding: 1.25rem; margin-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+              <div>
+                <h2 style="margin: 0; font-size: 1.15rem;"><i class="fa-solid fa-user-shield" aria-hidden="true"></i> Create Managerial &amp; Pseudo-Admin Accounts</h2>
+                <p style="margin: 0.25rem 0 0; color: var(--muted); font-size: 0.84rem;">
+                  Root Admin only. Create dedicated logins for Managers (/manager &amp; /refunds), Pseudo-Admins (/admin + CSV export, no account management), Staff (/staff), or Riders (/driver).
+                </p>
+              </div>
+              <button type="button" id="refresh-accounts-btn" class="admin-btn admin-btn-secondary">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i> Refresh
+              </button>
+            </div>
+
+            <form id="create-account-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.75rem; align-items: end;">
+              <div>
+                <label for="acct-fullname" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Full Name</label>
+                <input id="acct-fullname" type="text" placeholder="e.g. Chinedu Okafor" maxlength="80" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);" />
+              </div>
+              <div>
+                <label for="acct-username" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Username (14 alphanumeric)</label>
+                <input id="acct-username" type="text" required minlength="14" maxlength="14" placeholder="e.g. GarkiManager01" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'JetBrains Mono', monospace;" />
+              </div>
+              <div>
+                <label for="acct-password" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Password (14 alphanumeric)</label>
+                <div style="display: flex; gap: 0.35rem;">
+                  <input id="acct-password" type="text" required minlength="14" maxlength="14" placeholder="Strong password" style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'JetBrains Mono', monospace;" />
+                  <button type="button" id="acct-gen-pass-btn" class="admin-btn admin-btn-secondary" title="Generate 14-char password" style="padding: 0.55rem 0.7rem;">Gen</button>
+                </div>
+              </div>
+              <div>
+                <label for="acct-role" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Role &amp; Console Lock</label>
+                <select id="acct-role" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-weight: 600;">
+                  <option value="manager">Manager (/manager &amp; /refunds)</option>
+                  <option value="pseudo_admin">Pseudo-Admin (/admin + CSV)</option>
+                  <option value="staff">Staff (/staff · Kitchen)</option>
+                  <option value="driver">Rider (/driver · Delivery)</option>
+                </select>
+              </div>
+              <div>
+                <button type="submit" id="acct-create-btn" class="admin-btn" style="width: 100%; min-height: 42px;">
+                  <i class="fa-solid fa-plus" aria-hidden="true"></i> Create Account
+                </button>
+              </div>
+            </form>
+            <p id="acct-form-status" style="margin: 0.65rem 0 0; font-size: 0.84rem;" hidden></p>
+          </div>
+
+          <div class="orders-table-wrap">
+            <table class="orders-table" aria-label="Created Team Accounts">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Role</th>
+                  <th>Full Name</th>
+                  <th>Created By</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="accounts-body">
+                <tr><td colspan="6" style="text-align: center; padding: 1.5rem; color: var(--muted);">Loading team accounts...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     </main>
 
@@ -1365,7 +1437,8 @@
         });
 
         function applyRoleUI(role, username) {
-          const isAdmin = role === "admin";
+          const isRootAdmin = role === "admin";
+          const isAdmin = role === "admin" || role === "pseudo_admin";
           roleBadge.hidden = false;
           userLabel.hidden = false;
           const hFb = document.getElementById("header-feedback-link");
@@ -1374,13 +1447,15 @@
           if (hRf) hRf.hidden = false;
           userLabel.textContent = username;
           roleBadge.className = `role-badge ${isAdmin ? "role-admin" : "role-staff"}`;
-          roleBadge.textContent = isAdmin ? "Admin · Full Access" : "Regular User · State Change Only";
+          roleBadge.textContent = isRootAdmin ? "Admin · Root Access" : (role === "pseudo_admin" ? "Pseudo-Admin · Full + CSV" : "Regular User · State Change Only");
 
           staffNotice.hidden = isAdmin;
           analyticsBar.hidden = !isAdmin;
           exportCsvBtn.hidden = !isAdmin;
           const usersTabBtn = document.getElementById("tab-btn-users");
           if (usersTabBtn) usersTabBtn.hidden = !isAdmin;
+          const accountsTabBtn = document.getElementById("tab-btn-accounts");
+          if (accountsTabBtn) accountsTabBtn.hidden = !isRootAdmin;
           roleSubtitle.textContent = isAdmin
             ? "Full administrative access: inspect orders, update state, cancel, delete, and export."
             : "Staff operational console: advance order state as pizzas move from oven to delivery.";
@@ -1413,6 +1488,10 @@
           const usersBody = document.getElementById("users-body");
           if (usersTabBtn) usersTabBtn.hidden = true;
           if (panelUsers) panelUsers.hidden = true;
+          const accountsTabBtn = document.getElementById("tab-btn-accounts");
+          const panelAccounts = document.getElementById("panel-accounts");
+          if (accountsTabBtn) accountsTabBtn.hidden = true;
+          if (panelAccounts) panelAccounts.hidden = true;
           if (usersBody) usersBody.innerHTML = "";
           dashboardPanel.hidden = true;
           authPanel.hidden = false;
@@ -2345,7 +2424,7 @@
           }
         });
 
-        const panels = { orders: "panel-orders", completed: "panel-completed", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users" };
+        const panels = { orders: "panel-orders", completed: "panel-completed", refunds: "panel-refunds", feedback: "panel-feedback", users: "panel-users", accounts: "panel-accounts" };
         async function loadCompletedOrders() {
           const token = sessionStorage.getItem(TOKEN_KEY);
           if (!token) return;
@@ -2429,7 +2508,11 @@
         });
 
         function switchTab(name) {
-          if (name === "users" && sessionStorage.getItem(ROLE_KEY) !== "admin") {
+          const activeRole = sessionStorage.getItem(ROLE_KEY);
+          if (name === "users" && activeRole !== "admin" && activeRole !== "pseudo_admin") {
+            name = "orders";
+          }
+          if (name === "accounts" && activeRole !== "admin") {
             name = "orders";
           }
           Object.entries(panels).forEach(([k, id]) => { document.getElementById(id).hidden = k !== name; });
@@ -2445,6 +2528,7 @@
           if (name === "refunds") loadRefunds();
           if (name === "feedback") loadFeedback();
           if (name === "users") loadUsers();
+          if (name === "accounts") loadTeamAccounts();
         }
         document.querySelectorAll(".console-tab-btn").forEach((b) => b.addEventListener("click", () => switchTab(b.dataset.tab)));
         const refreshCompletedBtn = document.getElementById("refresh-completed-btn");
@@ -2453,6 +2537,131 @@
         const fbFilterEl = document.getElementById("feedback-type-filter");
         if (fbFilterEl) fbFilterEl.addEventListener("change", loadFeedback);
         document.getElementById("refresh-users-btn").addEventListener("click", loadUsers);
+
+        async function loadTeamAccounts() {
+          const tbody = document.getElementById("accounts-body");
+          const badge = document.getElementById("tab-accounts-badge");
+          if (!tbody) return;
+          try {
+            const res = await fetch(`${getApiBase()}/api/admin?view=accounts`, { headers: authHeaders() });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:1rem;">${escapeHtml(data.error || "Could not load accounts.")}</td></tr>`;
+              return;
+            }
+            const list = Array.isArray(data.accounts) ? data.accounts : [];
+            if (badge) badge.textContent = list.length;
+            if (!list.length) {
+              tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.25rem;">No dynamic team accounts created yet. Use the form above to add a Manager, Pseudo-Admin, Staff, or Rider.</td></tr>';
+              return;
+            }
+            const roleLabels = {
+              manager: "Manager (/manager)",
+              pseudo_admin: "Pseudo-Admin (/admin + CSV)",
+              staff: "Staff (/staff)",
+              driver: "Rider (/driver)",
+            };
+            tbody.innerHTML = list.map((a) => {
+              const active = a.is_active !== false;
+              return `<tr>
+                <td style="font-family:'JetBrains Mono',monospace;font-weight:700;">${escapeHtml(a.username)}</td>
+                <td><span class="role-badge ${a.role === "pseudo_admin" ? "role-admin" : "role-staff"}">${escapeHtml(roleLabels[a.role] || a.role)}</span></td>
+                <td>${escapeHtml(a.full_name || "—")}</td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:0.8rem;">${escapeHtml(a.created_by || "admin")}</td>
+                <td><span style="font-weight:700;color:${active ? "#5CC98A" : "#FF7B72"};">${active ? "Active" : "Disabled"}</span></td>
+                <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                  <button type="button" class="quick-btn" data-toggle-acct="${escapeHtml(a.username)}" data-next-active="${active ? "false" : "true"}">${active ? "Disable" : "Enable"}</button>
+                  <button type="button" class="quick-btn danger" data-delete-acct="${escapeHtml(a.username)}">Delete</button>
+                </td>
+              </tr>`;
+            }).join("");
+          } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--danger);padding:1rem;">Error loading accounts: ${escapeHtml(err.message)}</td></tr>`;
+          }
+        }
+
+        const genPassBtn = document.getElementById("acct-gen-pass-btn");
+        if (genPassBtn) {
+          genPassBtn.addEventListener("click", () => {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+            let out = "";
+            for (let i = 0; i < 14; i++) out += chars[Math.floor(Math.random() * chars.length)];
+            const passInput = document.getElementById("acct-password");
+            if (passInput) passInput.value = out;
+          });
+        }
+
+        const createAcctForm = document.getElementById("create-account-form");
+        if (createAcctForm) {
+          createAcctForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const statusEl = document.getElementById("acct-form-status");
+            const fullName = document.getElementById("acct-fullname").value.trim();
+            const username = document.getElementById("acct-username").value.trim();
+            const password = document.getElementById("acct-password").value.trim();
+            const role = document.getElementById("acct-role").value;
+            try {
+              const res = await fetch(`${getApiBase()}/api/admin`, {
+                method: "POST",
+                headers: { ...authHeaders(), "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "create_account", username, password, role, fullName }),
+              });
+              const data = await res.json().catch(() => ({}));
+              if (!res.ok) {
+                if (statusEl) {
+                  statusEl.hidden = false;
+                  statusEl.style.color = "var(--danger)";
+                  statusEl.textContent = data.error || "Could not create account.";
+                }
+                return;
+              }
+              if (statusEl) {
+                statusEl.hidden = false;
+                statusEl.style.color = "#5CC98A";
+                statusEl.textContent = `Created ${role} account "${username}". Share credentials securely.`;
+              }
+              createAcctForm.reset();
+              loadTeamAccounts();
+            } catch (err) {
+              if (statusEl) {
+                statusEl.hidden = false;
+                statusEl.style.color = "var(--danger)";
+                statusEl.textContent = err.message;
+              }
+            }
+          });
+        }
+
+        const refreshAcctBtn = document.getElementById("refresh-accounts-btn");
+        if (refreshAcctBtn) refreshAcctBtn.addEventListener("click", loadTeamAccounts);
+
+        const accountsBody = document.getElementById("accounts-body");
+        if (accountsBody) {
+          accountsBody.addEventListener("click", async (e) => {
+            const toggleBtn = e.target.closest("[data-toggle-acct]");
+            if (toggleBtn) {
+              const username = toggleBtn.dataset.toggleAcct;
+              const isActive = toggleBtn.dataset.nextActive === "true";
+              await fetch(`${getApiBase()}/api/admin`, {
+                method: "PATCH",
+                headers: { ...authHeaders(), "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "toggle_account", username, isActive }),
+              });
+              loadTeamAccounts();
+              return;
+            }
+            const delBtn = e.target.closest("[data-delete-acct]");
+            if (delBtn) {
+              const username = delBtn.dataset.deleteAcct;
+              if (!confirm(`Permanently delete team account "${username}"?`)) return;
+              await fetch(`${getApiBase()}/api/admin?view=accounts&username=${encodeURIComponent(username)}`, {
+                method: "DELETE",
+                headers: authHeaders(),
+              });
+              loadTeamAccounts();
+            }
+          });
+        }
 
         document.getElementById("refresh-orders-btn").addEventListener("click", () => fetchOrders(false));
         document.getElementById("logout-btn").addEventListener("click", () => lockConsole());

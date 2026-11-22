@@ -324,6 +324,19 @@ async function ensureNeonSchema() {
         )
       `;
       await sql`CREATE INDEX IF NOT EXISTS promotional_emails_created_idx ON promotional_emails (created_at DESC)`;
+      await sql`
+        CREATE TABLE IF NOT EXISTS console_accounts (
+          id            SERIAL PRIMARY KEY,
+          username      TEXT UNIQUE NOT NULL,
+          password_hash TEXT NOT NULL,
+          role          TEXT NOT NULL,
+          full_name     TEXT,
+          created_by    TEXT NOT NULL DEFAULT 'admin',
+          is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+          created_at    TIMESTAMPTZ DEFAULT NOW()
+        )
+      `;
+      await sql`CREATE INDEX IF NOT EXISTS console_accounts_username_idx ON console_accounts (LOWER(username))`;
       return sql;
     })().catch((err) => {
       neonSchemaPromise = null; // allow a retry on the next request
@@ -2023,6 +2036,190 @@ async function getPromotionalEmails({ limit = 25 } = {}) {
   return readLocalPromoEmailsFile().slice(0, limit);
 }
 
+
+const CONSOLE_ACCOUNTS_LOCAL_FILE = path.join(require("os").tmpdir(), "romeos-console-accounts.json");
+let memoryConsoleAccounts = [];
+
+function readLocalConsoleAccounts() {
+  try {
+    if (fs.existsSync(CONSOLE_ACCOUNTS_LOCAL_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(CONSOLE_ACCOUNTS_LOCAL_FILE, "utf8"));
+      if (Array.isArray(parsed)) {
+        memoryConsoleAccounts = parsed;
+        return parsed;
+      }
+    }
+  } catch (_) {}
+  return memoryConsoleAccounts;
+}
+
+function writeLocalConsoleAccounts(list) {
+  memoryConsoleAccounts = Array.isArray(list) ? list : [];
+  try {
+    fs.writeFileSync(CONSOLE_ACCOUNTS_LOCAL_FILE, JSON.stringify(memoryConsoleAccounts, null, 2), "utf8");
+  } catch (_) {}
+}
+
+async function createConsoleAccount({ username, passwordHash, role, fullName = "", createdBy = "admin" }) {
+  const cleanUser = String(username || "").trim();
+  const cleanRole = String(role || "").trim().toLowerCase();
+  const cleanName = String(fullName || "").trim();
+  const cleanCreator = String(createdBy || "admin").trim();
+  const nowIso = new Date().toISOString();
+
+  if (isNeonConfigured()) {
+    try {
+      const sql = await ensureNeonSchema();
+      const rows = await sql`
+        INSERT INTO console_accounts (username, password_hash, role, full_name, created_by, is_active)
+        VALUES (${cleanUser}, ${passwordHash}, ${cleanRole}, ${cleanName}, ${cleanCreator}, TRUE)
+        RETURNING id, username, role, full_name, created_by, is_active, created_at
+      `;
+      if (rows && rows[0]) return { ok: true, account: rows[0], provider: "neon" };
+    } catch (err) {
+      if (err && (err.code === "23505" || String(err.message || "").toLowerCase().includes("duplicate"))) {
+        return { ok: false, duplicate: true, error: "An account with this username already exists." };
+      }
+      console.warn("[DB] Neon createConsoleAccount failed, using fallback:", err.message);
+    }
+  }
+
+  const list = readLocalConsoleAccounts();
+  if (list.some((a) => String(a.username || "").toLowerCase() === cleanUser.toLowerCase())) {
+    return { ok: false, duplicate: true, error: "An account with this username already exists." };
+  }
+  const rec = {
+    id: Date.now(),
+    username: cleanUser,
+    password_hash: passwordHash,
+    role: cleanRole,
+    full_name: cleanName,
+    created_by: cleanCreator,
+    is_active: true,
+    created_at: nowIso,
+  };
+  list.unshift(rec);
+  writeLocalConsoleAccounts(list);
+  return {
+    ok: true,
+    account: {
+      id: rec.id,
+      username: rec.username,
+      role: rec.role,
+      full_name: rec.full_name,
+      created_by: rec.created_by,
+      is_active: rec.is_active,
+      created_at: rec.created_at,
+    },
+    provider: "local",
+  };
+}
+
+async function findConsoleAccountByUsername(username) {
+  const cleanUser = String(username || "").trim();
+  if (!cleanUser) return null;
+  if (isNeonConfigured()) {
+    try {
+      const sql = await ensureNeonSchema();
+      const rows = await sql`
+        SELECT id, username, password_hash, role, full_name, created_by, is_active, created_at
+        FROM console_accounts
+        WHERE LOWER(username) = LOWER(${cleanUser})
+        LIMIT 1
+      `;
+      if (rows && rows[0]) return rows[0];
+    } catch (err) {
+      console.warn("[DB] Neon findConsoleAccountByUsername failed:", err.message);
+    }
+  }
+  const list = readLocalConsoleAccounts();
+  return list.find((a) => String(a.username || "").toLowerCase() === cleanUser.toLowerCase()) || null;
+}
+
+async function getConsoleAccounts() {
+  if (isNeonConfigured()) {
+    try {
+      const sql = await ensureNeonSchema();
+      const rows = await sql`
+        SELECT id, username, role, full_name, created_by, is_active, created_at
+        FROM console_accounts
+        ORDER BY created_at DESC
+        LIMIT 200
+      `;
+      if (Array.isArray(rows)) return rows;
+    } catch (err) {
+      console.warn("[DB] Neon getConsoleAccounts failed:", err.message);
+    }
+  }
+  return readLocalConsoleAccounts().map((a) => ({
+    id: a.id,
+    username: a.username,
+    role: a.role,
+    full_name: a.full_name || "",
+    created_by: a.created_by || "admin",
+    is_active: a.is_active !== false,
+    created_at: a.created_at,
+  }));
+}
+
+async function setConsoleAccountActive(username, isActive) {
+  const cleanUser = String(username || "").trim();
+  const activeFlag = Boolean(isActive);
+  if (isNeonConfigured()) {
+    try {
+      const sql = await ensureNeonSchema();
+      const rows = await sql`
+        UPDATE console_accounts
+        SET is_active = ${activeFlag}
+        WHERE LOWER(username) = LOWER(${cleanUser})
+        RETURNING id, username, role, full_name, created_by, is_active, created_at
+      `;
+      if (rows && rows[0]) return { ok: true, account: rows[0] };
+    } catch (err) {
+      console.warn("[DB] Neon setConsoleAccountActive failed:", err.message);
+    }
+  }
+  const list = readLocalConsoleAccounts();
+  const item = list.find((a) => String(a.username || "").toLowerCase() === cleanUser.toLowerCase());
+  if (!item) return { ok: false, error: "Account not found." };
+  item.is_active = activeFlag;
+  writeLocalConsoleAccounts(list);
+  return {
+    ok: true,
+    account: {
+      id: item.id,
+      username: item.username,
+      role: item.role,
+      full_name: item.full_name || "",
+      created_by: item.created_by || "admin",
+      is_active: item.is_active,
+      created_at: item.created_at,
+    },
+  };
+}
+
+async function deleteConsoleAccount(username) {
+  const cleanUser = String(username || "").trim();
+  if (isNeonConfigured()) {
+    try {
+      const sql = await ensureNeonSchema();
+      const rows = await sql`
+        DELETE FROM console_accounts
+        WHERE LOWER(username) = LOWER(${cleanUser})
+        RETURNING username
+      `;
+      if (rows && rows[0]) return { ok: true, deleted: rows[0].username };
+    } catch (err) {
+      console.warn("[DB] Neon deleteConsoleAccount failed:", err.message);
+    }
+  }
+  const list = readLocalConsoleAccounts();
+  const next = list.filter((a) => String(a.username || "").toLowerCase() !== cleanUser.toLowerCase());
+  if (next.length === list.length) return { ok: false, error: "Account not found." };
+  writeLocalConsoleAccounts(next);
+  return { ok: true, deleted: cleanUser };
+}
+
 defaultHandler.insertOrder = insertOrder;
 defaultHandler.getOrders = getOrders;
 defaultHandler.allocatePin = allocatePin;
@@ -2062,6 +2259,11 @@ defaultHandler.deleteFeedback = deleteFeedback;
 defaultHandler.ensureNeonSchema = ensureNeonSchema;
 defaultHandler.isConfigured = isConfigured;
 defaultHandler.phoneMatchVariants = phoneMatchVariants;
+defaultHandler.createConsoleAccount = createConsoleAccount;
+defaultHandler.findConsoleAccountByUsername = findConsoleAccountByUsername;
+defaultHandler.getConsoleAccounts = getConsoleAccounts;
+defaultHandler.setConsoleAccountActive = setConsoleAccountActive;
+defaultHandler.deleteConsoleAccount = deleteConsoleAccount;
 defaultHandler.ORDER_STATUSES = ORDER_STATUSES;
 defaultHandler.CANCELLATION_WINDOW_MS = CANCELLATION_WINDOW_MS;
 
