@@ -627,6 +627,5 @@
     initCheckoutEnhancements();
     initPartyPickers();
     initTrackerEnhancements();
-    initColdberryToppingsIntegration();
   });
 })();
