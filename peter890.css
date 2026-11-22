@@ -8601,3 +8601,178 @@ body:has(.order-page) #rfb-trigger {
   padding: 0.06rem 0.38rem;
   border-radius: 999px;
 }
+
+/* =====================================================================
+   ALLERGEN & HALAL ACCORDIONS (CLEAN COLLAPSIBLE DISCLOSURE UI)
+   ===================================================================== */
+.toppings-allergen-accordion {
+  background: #FFF7F9;
+  border: 1px solid #EBD1DA;
+  border-left: 4px solid #8C1D40;
+  border-radius: 14px;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+:root[data-theme="dark"] .toppings-allergen-accordion {
+  background: #24161B;
+  border-color: rgba(255, 209, 224, 0.16);
+  border-left-color: #F0708F;
+}
+.toppings-allergen-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.95rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #5C1A2B;
+  user-select: none;
+}
+.toppings-allergen-summary::-webkit-details-marker {
+  display: none;
+}
+:root[data-theme="dark"] .toppings-allergen-summary {
+  color: #FFE4EC;
+}
+.toppings-allergen-summary-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.toppings-allergen-summary-left i {
+  color: #8C1D40;
+}
+:root[data-theme="dark"] .toppings-allergen-summary-left i {
+  color: #F59AB0;
+}
+.toppings-allergen-pill {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: #FDECEE;
+  color: #9A1B27;
+  border: 1px solid #F3B8BF;
+}
+:root[data-theme="dark"] .toppings-allergen-pill {
+  background: rgba(239, 68, 68, 0.16);
+  color: #FCA5A5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.toppings-allergen-chevron {
+  transition: transform 0.2s ease;
+  color: #8C1D40;
+  flex-shrink: 0;
+}
+.toppings-allergen-accordion[open] .toppings-allergen-chevron {
+  transform: rotate(180deg);
+}
+.toppings-allergen-body {
+  padding: 0 1.25rem 1.15rem;
+  border-top: 1px solid rgba(140, 29, 64, 0.1);
+  padding-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Per-Card Compact Allergen & Halal Accordion */
+.topping-dietary-accordion {
+  margin: 0.45rem 0 0.75rem;
+  border: 1px solid #F0DCE3;
+  border-radius: 9px;
+  background: #FFF9FB;
+  overflow: hidden;
+}
+:root[data-theme="dark"] .topping-dietary-accordion {
+  background: #23161B;
+  border-color: rgba(255, 209, 224, 0.14);
+}
+.topping-dietary-accordion summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.42rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #5C1A2B;
+  user-select: none;
+}
+.topping-dietary-accordion summary::-webkit-details-marker {
+  display: none;
+}
+:root[data-theme="dark"] .topping-dietary-accordion summary {
+  color: #F7D8E2;
+}
+.topping-dietary-summary-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  flex-wrap: wrap;
+}
+.topping-dietary-accordion .dietary-chevron {
+  font-size: 0.68rem;
+  transition: transform 0.18s ease;
+  opacity: 0.75;
+}
+.topping-dietary-accordion[open] .dietary-chevron {
+  transform: rotate(180deg);
+}
+.topping-dietary-accordion .dietary-badges {
+  margin: 0 !important;
+  padding: 0.45rem 0.65rem 0.6rem !important;
+  border-top: 1px solid rgba(140, 29, 64, 0.1);
+}
+.topping-summary-flag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.1rem 0.4rem;
+  border-radius: 5px;
+  text-transform: uppercase;
+}
+.topping-summary-flag.is-not-halal {
+  background: #FDECEE;
+  color: #9A1B27;
+}
+.topping-summary-flag.is-caution {
+  background: #FFF4E5;
+  color: #8A4500;
+}
+
+/* Nested Allergen Accordion inside Checkout & Split Tub Toppings Tray */
+.qsr-allergen-accordion {
+  border: 1px solid #EAD5DC;
+  border-radius: 8px;
+  background: #FFF9FB;
+  padding: 0.35rem 0.6rem;
+}
+:root[data-theme="dark"] .qsr-allergen-accordion {
+  background: #22151A;
+  border-color: rgba(255, 209, 224, 0.16);
+}
+.qsr-allergen-accordion summary {
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #8C1D40;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.qsr-allergen-accordion summary::-webkit-details-marker {
+  display: none;
+}
+:root[data-theme="dark"] .qsr-allergen-accordion summary {
+  color: #FF8FAB;
+}
+.qsr-allergen-accordion p {
+  margin: 0.4rem 0 0.15rem !important;
+}
