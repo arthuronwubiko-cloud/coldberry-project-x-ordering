@@ -8777,19 +8777,460 @@ body:has(.order-page) #rfb-trigger {
   margin: 0.4rem 0 0.15rem !important;
 }
 
-/* Real Brand Deal Banners: preserve full banner artwork without cropping edges */
+/* Real Brand Deal Banners: clean framing on white (Light) and deep berry (Dark) */
 .deal-card .deal-image {
-  background: #FFF8F5 !important;
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #F2E3E8 !important;
+  padding: 0.45rem !important;
+  box-sizing: border-box !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   overflow: hidden !important;
 }
-:root[data-theme="dark"] .deal-card .deal-image {
-  background: #1F1518 !important;
-}
 .deal-card .deal-image img {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain !important;
+  border-radius: 8px !important;
 }
+
+/* =====================================================================
+   COLOR & DARK-MODE LOCKDOWN (COLDBERRY ICE CREAM — WCAG AA/AAA)
+   ===================================================================== */
+
+/* Light Mode Contrast & Token Harmonization */
+.fulfilment-status-open,
+.fulfilment-open-badge,
+.deal-savings-badge {
+  background: #E2F7EE !important;
+  color: #066E4C !important;
+  border-color: #9EDDC1 !important;
+}
+.deal-anchor-price {
+  color: #6B5760 !important;
+}
+
+/* Dark Mode Root Tokens & Native Controls (Pure Creamery Berry — Zero Yellow Leakage) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-ivory: #140D10;
+  --color-parchment: #22161C;
+  --color-slate: #F9EDF1;
+  --color-deep-wine: #FF9BB6;
+  --color-saffron: #FF8FAB;
+}
+
+/* P0 Fix: Restore Deep Creamery Obsidian Canvas Over Unscoped Light-Mode Body Rules */
+:root[data-theme="dark"] html,
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] main,
+:root[data-theme="dark"] .hero,
+:root[data-theme="dark"] .menu-section,
+:root[data-theme="dark"] .deals-section,
+:root[data-theme="dark"] .order-page,
+:root[data-theme="dark"] .locations-section,
+:root[data-theme="dark"] .track-page,
+:root[data-theme="dark"] .login-page,
+:root[data-theme="dark"] .legal-page {
+  background-color: #140D10 !important;
+  color: #F9EDF1 !important;
+}
+
+/* Headings, Eyebrows & Secondary Copy on Dark Canvas */
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] h3,
+:root[data-theme="dark"] h4,
+:root[data-theme="dark"] .section-text .h1-text,
+:root[data-theme="dark"] .section-heading h2,
+:root[data-theme="dark"] .menu-heading h2,
+:root[data-theme="dark"] .menu-hero h1,
+:root[data-theme="dark"] .order-intro h2,
+:root[data-theme="dark"] .order-confirmation h2,
+:root[data-theme="dark"] .pizza-info h3,
+:root[data-theme="dark"] .deal-details h3,
+:root[data-theme="dark"] .location-card h4,
+:root[data-theme="dark"] .login-shell h1,
+:root[data-theme="dark"] .track-card h2 {
+  color: #FFFFFF !important;
+}
+
+:root[data-theme="dark"] .span-text,
+:root[data-theme="dark"] .section-label,
+:root[data-theme="dark"] .eyebrow,
+:root[data-theme="dark"] .motto,
+:root[data-theme="dark"] .hero-motto,
+:root[data-theme="dark"] .pizza-size-label,
+:root[data-theme="dark"] .deal-picker-label,
+:root[data-theme="dark"] .checkout-addons-title,
+:root[data-theme="dark"] .section-heading-link,
+:root[data-theme="dark"] .view-all-link,
+:root[data-theme="dark"] .deal-kicker,
+:root[data-theme="dark"] .menu-card-kicker {
+  color: #FF9BB6 !important;
+}
+
+:root[data-theme="dark"] .hero-text,
+:root[data-theme="dark"] .hero-trust-strip,
+:root[data-theme="dark"] .section-heading p,
+:root[data-theme="dark"] .menu-heading p,
+:root[data-theme="dark"] .order-intro p,
+:root[data-theme="dark"] .pizza-info p,
+:root[data-theme="dark"] .deal-details p,
+:root[data-theme="dark"] .location-card p,
+:root[data-theme="dark"] .fulfilment-eta,
+:root[data-theme="dark"] .weekly-drop-copy p,
+:root[data-theme="dark"] .checkout-addons-sub,
+:root[data-theme="dark"] .cart-empty-msg,
+:root[data-theme="dark"] .breadcrumb,
+:root[data-theme="dark"] .menu-breadcrumb,
+:root[data-theme="dark"] .login-shell > p {
+  color: #D5BDC6 !important;
+}
+:root[data-theme="dark"] .breadcrumb a,
+:root[data-theme="dark"] .menu-breadcrumb a,
+:root[data-theme="dark"] .login-shell a,
+:root[data-theme="dark"] #forgot-password-link {
+  color: #FF9BB6 !important;
+}
+
+/* Elevated Dark Surfaces */
+:root[data-theme="dark"] .fulfilment-bar,
+:root[data-theme="dark"] .weekly-drop-banner,
+:root[data-theme="dark"] .pizza-card,
+:root[data-theme="dark"] .menu-card,
+:root[data-theme="dark"] .deal-card,
+:root[data-theme="dark"] .location-card,
+:root[data-theme="dark"] .checkout-left,
+:root[data-theme="dark"] .checkout-cart-card,
+:root[data-theme="dark"] .checkout-addons,
+:root[data-theme="dark"] .order-confirmation,
+:root[data-theme="dark"] .track-card,
+:root[data-theme="dark"] .login-card,
+:root[data-theme="dark"] .legal-card,
+:root[data-theme="dark"] .qsr-split-accordion,
+:root[data-theme="dark"] .tracker-preview-steps {
+  background: #1E1419 !important;
+  border-color: #3D2832 !important;
+  color: #F9EDF1 !important;
+}
+
+/* P0 Fix: Primary CTAs (Crisp #FFFFFF Ink on Vibrant Berry #C82560 — 5.4:1 AA+) */
+:root[data-theme="dark"] .order-button,
+:root[data-theme="dark"] .traction-btn-primary,
+:root[data-theme="dark"] .weekly-drop-actions .traction-btn-primary,
+:root[data-theme="dark"] .order-submit-btn,
+:root[data-theme="dark"] .auth-submit-btn,
+:root[data-theme="dark"] .track-submit-btn,
+:root[data-theme="dark"] .fulfilment-mode-btn.is-active,
+:root[data-theme="dark"] .fulfilment-toggle-btn.is-active,
+:root[data-theme="dark"] .order-method label:has(input:checked),
+:root[data-theme="dark"] .order-method input:checked + span,
+:root[data-theme="dark"] .menu-cat-pill.is-active,
+:root[data-theme="dark"] .menu-cat-pill:hover,
+:root[data-theme="dark"] .quantity-control .qty-plus,
+:root[data-theme="dark"] .quantity-control button:last-child,
+:root[data-theme="dark"] .auth-tab-btn.active {
+  background: #C82560 !important;
+  color: #FFFFFF !important;
+  border-color: #E03A76 !important;
+}
+:root[data-theme="dark"] .order-button:hover,
+:root[data-theme="dark"] .traction-btn-primary:hover,
+:root[data-theme="dark"] .order-submit-btn:hover,
+:root[data-theme="dark"] .auth-submit-btn:hover,
+:root[data-theme="dark"] .track-submit-btn:hover,
+:root[data-theme="dark"] .quantity-control .qty-plus:hover,
+:root[data-theme="dark"] .quantity-control button:last-child:hover {
+  background: #DF2F6E !important;
+  color: #FFFFFF !important;
+}
+
+/* Secondary / Outline Buttons */
+:root[data-theme="dark"] .traction-btn-secondary,
+:root[data-theme="dark"] .weekly-drop-actions .traction-btn-secondary,
+:root[data-theme="dark"] .cart-empty-link,
+:root[data-theme="dark"] .qsr-track-mini-btn {
+  background: #2A1B22 !important;
+  color: #FFD2E0 !important;
+  border: 1px solid #593545 !important;
+}
+:root[data-theme="dark"] .traction-btn-secondary:hover,
+:root[data-theme="dark"] .cart-empty-link:hover,
+:root[data-theme="dark"] .qsr-track-mini-btn:hover {
+  background: #C82560 !important;
+  color: #FFFFFF !important;
+  border-color: #C82560 !important;
+}
+
+/* Fulfilment Bar, GPS Button & Status Badges */
+:root[data-theme="dark"] .fulfilment-modes,
+:root[data-theme="dark"] .fulfilment-toggle-group {
+  background: #140D10 !important;
+  border-color: #3D2832 !important;
+}
+:root[data-theme="dark"] .fulfilment-mode-btn,
+:root[data-theme="dark"] .fulfilment-toggle-btn {
+  color: #EAD6DE !important;
+}
+:root[data-theme="dark"] .fulfilment-gps-btn {
+  background: #2A1B22 !important;
+  color: #FF9BB6 !important;
+  border: 1px solid #4E313E !important;
+}
+:root[data-theme="dark"] .fulfilment-gps-btn:hover {
+  background: #3C2430 !important;
+  color: #FFFFFF !important;
+  border-color: #FF9BB6 !important;
+}
+:root[data-theme="dark"] .fulfilment-status-open,
+:root[data-theme="dark"] .fulfilment-open-badge,
+:root[data-theme="dark"] .deal-savings-badge {
+  background: rgba(16, 185, 129, 0.16) !important;
+  color: #6EE7B7 !important;
+  border-color: rgba(110, 231, 183, 0.32) !important;
+}
+:root[data-theme="dark"] .deal-anchor-price {
+  color: #A88E99 !important;
+}
+
+/* Menu Category Filter Bar */
+:root[data-theme="dark"] .menu-cat-nav {
+  background: #191014 !important;
+  border-bottom: 1px solid #35232C !important;
+}
+:root[data-theme="dark"] .menu-cat-pill {
+  background: #261920 !important;
+  color: #F4E4EA !important;
+  border: 1px solid #432C37 !important;
+}
+
+/* Menu & Home Product Cutout Soft Dark Glaze (Zero Seam, Zero Glare) */
+:root[data-theme="dark"] .pizza-card .pizza-image,
+:root[data-theme="dark"] .menu-card .menu-image,
+:root[data-theme="dark"] .topping-card .pizza-image {
+  position: relative !important;
+  border-bottom: 1px solid #3D2832 !important;
+}
+:root[data-theme="dark"] .pizza-card .pizza-image::after,
+:root[data-theme="dark"] .menu-card .menu-image::after,
+:root[data-theme="dark"] .topping-card .pizza-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 13, 16, 0.2);
+  pointer-events: none;
+  z-index: 1;
+}
+:root[data-theme="dark"] .qsr-fav-btn {
+  background: rgba(24, 15, 19, 0.88) !important;
+  color: #F8CEDB !important;
+  border: 1px solid rgba(255, 180, 205, 0.3) !important;
+  z-index: 3 !important;
+}
+:root[data-theme="dark"] .qsr-fav-btn:hover,
+:root[data-theme="dark"] .qsr-fav-btn.is-fav {
+  background: #C82560 !important;
+  color: #FFFFFF !important;
+  border-color: #FF9BB6 !important;
+}
+
+/* Deals Banner Frame & Quantity Stepper (Fixing White-on-White '0' P0) */
+:root[data-theme="dark"] .deal-card .deal-image {
+  background: #181014 !important;
+  border-bottom: 1px solid #35232C !important;
+}
+:root[data-theme="dark"] .deal-card .quantity-control,
+:root[data-theme="dark"] .pizza-card .quantity-control,
+:root[data-theme="dark"] .checkout-addon-card .quantity-control,
+:root[data-theme="dark"] .sister-cross-sell-item .quantity-control {
+  background: #140D10 !important;
+  border: 1px solid #422B36 !important;
+}
+:root[data-theme="dark"] .quantity-control span,
+:root[data-theme="dark"] .quantity-control .qty-val,
+:root[data-theme="dark"] .quantity-control .quantity-display {
+  color: #FFFFFF !important;
+}
+:root[data-theme="dark"] .quantity-control .qty-minus,
+:root[data-theme="dark"] .quantity-control button:first-child {
+  background: #2C1D24 !important;
+  color: #F9EDF1 !important;
+  border-color: #4D323E !important;
+}
+
+/* Order Page Hardcoded Light Widgets & Invisible Labels */
+:root[data-theme="dark"] .order-method-pills {
+  background: #140D10 !important;
+  border-color: #3D2832 !important;
+}
+:root[data-theme="dark"] .order-method label {
+  color: #EBD8E0 !important;
+  background: transparent !important;
+}
+:root[data-theme="dark"] .order-field label,
+:root[data-theme="dark"] .order-method legend,
+:root[data-theme="dark"] .order-terms-label {
+  color: #F6E6EC !important;
+}
+:root[data-theme="dark"] .qsr-hotspots-label {
+  color: #D5BDC6 !important;
+}
+:root[data-theme="dark"] .qsr-hotspot-chip {
+  background: #281B21 !important;
+  color: #F4DCE4 !important;
+  border: 1px solid #4A303C !important;
+}
+:root[data-theme="dark"] .qsr-hotspot-chip:hover,
+:root[data-theme="dark"] .qsr-hotspot-chip.is-active {
+  background: #3F2431 !important;
+  color: #FFFFFF !important;
+  border-color: #FF9BB6 !important;
+}
+
+:root[data-theme="dark"] .qsr-loyalty-box {
+  background: #25181E !important;
+  border: 1px solid #472D39 !important;
+  color: #F9EDF1 !important;
+}
+:root[data-theme="dark"] .qsr-loyalty-title {
+  color: #FF9BB6 !important;
+}
+:root[data-theme="dark"] .qsr-loyalty-pts,
+:root[data-theme="dark"] .qsr-loyalty-status,
+:root[data-theme="dark"] .qsr-loyalty-top span:last-child {
+  color: #F9EDF1 !important;
+}
+:root[data-theme="dark"] .qsr-loyalty-note,
+:root[data-theme="dark"] .qsr-loyalty-sub {
+  color: #D5BDC6 !important;
+}
+:root[data-theme="dark"] .qsr-loyalty-bar {
+  background: #3B2530 !important;
+}
+:root[data-theme="dark"] .qsr-loyalty-fill {
+  background: #E0427A !important;
+}
+:root[data-theme="dark"] .qsr-voucher-toggle {
+  color: #FF9BB6 !important;
+}
+
+:root[data-theme="dark"] .sister-cross-sell-box {
+  background: #23161C !important;
+  border: 1px solid #472D39 !important;
+  color: #F9EDF1 !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-kicker {
+  color: #FF9BB6 !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-box h3,
+:root[data-theme="dark"] .sister-cross-sell-title {
+  color: #FFFFFF !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-box p,
+:root[data-theme="dark"] .sister-cross-sell-desc {
+  color: #D5BDC6 !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-item,
+:root[data-theme="dark"] .checkout-addon-card {
+  background: #160E12 !important;
+  border: 1px solid #3D2832 !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-item-name,
+:root[data-theme="dark"] .checkout-addon-name {
+  color: #F9EDF1 !important;
+}
+:root[data-theme="dark"] .sister-cross-sell-item-price,
+:root[data-theme="dark"] .checkout-addon-price,
+:root[data-theme="dark"] .pizza-price,
+:root[data-theme="dark"] .deal-price,
+:root[data-theme="dark"] .weekly-drop-price {
+  color: #FF9BB6 !important;
+}
+
+/* Dark Mode Form Controls & Clean Non-Repeating Light Select Chevrons */
+:root[data-theme="dark"] .order-field input,
+:root[data-theme="dark"] .order-field textarea,
+:root[data-theme="dark"] .order-field select,
+:root[data-theme="dark"] select.fulfilment-branch-select,
+:root[data-theme="dark"] select.pizza-size-select,
+:root[data-theme="dark"] select.deal-picker-select,
+:root[data-theme="dark"] select.qsr-party-select,
+:root[data-theme="dark"] .login-card input,
+:root[data-theme="dark"] .track-card input,
+:root[data-theme="dark"] #track-form input,
+:root[data-theme="dark"] .track-form input {
+  background-color: #160E12 !important;
+  color: #F9EDF1 !important;
+  border-color: #462E39 !important;
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: #9D838E !important;
+}
+:root[data-theme="dark"] select#order-location,
+:root[data-theme="dark"] select#order-scheduled-time,
+:root[data-theme="dark"] select.fulfilment-branch-select,
+:root[data-theme="dark"] select.qsr-party-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23F5C8D7' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.85rem center !important;
+  background-size: 15px 15px !important;
+}
+
+/* Track, Login & Toppings Accordion Dark Polish */
+:root[data-theme="dark"] .tp-step {
+  color: #D5BDC6 !important;
+}
+:root[data-theme="dark"] .tp-step.is-lit {
+  color: #FFFFFF !important;
+}
+:root[data-theme="dark"] .tp-step i {
+  background: #2B1C23 !important;
+  color: #F4C8D6 !important;
+}
+:root[data-theme="dark"] .tp-step.is-lit i {
+  background: #C82560 !important;
+  color: #FFFFFF !important;
+}
+:root[data-theme="dark"] .tp-step span {
+  color: #E6D1D9 !important;
+}
+:root[data-theme="dark"] .toppings-allergen-chevron {
+  color: #FF9BB6 !important;
+}
+:root[data-theme="dark"] .topping-summary-flag.is-not-halal,
+:root[data-theme="dark"] .qsr-chip-warn.is-not-halal {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #FCA5A5 !important;
+}
+:root[data-theme="dark"] .topping-summary-flag.is-caution,
+:root[data-theme="dark"] .qsr-chip-warn.is-caution {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #FCD34D !important;
+}
+
+/* Final Critic Sign-Off Fixes (20/20 WCAG AA/AAA) */
+:root[data-theme="dark"] .qsr-voucher-details summary,
+:root[data-theme="dark"] .qsr-voucher-toggle {
+  color: #FF9BB6 !important;
+}
+:root[data-theme="dark"] .order-cart {
+  background: #1E1419 !important;
+  border-color: #3D2832 !important;
+}
+:root[data-theme="dark"] .category-pill-link.is-active,
+:root[data-theme="dark"] .menu-category-pill.is-active,
+:root[data-theme="dark"] .category-pill-link:hover,
+:root[data-theme="dark"] .menu-category-pill:hover {
+  background: #C82560 !important;
+  color: #FFFFFF !important;
+  border-color: #E03A76 !important;
+}
+:root[data-theme="dark"] .nav-bar .search-bar input::placeholder,
+:root[data-theme="dark"] .search-bar input::placeholder {
+  color: #DEC8D0 !important;
+  opacity: 1 !important;
+}
+

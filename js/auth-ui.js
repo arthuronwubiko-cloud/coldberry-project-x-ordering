@@ -47,7 +47,7 @@
         transition: transform 0.15s ease, background 0.15s ease;
       }
       .nav-auth-btn:hover { transform: translateY(-1px); background: #6F1632; border-color: #6F1632; }
-      :root[data-theme="dark"] .nav-auth-btn { border-color: #f472b6; background: #8C1D40; color: #ffffff; }
+      :root[data-theme="dark"] .nav-auth-btn { border-color: rgba(255, 198, 217, 0.35); background: #C82560; color: #ffffff; }
       .nav-auth-avatar {
         width: 24px; height: 24px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
@@ -68,7 +68,7 @@
         box-shadow: -8px 0 32px rgba(0,0,0,0.3);
         display: flex; flex-direction: column; gap: 1rem;
       }
-      :root[data-theme="dark"] .auth-drawer { background: #1e161b; color: #faf6f2; }
+      :root[data-theme="dark"] .auth-drawer { background: #1E1419; color: #F9EDF1; }
       .auth-avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
       .auth-avatar-opt {
         border: 1px solid rgba(128,128,128,0.28); border-radius: 6px;
@@ -77,7 +77,7 @@
         font-size: 0.72rem; font-weight: 600;
       }
       .auth-avatar-opt[aria-pressed="true"] {
-        border-color: #8C1D40; background: rgba(255, 87, 51, 0.14);
+        border-color: #9E1B4D; background: rgba(158, 27, 77, 0.14);
       }
       .auth-drawer-card {
         border: 1px solid rgba(128,128,128,0.22); border-radius: 6px; padding: 0.85rem;
