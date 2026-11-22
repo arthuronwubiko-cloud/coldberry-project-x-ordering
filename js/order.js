@@ -25,6 +25,7 @@
     "Coca-Cola (50cl)": 900,
     "Coca-Cola": 900,
     "Bottled Water": 850,
+    "Sweet Milk Cookies Topping": 800,
     // Coldberry Ice Cream Toppings & Mix-Ins (₦800 per serving)
     "Roasted Almonds Topping": 800,
     "Roasted Cashews Topping": 800,

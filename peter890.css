@@ -8507,3 +8507,97 @@ body:has(.order-page) #rfb-trigger {
   object-fit: contain !important;
   padding: 0.45rem !important;
 }
+
+/* Integrated 1-Tap Toppings & Mix-Ins Tray (Split Tub + Checkout) */
+.qsr-toppings-tray {
+  margin: 0.75rem 0 !important;
+}
+.qsr-toppings-tray-body {
+  padding-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.qsr-toppings-disclaimer {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #6E5560;
+}
+:root[data-theme="dark"] .qsr-toppings-disclaimer {
+  color: #C7B0B8;
+}
+.qsr-toppings-cat-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8C1D40;
+  margin-bottom: 0.35rem;
+}
+:root[data-theme="dark"] .qsr-toppings-cat-label {
+  color: #FF8FAB;
+}
+.qsr-toppings-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.qsr-topping-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.34rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #E5CFD6;
+  background: #FFFFFF;
+  color: #2A1218;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.qsr-topping-chip:hover,
+.qsr-topping-chip.is-added {
+  border-color: #8C1D40;
+  background: #FDF1F5;
+}
+:root[data-theme="dark"] .qsr-topping-chip {
+  background: #24171C;
+  border-color: rgba(255, 209, 224, 0.2);
+  color: #F8EAEF;
+}
+:root[data-theme="dark"] .qsr-topping-chip.is-added {
+  border-color: #FF8FAB;
+  background: #3A1C27;
+}
+.qsr-chip-price {
+  color: #8C1D40;
+  font-weight: 800;
+}
+:root[data-theme="dark"] .qsr-chip-price {
+  color: #FF8FAB;
+}
+.qsr-chip-warn {
+  font-size: 0.64rem;
+  font-weight: 800;
+  padding: 0.08rem 0.34rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.qsr-chip-warn.is-not-halal {
+  background: #FDECEE;
+  color: #9A1B27;
+}
+.qsr-chip-warn.is-caution {
+  background: #FFF4E5;
+  color: #8A4500;
+}
+.qsr-chip-qty {
+  background: #8C1D40;
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.06rem 0.38rem;
+  border-radius: 999px;
+}
