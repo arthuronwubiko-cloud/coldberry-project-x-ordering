@@ -1882,6 +1882,19 @@
               </button>
             </div>
 
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.9rem; align-items: center;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;">Quick Generate:</span>
+              <button type="button" id="acct-quick-pseudo-btn" class="admin-btn admin-btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.82rem;">
+                <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i> Generate Pseudo-Admin
+              </button>
+              <button type="button" id="acct-quick-manager-btn" class="admin-btn admin-btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.82rem;">
+                <i class="fa-solid fa-user-tie" aria-hidden="true"></i> Generate Manager
+              </button>
+              <button type="button" id="acct-copy-draft-btn" class="admin-btn admin-btn-secondary" style="padding: 0.45rem 0.8rem; font-size: 0.82rem;">
+                <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy Credentials
+              </button>
+            </div>
+
             <form id="create-account-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.75rem; align-items: end;">
               <div>
                 <label for="acct-fullname" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Full Name</label>
@@ -1889,7 +1902,10 @@
               </div>
               <div>
                 <label for="acct-username" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Username (14 alphanumeric)</label>
-                <input id="acct-username" type="text" required minlength="14" maxlength="14" placeholder="e.g. GarkiManager01" style="width: 100%; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'JetBrains Mono', monospace;" />
+                <div style="display: flex; gap: 0.35rem;">
+                  <input id="acct-username" type="text" required minlength="14" maxlength="14" placeholder="e.g. GarkiManager01" style="flex: 1; min-width: 0; box-sizing: border-box; padding: 0.6rem 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-family: 'JetBrains Mono', monospace;" />
+                  <button type="button" id="acct-gen-user-btn" class="admin-btn admin-btn-secondary" title="Generate 14-char username" style="padding: 0.55rem 0.7rem;">Gen</button>
+                </div>
               </div>
               <div>
                 <label for="acct-password" style="display: block; font-size: 0.78rem; font-weight: 700; color: var(--muted); margin-bottom: 0.3rem;">Password (14 alphanumeric)</label>
@@ -1914,6 +1930,12 @@
               </div>
             </form>
             <p id="acct-form-status" style="margin: 0.65rem 0 0; font-size: 0.84rem;" hidden></p>
+            <div id="acct-created-box" hidden style="margin-top: 0.75rem; padding: 0.85rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;">
+              <div id="acct-created-text" style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.55;"></div>
+              <button type="button" id="acct-copy-created-btn" class="admin-btn admin-btn-secondary" style="padding: 0.45rem 0.85rem; font-size: 0.82rem;">
+                <i class="fa-solid fa-copy" aria-hidden="true"></i> Copy Saved Credentials
+              </button>
+            </div>
           </div>
 
           <div class="orders-table-wrap">
@@ -3224,14 +3246,109 @@
           }
         }
 
+        function generateCryptoAlnum(len) {
+          const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+          const bytes = new Uint8Array(len);
+          if (window.crypto && window.crypto.getRandomValues) {
+            window.crypto.getRandomValues(bytes);
+          } else {
+            for (let i = 0; i < len; i++) bytes[i] = Math.floor(Math.random() * 256);
+          }
+          let out = "";
+          for (let i = 0; i < len; i++) out += chars[bytes[i] % chars.length];
+          return out;
+        }
+
+        function generateRoleUsername(role) {
+          const prefixMap = {
+            pseudo_admin: "CbPseudo",
+            manager: "CbMgr",
+            staff: "CbStaff",
+            driver: "CbRider",
+          };
+          const prefix = prefixMap[role] || "CbTeam";
+          return prefix + generateCryptoAlnum(Math.max(0, 14 - prefix.length));
+        }
+
+        function fillGeneratedCredentials(targetRole) {
+          const roleSel = document.getElementById("acct-role");
+          const userInput = document.getElementById("acct-username");
+          const passInput = document.getElementById("acct-password");
+          const statusEl = document.getElementById("acct-form-status");
+          if (roleSel && targetRole) roleSel.value = targetRole;
+          const activeRole = roleSel ? roleSel.value : (targetRole || "manager");
+          if (userInput) userInput.value = generateRoleUsername(activeRole);
+          if (passInput) passInput.value = generateCryptoAlnum(14);
+          if (statusEl) {
+            statusEl.hidden = false;
+            statusEl.style.color = "var(--muted)";
+            statusEl.textContent = `Generated 14-char credentials for ${activeRole.replace("_", "-")}. Click "Create Account" to save.`;
+          }
+        }
+
+        function formatCredsClipboard(role, username, password) {
+          const pathMap = { pseudo_admin: "/admin", manager: "/manager", staff: "/staff", driver: "/driver" };
+          const url = window.location.origin + (pathMap[role] || "/admin");
+          return `Role: ${role}\nConsole: ${url}\nUsername: ${username}\nPassword: ${password}`;
+        }
+
+        const genUserBtn = document.getElementById("acct-gen-user-btn");
+        if (genUserBtn) {
+          genUserBtn.addEventListener("click", () => {
+            const roleSel = document.getElementById("acct-role");
+            const userInput = document.getElementById("acct-username");
+            if (userInput) userInput.value = generateRoleUsername(roleSel ? roleSel.value : "manager");
+          });
+        }
+
         const genPassBtn = document.getElementById("acct-gen-pass-btn");
         if (genPassBtn) {
           genPassBtn.addEventListener("click", () => {
-            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-            let out = "";
-            for (let i = 0; i < 14; i++) out += chars[Math.floor(Math.random() * chars.length)];
             const passInput = document.getElementById("acct-password");
-            if (passInput) passInput.value = out;
+            if (passInput) passInput.value = generateCryptoAlnum(14);
+          });
+        }
+
+        const quickPseudoBtn = document.getElementById("acct-quick-pseudo-btn");
+        if (quickPseudoBtn) quickPseudoBtn.addEventListener("click", () => fillGeneratedCredentials("pseudo_admin"));
+
+        const quickManagerBtn = document.getElementById("acct-quick-manager-btn");
+        if (quickManagerBtn) quickManagerBtn.addEventListener("click", () => fillGeneratedCredentials("manager"));
+
+        const copyDraftBtn = document.getElementById("acct-copy-draft-btn");
+        if (copyDraftBtn) {
+          copyDraftBtn.addEventListener("click", async () => {
+            const u = (document.getElementById("acct-username")?.value || "").trim();
+            const p = (document.getElementById("acct-password")?.value || "").trim();
+            const r = document.getElementById("acct-role")?.value || "manager";
+            if (!u || !p) {
+              fillGeneratedCredentials(r);
+            }
+            const text = formatCredsClipboard(
+              document.getElementById("acct-role")?.value || r,
+              (document.getElementById("acct-username")?.value || "").trim(),
+              (document.getElementById("acct-password")?.value || "").trim()
+            );
+            try {
+              await navigator.clipboard.writeText(text);
+              const prev = copyDraftBtn.innerHTML;
+              copyDraftBtn.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> Copied!';
+              setTimeout(() => { copyDraftBtn.innerHTML = prev; }, 1800);
+            } catch (_) {}
+          });
+        }
+
+        let lastCreatedCredsText = "";
+        const copyCreatedBtn = document.getElementById("acct-copy-created-btn");
+        if (copyCreatedBtn) {
+          copyCreatedBtn.addEventListener("click", async () => {
+            if (!lastCreatedCredsText) return;
+            try {
+              await navigator.clipboard.writeText(lastCreatedCredsText);
+              const prev = copyCreatedBtn.innerHTML;
+              copyCreatedBtn.innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i> Copied!';
+              setTimeout(() => { copyCreatedBtn.innerHTML = prev; }, 1800);
+            } catch (_) {}
           });
         }
 
@@ -3240,6 +3357,8 @@
           createAcctForm.addEventListener("submit", async (e) => {
             e.preventDefault();
             const statusEl = document.getElementById("acct-form-status");
+            const createdBox = document.getElementById("acct-created-box");
+            const createdText = document.getElementById("acct-created-text");
             const fullName = document.getElementById("acct-fullname").value.trim();
             const username = document.getElementById("acct-username").value.trim();
             const password = document.getElementById("acct-password").value.trim();
@@ -3262,7 +3381,12 @@
               if (statusEl) {
                 statusEl.hidden = false;
                 statusEl.style.color = "#5CC98A";
-                statusEl.textContent = `Created ${role} account "${username}". Share credentials securely.`;
+                statusEl.textContent = `Created ${role} account "${username}". Save or copy the password below — it cannot be recovered once hidden.`;
+              }
+              lastCreatedCredsText = formatCredsClipboard(role, username, password);
+              if (createdBox && createdText) {
+                createdText.innerHTML = `<strong>Role:</strong> ${esc(role)} &nbsp;·&nbsp; <strong>Username:</strong> ${esc(username)} &nbsp;·&nbsp; <strong>Password:</strong> ${esc(password)}`;
+                createdBox.hidden = false;
               }
               createAcctForm.reset();
               loadTeamAccounts();
