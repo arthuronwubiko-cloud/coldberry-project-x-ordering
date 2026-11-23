@@ -6,7 +6,7 @@
       "has": [
         {
           "type": "host",
-          "value": "romeos-project-x-admin.vercel.app"
+          "value": "coldberry-project-x-admin.vercel.app"
         }
       ],
       "destination": "/admin",
@@ -19,7 +19,7 @@
       "has": [
         {
           "type": "host",
-          "value": "romeos-project-x-admin.vercel.app"
+          "value": "coldberry-project-x-admin.vercel.app"
         }
       ],
       "destination": "/admin.html"

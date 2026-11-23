@@ -2988,7 +2988,7 @@
 
         async function sendAdminCustomerMessage(target, recipientPhone, title, message) {
           const token = sessionStorage.getItem(TOKEN_KEY);
-          if (!token || sessionStorage.getItem(ROLE_KEY) !== "admin") return;
+          const _r = sessionStorage.getItem(ROLE_KEY); if (!token || (_r !== "admin" && _r !== "pseudo_admin")) return;
           const res = await fetch(`${getApiBase()}/api/admin`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -3022,7 +3022,7 @@
         if (sendPromoEmailBtn) {
           sendPromoEmailBtn.addEventListener("click", async () => {
             const token = sessionStorage.getItem(TOKEN_KEY);
-            if (!token || sessionStorage.getItem(ROLE_KEY) !== "admin") return;
+            const _r = sessionStorage.getItem(ROLE_KEY); if (!token || (_r !== "admin" && _r !== "pseudo_admin")) return;
             const subjEl = document.getElementById("promo-email-subject");
             const bodyEl = document.getElementById("promo-email-body");
             const subject = (subjEl ? subjEl.value : "").trim();
@@ -3312,7 +3312,7 @@
 
         async function loadVouchers() {
           const token = sessionStorage.getItem(TOKEN_KEY);
-          if (!token || sessionStorage.getItem(ROLE_KEY) !== "admin") return;
+          const _r = sessionStorage.getItem(ROLE_KEY); if (!token || (_r !== "admin" && _r !== "pseudo_admin")) return;
           const listEl = document.getElementById("vouchers-list");
           if (!listEl) return;
           try {

@@ -337,6 +337,10 @@ async function ensureNeonSchema() {
         )
       `;
       await sql`CREATE INDEX IF NOT EXISTS console_accounts_username_idx ON console_accounts (LOWER(username))`;
+      await sql`CREATE INDEX IF NOT EXISTS orders_status_created_idx ON orders (status, created_at DESC)`;
+      await sql`CREATE INDEX IF NOT EXISTS orders_phone_idx ON orders (phone)`;
+      await sql`CREATE INDEX IF NOT EXISTS refund_tokens_claimed_created_idx ON refund_tokens (claimed, created_at DESC)`;
+      await sql`CREATE INDEX IF NOT EXISTS customer_users_email_idx ON customer_users (LOWER(email))`;
       return sql;
     })().catch((err) => {
       neonSchemaPromise = null; // allow a retry on the next request
@@ -2046,7 +2050,7 @@ async function getPromotionalEmails({ limit = 25 } = {}) {
 }
 
 
-const CONSOLE_ACCOUNTS_LOCAL_FILE = path.join(require("os").tmpdir(), "romeos-console-accounts.json");
+const CONSOLE_ACCOUNTS_LOCAL_FILE = path.join(require("os").tmpdir(), "coldberry-console-accounts.json");
 let memoryConsoleAccounts = [];
 
 function readLocalConsoleAccounts() {
